@@ -67,7 +67,7 @@ export function BookshopManagerLoginScreen() {
           <div className="mb-2 flex items-center justify-center">
             <img src="/logo.png" alt="Dominion City" className="h-16 w-auto" />
           </div>
-          <CardTitle className="text-2xl text-[#00369a]">Bookshop Manager</CardTitle>
+          <CardTitle className="text-2xl text-[#0E1330]">Bookshop Manager</CardTitle>
           <CardDescription>Sign in to manage the bookshop.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -96,7 +96,7 @@ export function BookshopManagerLoginScreen() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-[#00369a] hover:bg-[#002d7a] text-white"
+              className="w-full bg-[#0E1330] hover:bg-[#070A1C] text-white"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Signing In..." : "Sign In"}

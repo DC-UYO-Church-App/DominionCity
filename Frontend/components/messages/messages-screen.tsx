@@ -127,7 +127,7 @@ export function MessagesScreen() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#00369a]">Sermons & Media</h1>
+        <h1 className="text-2xl font-bold text-[#0E1330]">Sermons & Media</h1>
         <p className="text-gray-600">Watch and listen to church sermons</p>
       </div>
 
@@ -192,7 +192,7 @@ export function MessagesScreen() {
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                       <Button
                         size="sm"
-                        className="bg-[#00369a] hover:bg-[#002d7a] text-white"
+                        className="bg-[#0E1330] hover:bg-[#070A1C] text-white"
                         onClick={() =>
                           sermon.type === "video"
                             ? handlePlayVideo(sermon.youtubeId!)
@@ -262,7 +262,7 @@ export function MessagesScreen() {
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          className="bg-[#00369a] hover:bg-[#002d7a] text-white"
+                          className="bg-[#0E1330] hover:bg-[#070A1C] text-white"
                           onClick={() =>
                             sermon.type === "video"
                               ? handlePlayVideo(sermon.youtubeId!)
@@ -297,7 +297,7 @@ export function MessagesScreen() {
                       <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                         <Button
                           size="sm"
-                          className="bg-[#00369a] hover:bg-[#002d7a] text-white"
+                          className="bg-[#0E1330] hover:bg-[#070A1C] text-white"
                           onClick={() => handlePlayVideo(sermon.youtubeId!)}
                         >
                           <Play className="h-4 w-4 mr-1" />
@@ -373,7 +373,7 @@ export function MessagesScreen() {
                       <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                         <Button
                           size="sm"
-                          className="bg-[#00369a] hover:bg-[#002d7a] text-white"
+                          className="bg-[#0E1330] hover:bg-[#070A1C] text-white"
                           onClick={() => handlePlayAudio(sermon.audioUrl!)}
                         >
                           <Play className="h-4 w-4 mr-1" />
@@ -381,7 +381,7 @@ export function MessagesScreen() {
                         </Button>
                       </div>
                       <div className="absolute top-2 left-2">
-                        <Badge variant="secondary" className="bg-[#00369a] text-white">
+                        <Badge variant="secondary" className="bg-[#0E1330] text-white">
                           <Headphones className="h-3 w-3 mr-1" />
                           Audio
                         </Badge>
@@ -427,7 +427,7 @@ export function MessagesScreen() {
                           </Button>
                           <Button
                             size="sm"
-                            className="bg-[#00369a] hover:bg-[#002d7a] text-white"
+                            className="bg-[#0E1330] hover:bg-[#070A1C] text-white"
                             onClick={() => handlePlayAudio(sermon.audioUrl!)}
                           >
                             <Headphones className="h-4 w-4 mr-1" />

@@ -1,0 +1,20 @@
+.event { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.event__thumb { position: relative; }
+.event__thumb .ph { border-radius: 0; }
+.event__tag {
+  position: absolute; left: 0.7rem; top: 0.7rem;
+  font-size: var(--step--1); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--c-nightfall); background: var(--accent);
+  padding: 0.2rem 0.6rem; border-radius: 999px;
+}
+.event__row { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); }
+.event__date {
+  flex: none; width: 58px; text-align: center; line-height: 1;
+  border-radius: var(--radius); padding: 0.6rem 0; background: var(--bg-soft);
+  border: 1px solid var(--line);
+}
+.event__day { display: block; font-family: var(--font-display); font-size: var(--step-2); font-weight: 500; }
+.event__mon { display: block; font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-soft); }
+.event__title { margin: 0 0 0.1rem; font-size: var(--step-1); }
+.event__when { color: var(--text-soft); font-size: var(--step--1); margin: 0 0 0.4rem; font-variant-numeric: tabular-nums; }
+.event__blurb { margin: 0; color: var(--text-soft); font-size: var(--step--1); }

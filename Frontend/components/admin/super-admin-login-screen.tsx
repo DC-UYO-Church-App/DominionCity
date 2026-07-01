@@ -48,7 +48,7 @@ export function SuperAdminLoginScreen() {
       <Card className="w-full max-w-md bg-white/95 shadow-2xl backdrop-blur-sm">
         <CardHeader className="space-y-2 items-center text-center">
           <img src="/logo.png" alt="Dominion City" className="h-16 w-auto" />
-          <CardTitle className="text-2xl text-[#00369a]">Super Admin Login</CardTitle>
+          <CardTitle className="text-2xl text-[#0E1330]">Super Admin Login</CardTitle>
           <CardDescription>Restricted access</CardDescription>
         </CardHeader>
         <CardContent>
@@ -75,7 +75,7 @@ export function SuperAdminLoginScreen() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full bg-[#00369a] hover:bg-[#002d7a] text-white" disabled={isSubmitting}>
+            <Button type="submit" className="w-full bg-[#0E1330] hover:bg-[#070A1C] text-white" disabled={isSubmitting}>
               {isSubmitting ? "Signing In..." : "Sign In"}
             </Button>
           </form>

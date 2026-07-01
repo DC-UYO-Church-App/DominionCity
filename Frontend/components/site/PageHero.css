@@ -1,0 +1,9 @@
+.page-hero { position: relative; overflow: clip; padding-block: var(--space-2xl) var(--space-xl); isolation: isolate; }
+.page-hero__glow {
+  position: absolute; inset: 0; z-index: -1;
+  background:
+    radial-gradient(120% 90% at 18% 120%, rgba(232,130,91,0.30), transparent 55%),
+    radial-gradient(90% 80% at 88% 130%, rgba(230,182,92,0.20), transparent 60%);
+}
+.page-hero__title { font-size: var(--step-5); margin: 0.3rem 0 0; max-width: 18ch; }
+.page-hero__lede { margin-top: var(--space-md); max-width: 52ch; }

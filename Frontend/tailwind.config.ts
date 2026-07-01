@@ -26,8 +26,8 @@ const config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#00369a",
-          foreground: "#ffffff",
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -42,7 +42,7 @@ const config = {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
+          DEFAULT: "hsl(var(--accent-hsl))",
           foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
@@ -54,9 +54,9 @@ const config = {
           foreground: "hsl(var(--card-foreground))",
         },
         church: {
-          primary: "#00369a",
-          secondary: "#ffffff",
-          accent: "#f8f9fa",
+          primary: "#0E1330",
+          secondary: "#E6B65C",
+          accent: "#F7F2E7",
         },
       },
       borderRadius: {

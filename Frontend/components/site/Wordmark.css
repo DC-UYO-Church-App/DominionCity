@@ -1,0 +1,15 @@
+.wordmark { display: inline-flex; align-items: center; gap: 0.55rem; }
+.wordmark__mark { width: 30px; height: 30px; flex: none; }
+.wordmark__text {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.32rem;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  font-optical-sizing: auto;
+}
+.wordmark__name--alt { color: var(--accent-ink); }
+/* Over the dark hero (header at top) the "City" can be bright gold;
+   once the header is a light frosted pill it uses the AA-safe brass. */
+.site-header.is-top .wordmark__name--alt { color: var(--accent); }
+.wordmark__name + .wordmark__name { margin-left: 0.28em; }

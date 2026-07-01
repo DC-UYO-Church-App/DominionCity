@@ -1,0 +1,22 @@
+.about-story { display: grid; gap: var(--space-xl); align-items: center; }
+@media (min-width: 56rem) { .about-story { grid-template-columns: 1.1fr 0.9fr; } }
+.about-story__media { max-width: 460px; width: 100%; margin-inline: auto; }
+.prose { max-width: 60ch; }
+.prose__lead { font-size: var(--step-2); font-family: var(--font-display); font-weight: 380; line-height: 1.35; }
+.prose em { color: var(--accent-ink); font-style: italic; }
+
+.beliefs { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-lg); }
+@media (min-width: 44rem) { .beliefs { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 68rem) { .beliefs { grid-template-columns: repeat(4, 1fr); } }
+.belief { padding-top: var(--space-sm); border-top: 2px solid var(--accent); }
+.belief__h { font-size: var(--step-1); margin-bottom: 0.3rem; }
+.belief p { color: var(--text-soft); margin: 0; }
+
+.leaders { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-md); }
+@media (min-width: 44rem) { .leaders { grid-template-columns: repeat(3, 1fr); } }
+.leader { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.leader__photo .ph { border-radius: 0; }
+.leader__meta { padding: var(--space-md); }
+.leader__name { font-weight: 600; margin: 0; }
+.leader__role { color: var(--text-soft); font-size: var(--step--1); margin: 0; }
+.cta-band { text-align: center; }

@@ -1,0 +1,21 @@
+.book { padding: 0; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
+.book__cover { position: relative; }
+.book__cover .ph { border-radius: 0; }
+.book__status {
+  position: absolute; top: 0.7rem; right: 0.7rem;
+  font-size: var(--step--1); font-weight: 600; letter-spacing: 0.04em;
+  padding: 0.25rem 0.6rem; border-radius: 999px;
+  backdrop-filter: blur(4px);
+}
+.book__status.is-available { background: color-mix(in oklab, var(--accent) 88%, transparent); color: var(--c-nightfall); }
+.book__status.is-out { background: color-mix(in oklab, var(--c-nightfall) 62%, transparent); color: var(--text-invert); border: 1px solid var(--line-invert); }
+
+.book__body { padding: var(--space-md); display: flex; flex-direction: column; gap: 0.4rem; flex: 1; }
+.book__category { font-size: var(--step--1); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-ink); }
+.book__title { margin: 0.1rem 0 0; font-size: var(--step-2); line-height: 1.15; }
+.book__author { color: var(--text-soft); font-size: var(--step--1); margin: 0; }
+.book__blurb { color: var(--text-soft); margin: 0.3rem 0 0; }
+.book__foot { margin-top: auto; padding-top: 0.9rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
+.book__format { font-size: var(--step--1); color: var(--text-faint); }
+.book__cta { display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
+.book__cta--muted { color: var(--text-faint); }

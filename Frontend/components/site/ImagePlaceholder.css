@@ -1,0 +1,44 @@
+.ph {
+  position: relative;
+  aspect-ratio: var(--ph-ratio, 16 / 9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  isolation: isolate;
+}
+.ph::before {
+  /* faint diagonal hatch so it reads clearly as a placeholder */
+  content: "";
+  position: absolute; inset: 0; z-index: -1;
+  background-image: repeating-linear-gradient(
+    135deg, transparent 0 11px, color-mix(in oklab, currentColor 9%, transparent) 11px 12px
+  );
+  opacity: 0.5;
+}
+.ph::after {
+  content: "";
+  position: absolute; inset: 10px; z-index: -1;
+  border: 1px solid currentColor; opacity: 0.16; border-radius: inherit;
+}
+
+.ph--light {
+  background: linear-gradient(140deg, var(--c-daybreak-2), #E7DCC2);
+  color: var(--c-stone);
+}
+.ph--dark {
+  background: linear-gradient(140deg, #19204A, #0B0F26);
+  color: var(--text-invert-soft);
+}
+
+.ph--circle { aspect-ratio: 1; border-radius: 50%; }
+.ph--circle::after { inset: 6px; }
+
+.ph__icon { width: clamp(26px, 4.5vw, 42px); height: auto; opacity: 0.7; }
+.ph__label {
+  font-size: var(--step--1); font-weight: 600; letter-spacing: 0.04em;
+  text-align: center; padding: 0 1rem; opacity: 0.85; max-width: 28ch;
+}

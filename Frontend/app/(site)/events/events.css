@@ -1,0 +1,4 @@
+.events-list { display: grid; gap: var(--space-md); }
+@media (min-width: 48rem) { .events-list { grid-template-columns: repeat(2, 1fr); } }
+.events-empty { margin-top: var(--space-xl); color: var(--text-soft); text-align: center; }
+.cta-band { text-align: center; }

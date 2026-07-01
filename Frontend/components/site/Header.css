@@ -1,0 +1,146 @@
+.site-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  padding-top: 0.8rem;
+  pointer-events: none;            /* transparent gutters don't trap clicks */
+  transition: padding-top var(--dur-2) var(--ease-rise);
+}
+
+/* DEFAULT = the floating frosted pill (the scrolled state) */
+.site-header__bar {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  width: min(80%, 1080px);
+  margin-inline: auto;
+  min-height: 60px;
+  padding-inline: clamp(1rem, 3vw, 1.6rem);
+  color: var(--text);
+  background: color-mix(in oklab, var(--c-daybreak) 78%, transparent);
+  -webkit-backdrop-filter: saturate(1.5) blur(14px);
+  backdrop-filter: saturate(1.5) blur(14px);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: var(--shadow-lift);
+  transition:
+    width var(--dur-2) var(--ease-rise),
+    color var(--dur-2) var(--ease-out),
+    background-color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    border-radius var(--dur-2) var(--ease-rise),
+    box-shadow var(--dur-2) var(--ease-out);
+}
+
+/* TOP = transparent, full-width, light text over the dark hero */
+.site-header.is-top { padding-top: 0; }
+.site-header.is-top .site-header__bar {
+  width: min(100% - 1.5rem, 1400px);
+  min-height: 68px;
+  color: var(--text-invert);
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.site-header__brand { display: inline-flex; text-decoration: none; color: inherit; }
+
+.site-nav { display: none; }
+.site-nav__list { display: flex; gap: clamp(0.75rem, 2vw, 1.75rem); list-style: none; margin: 0; padding: 0; }
+.site-nav__link {
+  text-decoration: none;
+  font-weight: 500;
+  font-size: var(--step--1);
+  letter-spacing: 0.01em;
+  padding: 0.4rem 0;
+  position: relative;
+  color: inherit;
+  opacity: 0.85;
+  transition: opacity var(--dur-1) var(--ease-out);
+}
+.site-nav__link::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px;
+  background: var(--accent-ink); transform: scaleX(0); transform-origin: left;
+  transition: transform var(--dur-2) var(--ease-out);
+}
+.site-header.is-top .site-nav__link::after { background: var(--accent); }
+.site-nav__link:hover { opacity: 1; }
+.site-nav__link:hover::after,
+.site-nav__link[aria-current="page"]::after { transform: scaleX(1); }
+.site-nav__link[aria-current="page"] { opacity: 1; }
+
+.site-header__cta { display: flex; align-items: center; gap: var(--space-sm); }
+/* Signup | Register as one rounded gold pill, split into two segments */
+.site-header__auth {
+  display: inline-flex; align-items: center;
+  background: var(--accent);
+  border-radius: 999px;
+  min-height: 42px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lift, 0 6px 18px -8px rgba(0,0,0,0.35));
+}
+.site-header__authlink {
+  color: var(--c-nightfall); text-decoration: none;
+  font-weight: 700; font-size: var(--step--1);
+  padding: 0.6em 1.1em; align-self: stretch;
+  display: inline-flex; align-items: center;
+  transition: background var(--dur-2) var(--ease-out);
+}
+.site-header__authlink:hover { background: color-mix(in oklab, var(--c-nightfall) 12%, transparent); }
+.site-header__authsep { color: color-mix(in oklab, var(--c-nightfall) 35%, transparent); user-select: none; }
+
+/* Native disclosure menu — no JS required */
+.menu { position: relative; }
+.menu__toggle {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  list-style: none; cursor: pointer; user-select: none;
+  padding: 0.55rem 0.7rem; border: 1px solid var(--line); border-radius: 999px;
+  font-weight: 600; font-size: var(--step--1); color: inherit;
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+.site-header.is-top .menu__toggle { border-color: var(--line-invert); }
+.menu__toggle::-webkit-details-marker { display: none; }
+.menu__bars { width: 18px; height: 12px; position: relative; }
+.menu__bars::before, .menu__bars::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 2px; border-radius: 2px;
+  background: currentColor;
+}
+.menu__bars::before { top: 0; box-shadow: 0 5px 0 currentColor; }
+.menu__bars::after { bottom: 0; }
+.menu__panel {
+  position: absolute; right: 0; top: calc(100% + 0.6rem);
+  min-width: 220px;
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lift);
+  padding: 0.5rem;
+}
+.menu__panel ul { list-style: none; margin: 0; padding: 0; }
+.menu__panel a {
+  display: block; padding: 0.7rem 0.8rem; border-radius: var(--radius);
+  text-decoration: none; font-weight: 500; color: var(--text);
+}
+.menu__panel a:hover { background: var(--bg-soft); }
+.menu[open] .menu__bars::before { box-shadow: none; top: 5px; transform: rotate(45deg); }
+.menu[open] .menu__bars::after { bottom: 5px; transform: rotate(-45deg); }
+
+/* On small screens the pill is near-full-width and gently rounded, not 80% */
+@media (max-width: 48rem) {
+  .site-header__bar,
+  .site-header.is-top .site-header__bar { width: calc(100% - 1.5rem); }
+  .site-header__bar { border-radius: 18px; }
+}
+
+@media (min-width: 60rem) {
+  .site-nav { display: block; }
+  .menu { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header, .site-header__bar, .menu__toggle { transition: none; }
+}

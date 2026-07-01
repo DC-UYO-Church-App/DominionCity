@@ -1,0 +1,24 @@
+.contact-grid { display: grid; gap: var(--space-lg); align-items: start; }
+@media (min-width: 60rem) { .contact-grid { grid-template-columns: 1.3fr 1fr; gap: var(--space-xl); } }
+.contact-form__h { font-size: var(--step-2); margin-bottom: var(--space-md); }
+.field { display: grid; gap: 0.35rem; margin-bottom: var(--space-md); }
+.field__opt { font-weight: 400; color: var(--text-faint); }
+/* The text controls are shadcn <Input>/<Textarea>; the native <select> is kept
+   for no-JS resilience and styled here to match them exactly. */
+.field select {
+  font: inherit; font-size: var(--step-0); padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg);
+  color: var(--text); width: 100%;
+}
+.field-check { display: flex; gap: 0.6rem; align-items: flex-start; margin-bottom: var(--space-md); font-size: var(--step--1); color: var(--text-soft); }
+.field-check input { margin-top: 0.2rem; width: 18px; height: 18px; flex: none; }
+.contact-form__fallback { margin: var(--space-sm) 0 0; font-size: var(--step--1); color: var(--text-soft); }
+
+.contact-side { display: grid; gap: var(--space-md); }
+.contact-side__h { font-size: var(--step-1); margin-bottom: 0.6rem; }
+.contact-side__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+.contact-side__list li { display: grid; grid-template-columns: 6rem 1fr; align-items: baseline; gap: 0.5rem; }
+.contact-side__list span { font-size: var(--step--1); color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+.contact-side__addr { font-style: normal; line-height: 1.7; color: var(--text-soft); margin-bottom: var(--space-sm); }
+.contact-side__pray { background: var(--bg-soft); }
+.contact-side__pray p { color: var(--text-soft); margin: 0; }

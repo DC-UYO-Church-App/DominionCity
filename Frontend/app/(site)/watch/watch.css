@@ -1,0 +1,13 @@
+.watch-grid { display: grid; gap: var(--space-xl); align-items: start; }
+@media (min-width: 60rem) { .watch-grid { grid-template-columns: 1.5fr 1fr; } }
+.watch-player {
+  aspect-ratio: 16 / 9; border-radius: var(--radius-lg); overflow: hidden;
+  display: grid; place-items: center; text-align: center;
+  background: radial-gradient(120% 120% at 50% 130%, rgba(230,182,92,0.25), transparent 55%), linear-gradient(160deg, #1B2350, #070A1C);
+  border: 1px solid var(--line-invert); color: var(--text-invert);
+}
+.watch-player__inner { display: grid; gap: var(--space-sm); place-items: center; padding: var(--space-md); }
+.watch-player__status { margin: 0; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: var(--step--1); }
+.watch-player__cc { margin: 0; color: var(--text-invert-soft); font-size: var(--step--1); }
+.watch-note { margin-top: var(--space-md); color: var(--text-soft); max-width: 52ch; }
+.watch-side-note { margin: var(--space-sm) 0 0; color: var(--text-soft); font-size: var(--step--1); }

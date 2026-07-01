@@ -22,7 +22,7 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
         "Connect with your church community, access sermons, and stay updated with church activities all in one place.",
       icon: Heart,
       image: "/placeholder.svg?height=300&width=400",
-      color: "bg-gradient-to-br from-[#00369a] to-[#0052cc]",
+      color: "bg-gradient-to-br from-[#0E1330] to-[#0052cc]",
     },
     {
       id: 2,
@@ -32,7 +32,7 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
         "Find and connect with cell groups in your area. Build meaningful relationships with fellow believers.",
       icon: Users,
       image: "/placeholder.svg?height=300&width=400",
-      color: "bg-gradient-to-br from-[#00369a] to-[#004db3]",
+      color: "bg-gradient-to-br from-[#0E1330] to-[#004db3]",
     },
     {
       id: 3,
@@ -42,7 +42,7 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
         "Quick and easy check-in for services. Keep track of your attendance and stay engaged with church activities.",
       icon: Calendar,
       image: "/placeholder.svg?height=300&width=400",
-      color: "bg-gradient-to-br from-[#00369a] to-[#003d8a]",
+      color: "bg-gradient-to-br from-[#0E1330] to-[#003d8a]",
     },
     {
       id: 4,
@@ -51,7 +51,7 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
       description: "Stream video sermons on YouTube or download audio messages to listen anywhere, anytime.",
       icon: Headphones,
       image: "/placeholder.svg?height=300&width=400",
-      color: "bg-gradient-to-br from-[#00369a] to-[#002e73]",
+      color: "bg-gradient-to-br from-[#0E1330] to-[#002e73]",
     },
   ]
 
@@ -84,15 +84,15 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
       {/* Header */}
       <div className="flex justify-between items-center p-4">
         <div className="flex items-center">
-          <div className="w-10 h-10 rounded-full bg-[#00369a] flex items-center justify-center mr-3">
+          <div className="w-10 h-10 rounded-full bg-[#0E1330] flex items-center justify-center mr-3">
             <span className="text-sm font-bold text-white">GH</span>
           </div>
           <div>
-            <h1 className="text-lg font-bold text-[#00369a]">Golden Heart</h1>
+            <h1 className="text-lg font-bold text-[#0E1330]">Golden Heart</h1>
             <p className="text-xs text-gray-600">Dominion City Church</p>
           </div>
         </div>
-        <Button variant="ghost" className="text-[#00369a]" onClick={handleSkip}>
+        <Button variant="ghost" className="text-[#0E1330]" onClick={handleSkip}>
           Skip
         </Button>
       </div>
@@ -123,7 +123,7 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
 
                 {/* Content Section */}
                 <div className="bg-white p-8 text-center">
-                  <h2 className="text-2xl font-bold text-[#00369a] mb-2">{slide.title}</h2>
+                  <h2 className="text-2xl font-bold text-[#0E1330] mb-2">{slide.title}</h2>
                   <h3 className="text-lg font-semibold text-gray-700 mb-4">{slide.subtitle}</h3>
                   <p className="text-gray-600 leading-relaxed max-w-sm mx-auto">{slide.description}</p>
                 </div>
@@ -140,7 +140,7 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
               onClick={() => goToSlide(index)}
               className={cn(
                 "w-3 h-3 rounded-full transition-colors duration-200",
-                currentSlide === index ? "bg-[#00369a]" : "bg-gray-300",
+                currentSlide === index ? "bg-[#0E1330]" : "bg-gray-300",
               )}
             />
           ))}
@@ -155,11 +155,11 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
             </Button>
 
             {currentSlide === slides.length - 1 ? (
-              <Button onClick={handleGetStarted} className="bg-[#00369a] hover:bg-[#002d7a] text-white px-8">
+              <Button onClick={handleGetStarted} className="bg-[#0E1330] hover:bg-[#070A1C] text-white px-8">
                 Get Started
               </Button>
             ) : (
-              <Button onClick={nextSlide} className="bg-[#00369a] hover:bg-[#002d7a] text-white flex items-center">
+              <Button onClick={nextSlide} className="bg-[#0E1330] hover:bg-[#070A1C] text-white flex items-center">
                 Next
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>

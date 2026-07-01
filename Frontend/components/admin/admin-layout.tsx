@@ -67,7 +67,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <aside className="hidden h-screen w-64 flex-col border-r border-slate-200 bg-white lg:flex">
           <div className="flex items-center gap-3 px-6 py-6">
             <img src="/logo.png" alt="Dominion City" className="h-8 w-auto" />
-            <span className="text-sm font-semibold text-[#00369a]">Dominion City</span>
+            <span className="text-sm font-semibold text-[#0E1330]">Dominion City</span>
           </div>
           <div className="px-4">
             <p className="px-3 text-xs font-semibold uppercase text-slate-400">Menu</p>

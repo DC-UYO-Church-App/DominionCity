@@ -1,0 +1,21 @@
+.sermon { padding: 0; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
+.sermon__thumb { position: relative; }
+.sermon__thumb .ph { border-radius: 0; }
+.sermon__play-badge {
+  position: absolute; left: 0.8rem; bottom: 0.8rem;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--accent); color: var(--c-nightfall);
+  box-shadow: var(--shadow-lift);
+}
+.sermon__body { padding: var(--space-md); display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+.sermon__top { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.sermon__series { font-size: var(--step--1); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-ink); }
+.sermon__dur { font-size: var(--step--1); color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.sermon__title { margin: 0.2rem 0 0; font-size: var(--step-2); }
+.sermon--featured .sermon__title { font-size: var(--step-3); }
+.sermon__meta { color: var(--text-soft); font-size: var(--step--1); margin: 0; }
+.sermon__blurb { color: var(--text-soft); margin: 0.4rem 0 0; }
+.sermon__foot { margin-top: auto; padding-top: 0.8rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.sermon__date { font-size: var(--step--1); color: var(--text-faint); }
+.sermon__play { display: inline-flex; align-items: center; gap: 0.35rem; }

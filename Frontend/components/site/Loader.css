@@ -1,0 +1,117 @@
+.loader {
+  position: fixed; inset: 0; z-index: 9999;
+  display: grid; place-items: center;
+  background:
+    radial-gradient(120% 90% at 50% 36%, #1B2350 0%, #0E1330 48%, #070A1C 100%);
+  color: var(--text-invert);
+  /* exit */
+  opacity: 1; visibility: visible;
+  transition: opacity 0.7s var(--ease-out), visibility 0.7s, transform 0.7s var(--ease-rise), filter 0.7s ease;
+  /* Fallback: fade out on its own even if JS never runs */
+  animation: loader-autohide 0.7s 3.6s forwards;
+}
+.loader.is-done {
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: scale(1.06); filter: blur(6px);
+  animation: none;
+}
+@keyframes loader-autohide {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+
+/* faint grid + vignette for a "systems online" texture */
+.loader__field {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--accent) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--accent) 6%, transparent) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask: radial-gradient(60% 55% at 50% 45%, #000, transparent 78%);
+  mask: radial-gradient(60% 55% at 50% 45%, #000, transparent 78%);
+  opacity: 0.5;
+}
+
+.loader__stage {
+  position: relative; z-index: 1;
+  display: grid; justify-items: center; gap: 1.6rem;
+}
+
+.loader__orbit {
+  position: relative;
+  width: 132px; height: 132px;
+  display: grid; place-items: center;
+}
+/* structural faint ring */
+.loader__orbit::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--accent) 14%, transparent);
+}
+/* soft glow pool behind the glyph */
+.loader__orbit::after {
+  content: ""; position: absolute; inset: 14%; border-radius: 50%; z-index: -1;
+  background: radial-gradient(circle, color-mix(in oklab, var(--accent) 26%, transparent), transparent 70%);
+  filter: blur(8px);
+  animation: loader-pulse 2.2s var(--ease-out) infinite;
+}
+
+.loader__ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 62%, var(--accent) 88%, transparent 100%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--accent) 55%, transparent));
+  animation: loader-spin 1.5s linear infinite;
+}
+.loader__ring--inner {
+  inset: 20px;
+  background: conic-gradient(from 180deg, transparent 0 68%, var(--accent-brass) 92%, transparent 100%);
+  animation-duration: 2.1s;
+  animation-direction: reverse;
+  opacity: 0.9;
+}
+
+.loader__mark {
+  width: 48px; height: 48px;
+  color: var(--text-invert);
+  filter: drop-shadow(0 0 10px color-mix(in oklab, var(--accent) 50%, transparent));
+  animation: loader-float 2.6s var(--ease-out) infinite;
+}
+
+.loader__word {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.4rem; font-weight: 500; letter-spacing: 0.02em;
+  color: var(--text-invert);
+  opacity: 0;
+  animation: loader-word 0.9s 0.25s var(--ease-rise) forwards;
+}
+
+.loader__bar {
+  width: 168px; height: 2px; border-radius: 999px; overflow: hidden;
+  background: color-mix(in oklab, var(--text-invert) 16%, transparent);
+}
+.loader__fill {
+  display: block; height: 100%; width: 100%;
+  transform-origin: left; transform: scaleX(0);
+  background: linear-gradient(90deg, var(--accent-brass), var(--accent), var(--accent-warm));
+  box-shadow: 0 0 10px color-mix(in oklab, var(--accent) 70%, transparent);
+  animation: loader-fill 1.5s 0.15s var(--ease-out) forwards;
+}
+
+@keyframes loader-spin  { to { transform: rotate(360deg); } }
+@keyframes loader-pulse { 0%, 100% { opacity: 0.5; transform: scale(0.92); } 50% { opacity: 1; transform: scale(1.06); } }
+@keyframes loader-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes loader-word  { to { opacity: 0.92; } }
+@keyframes loader-fill  { to { transform: scaleX(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .loader { animation: loader-autohide 0.4s 1.2s forwards; }
+  .loader__ring, .loader__orbit::after, .loader__mark, .loader__fill, .loader__word {
+    animation: none;
+  }
+  .loader__fill { transform: scaleX(1); }
+  .loader__word { opacity: 0.92; }
+}
+
+/* html.is-loading lock lives outside the component scope */
+html.is-loading, html.is-loading body { overflow: hidden; }

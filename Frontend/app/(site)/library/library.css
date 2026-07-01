@@ -1,0 +1,12 @@
+.library__count {
+  color: var(--text-soft);
+  margin: 0 0 var(--space-lg);
+  font-size: var(--step-0);
+}
+.library__count strong { color: var(--text); }
+
+.library__grid { display: grid; gap: var(--space-md); }
+@media (min-width: 44rem) { .library__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 68rem) { .library__grid { grid-template-columns: repeat(3, 1fr); } }
+
+.library__note { margin: var(--space-lg) 0 0; color: var(--text-soft); }
