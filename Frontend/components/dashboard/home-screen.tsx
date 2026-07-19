@@ -47,6 +47,7 @@ export function HomeScreen() {
   const [userCellGroupId, setUserCellGroupId] = useState<string | null>(null)
   const [myJoinRequest, setMyJoinRequest] = useState<any>(null)
   const [joiningCellId, setJoiningCellId] = useState<string | null>(null)
+  const [featuredProject, setFeaturedProject] = useState<any>(null)
 
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api"
   const uploadsBaseUrl = apiBaseUrl.replace(/\/api$/, "")
@@ -171,6 +172,18 @@ export function HomeScreen() {
       })
       .finally(() => setSermonsLoading(false))
   }, [uploadsBaseUrl])
+
+  useEffect(() => {
+    apiClient
+      .getProjects()
+      .then((res) => {
+        const projects = (res?.projects || []).filter((p: any) => p.status !== "archived")
+        // Prefer a project with a cover image, otherwise fall back to the first
+        const withImage = projects.find((p: any) => p.imageUrl)
+        setFeaturedProject(withImage || projects[0] || null)
+      })
+      .catch(() => setFeaturedProject(null))
+  }, [])
 
   const findNearbyGroups = () => {
     setShowNearbyModal(true)
@@ -348,11 +361,11 @@ export function HomeScreen() {
         ))}
       </div>
 
-      {/* Cell Group + Upcoming Events side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      {/* Cell Group + Ongoing Project + Upcoming Events in one line */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
 
         {/* My Cell Group */}
-        <div className="bg-white rounded-xl p-5 shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100 h-full">
+        <div className="bg-white rounded-xl p-5 shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-[#1A3A6E]">
               {isLeaderOfCell ? "My Cell (Leader)" : "My Cell Group"}
@@ -403,6 +416,43 @@ export function HomeScreen() {
             </button>
           )}
         </div>
+
+        {/* Ongoing Project */}
+        {featuredProject && (
+          <div className="bg-white rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
+            <div className="h-32 bg-[#1A3A6E]/10">
+              {resolveImageUrl(featuredProject.imageUrl) ? (
+                <img
+                  src={resolveImageUrl(featuredProject.imageUrl) as string}
+                  alt={featuredProject.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <TrendingUp className="h-7 w-7 text-[#1A3A6E]/25" />
+                </div>
+              )}
+            </div>
+            <div className="p-5">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-[#1A3A6E]">Ongoing Project</h3>
+                <Link
+                  href="/dashboard/projects"
+                  className="text-[#1E5EC8] text-sm font-semibold flex items-center gap-1 hover:underline"
+                >
+                  See More
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+              <p className="mt-2 font-bold text-gray-800">{featuredProject.title}</p>
+              {featuredProject.description && (
+                <p className="mt-1 text-sm text-gray-500 line-clamp-2 leading-relaxed">
+                  {featuredProject.description}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Upcoming Events */}
         <div>

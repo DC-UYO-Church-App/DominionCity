@@ -229,3 +229,17 @@ DCA part
 Church branches[City pastors][chapter pastors]
 Integrate whatsapp notification
 Ongoning projects
+Programs - National Programs, State Programs
+Weekly Activites
+Satlite Churches
+
+---- Start Here ---
+Ongoing project section in the admin dashboard, the admin can upload the lists of ongoing projects. On each project there will be a an amount given section for the project, lists of users that particular gave for the project. In the users dashboard, the users sees the ongoing project section and they can give to support. There will also an option to give annonymously. The payment method for now will be manual, when a user makes payment they can click I've paid button and it'll be updated when the admin confirms it.
+
+Change the Events page to Programs. Then their will be a section for national programs and State programs, the admin uploads and programs and it appears on the users page, there will also be a "Support Program" button for giving for the program, users can select the option of give annonymosly.
+
+Weekly Activites. The admin uploads the weekly activites program and it appears in the activities section in the users dashboard.
+
+Giving Page. In the Admin page, It will consist the total amount that they gave to the church, sections of amount given to different projects and programs. Sections for top 10 givers and list of givers.
+
+Satelite Churches: The Admin super-admin has a page that's called "Satelite Churches" the super admin creates a satelite church and assign it to any member, the page will show on the members (the one that the role was assigned to) dashboard there'll be a button that says "Visit my Satelite Dashboard" With time we will work on this satelite section well.

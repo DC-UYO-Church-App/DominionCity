@@ -691,6 +691,322 @@ class ApiClient {
     return this.request(`/admin/departments/${id}`, { method: 'DELETE' });
   }
 
+  // Shared multipart helper for create/update with an optional cover image
+  private async requestMultipart(
+    endpoint: string,
+    method: string,
+    fields: Record<string, any>,
+    fileField?: string,
+    file?: File | null
+  ) {
+    const formData = new FormData();
+    Object.entries(fields).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        formData.append(key, String(value));
+      }
+    });
+    if (fileField && file) {
+      formData.append(fileField, file);
+    }
+
+    const headers: HeadersInit = {};
+    if (this.token) {
+      headers["Authorization"] = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method,
+      body: formData,
+      headers,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: "Request failed" }));
+      throw new Error(error.error || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // Ongoing Projects
+  async getProjects() {
+    return this.request("/projects");
+  }
+
+  async getProject(id: string) {
+    return this.request(`/projects/${id}`);
+  }
+
+  async createProject(data: {
+    title: string;
+    description?: string;
+    targetAmount?: number;
+    status?: string;
+    coverFile?: File | null;
+  }) {
+    return this.requestMultipart(
+      "/projects",
+      "POST",
+      {
+        title: data.title,
+        description: data.description,
+        targetAmount: data.targetAmount,
+        status: data.status,
+      },
+      "cover",
+      data.coverFile
+    );
+  }
+
+  async updateProject(
+    id: string,
+    data: {
+      title?: string;
+      description?: string;
+      targetAmount?: number;
+      status?: string;
+      coverFile?: File | null;
+    }
+  ) {
+    return this.requestMultipart(
+      `/projects/${id}`,
+      "PUT",
+      {
+        title: data.title,
+        description: data.description,
+        targetAmount: data.targetAmount,
+        status: data.status,
+      },
+      "cover",
+      data.coverFile
+    );
+  }
+
+  async deleteProject(id: string) {
+    return this.request(`/projects/${id}`, { method: "DELETE" });
+  }
+
+  async giveToProject(id: string, data: { amount: number; isAnonymous?: boolean; note?: string }) {
+    return this.request(`/projects/${id}/give`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Programs (National / State)
+  async getPrograms(scope?: "national" | "state") {
+    const params = scope ? `?scope=${scope}` : "";
+    return this.request(`/programs${params}`);
+  }
+
+  async getProgram(id: string) {
+    return this.request(`/programs/${id}`);
+  }
+
+  async createProgram(data: {
+    title: string;
+    description?: string;
+    scope: "national" | "state";
+    location?: string;
+    startDate?: string;
+    status?: string;
+    coverFile?: File | null;
+  }) {
+    return this.requestMultipart(
+      "/programs",
+      "POST",
+      {
+        title: data.title,
+        description: data.description,
+        scope: data.scope,
+        location: data.location,
+        startDate: data.startDate,
+        status: data.status,
+      },
+      "cover",
+      data.coverFile
+    );
+  }
+
+  async updateProgram(
+    id: string,
+    data: {
+      title?: string;
+      description?: string;
+      scope?: "national" | "state";
+      location?: string;
+      startDate?: string;
+      status?: string;
+      coverFile?: File | null;
+    }
+  ) {
+    return this.requestMultipart(
+      `/programs/${id}`,
+      "PUT",
+      {
+        title: data.title,
+        description: data.description,
+        scope: data.scope,
+        location: data.location,
+        startDate: data.startDate,
+        status: data.status,
+      },
+      "cover",
+      data.coverFile
+    );
+  }
+
+  async deleteProgram(id: string) {
+    return this.request(`/programs/${id}`, { method: "DELETE" });
+  }
+
+  async giveToProgram(id: string, data: { amount: number; isAnonymous?: boolean; note?: string }) {
+    return this.request(`/programs/${id}/give`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Weekly Activities
+  async getWeeklyActivities(activeOnly?: boolean) {
+    const params = activeOnly ? "?active=true" : "";
+    return this.request(`/weekly-activities${params}`);
+  }
+
+  async createWeeklyActivity(data: {
+    title: string;
+    description?: string;
+    dayOfWeek: string;
+    startTime?: string;
+    endTime?: string;
+    location?: string;
+    isActive?: boolean;
+    coverFile?: File | null;
+  }) {
+    return this.requestMultipart(
+      "/weekly-activities",
+      "POST",
+      {
+        title: data.title,
+        description: data.description,
+        dayOfWeek: data.dayOfWeek,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        location: data.location,
+        isActive: data.isActive,
+      },
+      "cover",
+      data.coverFile
+    );
+  }
+
+  async updateWeeklyActivity(
+    id: string,
+    data: {
+      title?: string;
+      description?: string;
+      dayOfWeek?: string;
+      startTime?: string;
+      endTime?: string;
+      location?: string;
+      isActive?: boolean;
+      coverFile?: File | null;
+    }
+  ) {
+    return this.requestMultipart(
+      `/weekly-activities/${id}`,
+      "PUT",
+      {
+        title: data.title,
+        description: data.description,
+        dayOfWeek: data.dayOfWeek,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        location: data.location,
+        isActive: data.isActive,
+      },
+      "cover",
+      data.coverFile
+    );
+  }
+
+  async deleteWeeklyActivity(id: string) {
+    return this.request(`/weekly-activities/${id}`, { method: "DELETE" });
+  }
+
+  // Giving (contributions + admin stats)
+  async getGivingStats() {
+    return this.request("/giving/stats");
+  }
+
+  async getContributions(filters?: { status?: string; sourceType?: string; sourceId?: string }) {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.append(key, value);
+      });
+    }
+    const qs = params.toString();
+    return this.request(`/giving/contributions${qs ? `?${qs}` : ""}`);
+  }
+
+  async getMyContributions() {
+    return this.request("/giving/mine");
+  }
+
+  async confirmContribution(id: string) {
+    return this.request(`/giving/contributions/${id}/confirm`, {
+      method: "PATCH",
+      body: JSON.stringify({}),
+    });
+  }
+
+  async rejectContribution(id: string) {
+    return this.request(`/giving/contributions/${id}/reject`, {
+      method: "PATCH",
+      body: JSON.stringify({}),
+    });
+  }
+
+  // Satellite Churches (super-admin) + member view
+  async getSatelliteChurches() {
+    return this.request("/satellite-churches");
+  }
+
+  async getSatelliteChurch(id: string) {
+    return this.request(`/satellite-churches/${id}`);
+  }
+
+  async getMySatelliteChurches() {
+    return this.request("/satellite-churches/mine");
+  }
+
+  async createSatelliteChurch(data: {
+    name: string;
+    location?: string;
+    description?: string;
+    assignedUserId?: string;
+  }) {
+    return this.request("/satellite-churches", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateSatelliteChurch(
+    id: string,
+    data: { name?: string; location?: string; description?: string; assignedUserId?: string | null }
+  ) {
+    return this.request(`/satellite-churches/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteSatelliteChurch(id: string) {
+    return this.request(`/satellite-churches/${id}`, { method: "DELETE" });
+  }
+
   logout() {
     this.clearToken();
   }

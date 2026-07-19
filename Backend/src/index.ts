@@ -19,6 +19,11 @@ import { cellGroupRoutes } from './routes/cellGroupRoutes';
 import { adminRoutes } from './routes/adminRoutes';
 import { eventRoutes } from './routes/eventRoutes';
 import { bookRoutes } from './routes/bookRoutes';
+import { projectRoutes } from './routes/projectRoutes';
+import { programRoutes } from './routes/programRoutes';
+import { weeklyActivityRoutes } from './routes/weeklyActivityRoutes';
+import { givingRoutes } from './routes/givingRoutes';
+import { satelliteChurchRoutes } from './routes/satelliteChurchRoutes';
 
 const fastify = Fastify({
   logger: {
@@ -77,6 +82,11 @@ async function registerRoutes() {
   await fastify.register(eventRoutes, { prefix: '/api/events' });
   await fastify.register(bookRoutes, { prefix: '/api/books' });
   await fastify.register(cellGroupRoutes, { prefix: '/api/cell-groups' });
+  await fastify.register(projectRoutes, { prefix: '/api/projects' });
+  await fastify.register(programRoutes, { prefix: '/api/programs' });
+  await fastify.register(weeklyActivityRoutes, { prefix: '/api/weekly-activities' });
+  await fastify.register(givingRoutes, { prefix: '/api/giving' });
+  await fastify.register(satelliteChurchRoutes, { prefix: '/api/satellite-churches' });
   await fastify.register(adminRoutes, { prefix: '/api/admin' });
 
   // WebSocket for real-time messaging

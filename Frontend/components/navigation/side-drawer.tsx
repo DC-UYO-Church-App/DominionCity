@@ -14,6 +14,11 @@ import {
   CheckSquare,
   MessageSquare,
   User,
+  HandCoins,
+  FolderKanban,
+  CalendarDays,
+  Repeat,
+  Church,
 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 
@@ -56,14 +61,29 @@ export function SideDrawer({ isOpen, setIsOpen }: SideDrawerProps) {
 
   const drawerNavItems = [
     {
-      name: "Settings",
-      href: "/dashboard/settings",
-      icon: Settings,
+      name: "Giving",
+      href: "/dashboard/giving",
+      icon: HandCoins,
     },
     {
-      name: "Notifications",
-      href: "/dashboard/notifications",
-      icon: Bell,
+      name: "Projects",
+      href: "/dashboard/projects",
+      icon: FolderKanban,
+    },
+    {
+      name: "Programs",
+      href: "/dashboard/programs",
+      icon: CalendarDays,
+    },
+    {
+      name: "Weekly Activities",
+      href: "/dashboard/activities",
+      icon: Repeat,
+    },
+    {
+      name: "Satellite Churches",
+      href: "/dashboard/satellite",
+      icon: Church,
     },
     {
       name: "Sermons",
@@ -71,9 +91,14 @@ export function SideDrawer({ isOpen, setIsOpen }: SideDrawerProps) {
       icon: Headphones,
     },
     {
-      name: "Books & Resources",
-      href: "/dashboard/resources",
-      icon: BookOpen,
+      name: "Notifications",
+      href: "/dashboard/notifications",
+      icon: Bell,
+    },
+    {
+      name: "Settings",
+      href: "/dashboard/settings",
+      icon: Settings,
     },
   ]
 

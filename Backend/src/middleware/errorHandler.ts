@@ -1,7 +1,7 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyRequest, FastifyReply, FastifyError } from 'fastify';
 
 export const errorHandler = (
-  error: Error,
+  error: FastifyError,
   _request: FastifyRequest,
   reply: FastifyReply
 ) => {
@@ -22,8 +22,8 @@ export const errorHandler = (
     });
   }
 
-  // Validation errors
-  if (error.name === 'ValidationError') {
+  // Schema/validation errors (Fastify sets `validation`; custom ones use the name)
+  if (error.validation || error.name === 'ValidationError') {
     return reply.status(400).send({
       error: 'Validation error',
       message: error.message,
@@ -38,8 +38,19 @@ export const errorHandler = (
     });
   }
 
-  // Default error
-  return reply.status(500).send({
+  // Honour the status code Fastify (or the thrower) attached, so genuine
+  // client errors (400/401/403/404, empty body, unsupported media type, etc.)
+  // aren't masked as 500s.
+  const statusCode = typeof error.statusCode === 'number' ? error.statusCode : 500;
+  if (statusCode >= 400 && statusCode < 500) {
+    return reply.status(statusCode).send({
+      error: error.message || 'Request error',
+      message: error.message,
+    });
+  }
+
+  // Default error (unexpected server-side failures)
+  return reply.status(statusCode >= 500 ? statusCode : 500).send({
     error: 'Internal server error',
     message: error.message,
   });

@@ -7,7 +7,8 @@ import { BottomNavigation } from "@/components/navigation/bottom-navigation"
 import { SideDrawer } from "@/components/navigation/side-drawer"
 import { Button } from "@/components/ui/button"
 import { Menu, Bell } from "lucide-react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { useRouter, usePathname } from "next/navigation"
 import { apiClient } from "@/lib/api"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -23,6 +24,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<any | null>(null)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
+
+  const navLinks = [
+    { label: "Giving", href: "/dashboard/giving" },
+    { label: "Projects", href: "/dashboard/projects" },
+    { label: "Programs", href: "/dashboard/programs" },
+    { label: "Activities", href: "/dashboard/activities" },
+  ]
 
   useEffect(() => {
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
@@ -71,6 +80,24 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <img src="/logo.png" alt="Dominion City" className="h-8 w-auto mr-2" />
           <h1 className="text-lg font-bold text-slate-900">Golden Heart</h1>
         </div>
+        <nav className="hidden items-center gap-1 md:flex">
+          {navLinks.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+                  isActive
+                    ? "bg-[#1E5EC8] text-white"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-[#1A3A6E]"
+                }`}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
+        </nav>
         <div className="flex items-center gap-2">
           <button className="relative p-2 rounded-full hover:bg-slate-100 transition-colors">
             <Bell className="h-5 w-5 text-slate-600" />

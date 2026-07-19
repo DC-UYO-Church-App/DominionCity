@@ -9,10 +9,14 @@ import {
   BookOpen,
   CalendarDays,
   ChevronDown,
+  Church,
   CreditCard,
+  FolderKanban,
+  HandCoins,
   LayoutDashboard,
   LogOut,
   Menu,
+  Repeat,
   Search,
   Settings,
   Users,
@@ -26,15 +30,17 @@ type AdminLayoutProps = {
 const primaryNav = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/admin" },
   { icon: BookOpen, label: "Sermons", href: "/dashboard/admin/sermons" },
-  { icon: CreditCard, label: "Donations", href: "/dashboard/admin/donations" },
+  { icon: HandCoins, label: "Giving", href: "/dashboard/admin/giving" },
+  { icon: FolderKanban, label: "Projects", href: "/dashboard/admin/projects" },
+  { icon: CalendarDays, label: "Programs", href: "/dashboard/admin/programs" },
   { icon: Users2, label: "Departments", href: "/dashboard/admin/community" },
   { icon: BookOpen, label: "Book Shop", href: "/dashboard/admin/book-shop" },
 ]
 
 const secondaryNav = [
+  { icon: Repeat, label: "Weekly Activities", href: "/dashboard/admin/activities" },
+  { icon: Church, label: "Satellite Churches", href: "/dashboard/admin/satellite-churches" },
   { icon: CalendarDays, label: "Events", href: "/dashboard/admin/events" },
-  { icon: Users, label: "Reports", href: "/dashboard/admin/reports" },
-  { icon: Users2, label: "Contact", href: "/dashboard/admin/contact" },
   { icon: Users, label: "Team", href: "/dashboard/admin/team" },
   { icon: Users2, label: "Cells", href: "/dashboard/admin/cells" },
 ]

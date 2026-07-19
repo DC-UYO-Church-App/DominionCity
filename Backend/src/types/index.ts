@@ -219,3 +219,99 @@ export interface Notification {
   metadata?: Record<string, any>;
   createdAt: Date;
 }
+
+export enum ProjectStatus {
+  ACTIVE = 'active',
+  COMPLETED = 'completed',
+  ARCHIVED = 'archived',
+}
+
+export enum ProgramScope {
+  NATIONAL = 'national',
+  STATE = 'state',
+}
+
+export enum ProgramStatus {
+  SCHEDULED = 'scheduled',
+  ONGOING = 'ongoing',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+}
+
+export enum ContributionSource {
+  PROJECT = 'project',
+  PROGRAM = 'program',
+}
+
+export enum ContributionStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  REJECTED = 'rejected',
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  targetAmount?: number;
+  status: ProjectStatus;
+  createdBy?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Program {
+  id: string;
+  title: string;
+  description?: string;
+  scope: ProgramScope;
+  imageUrl?: string;
+  location?: string;
+  startDate?: Date;
+  status: ProgramStatus;
+  createdBy?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface WeeklyActivity {
+  id: string;
+  title: string;
+  description?: string;
+  dayOfWeek: string;
+  startTime?: string;
+  endTime?: string;
+  location?: string;
+  imageUrl?: string;
+  isActive: boolean;
+  createdBy?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Contribution {
+  id: string;
+  userId: string;
+  sourceType: ContributionSource;
+  sourceId: string;
+  amount: number;
+  isAnonymous: boolean;
+  status: ContributionStatus;
+  note?: string;
+  confirmedBy?: string;
+  confirmedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SatelliteChurch {
+  id: string;
+  name: string;
+  location?: string;
+  description?: string;
+  assignedUserId?: string;
+  createdBy?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
