@@ -3,53 +3,90 @@ import path from 'path';
 
 dotenv.config();
 
+const missing: string[] = [];
+const invalid: string[] = [];
+
+// A variable that is present but empty is treated as missing, so a blank value
+// in the environment fails loudly instead of silently becoming ''.
+function str(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value.trim() === '') {
+    missing.push(name);
+    return '';
+  }
+  return value;
+}
+
+function int(name: string): number {
+  const value = str(name);
+  if (value === '') return 0; // already recorded as missing
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed)) {
+    invalid.push(`${name} (expected an integer, got "${value}")`);
+    return 0;
+  }
+  return parsed;
+}
+
 export const config = {
   server: {
-    nodeEnv: process.env.NODE_ENV || 'development',
-    port: parseInt(process.env.PORT || '3000', 10),
-    host: process.env.HOST || '0.0.0.0',
+    nodeEnv: str('NODE_ENV'),
+    port: int('PORT'),
+    host: str('HOST'),
   },
   database: {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    name: process.env.DB_NAME || 'dominion_city_db',
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || '',
+    host: str('DB_HOST'),
+    port: int('DB_PORT'),
+    name: str('DB_NAME'),
+    user: str('DB_USER'),
+    password: str('DB_PASSWORD'),
   },
   jwt: {
-    secret: process.env.JWT_SECRET || 'change-this-secret',
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    secret: str('JWT_SECRET'),
+    expiresIn: str('JWT_EXPIRES_IN'),
   },
   redis: {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379', 10),
-    password: process.env.REDIS_PASSWORD || undefined,
+    host: str('REDIS_HOST'),
+    port: int('REDIS_PORT'),
+    password: str('REDIS_PASSWORD'),
   },
   resend: {
-    apiKey: process.env.RESEND_API_KEY || '',
-    fromEmail: process.env.RESEND_FROM_EMAIL || 'noreply@dominioncityuyo.org',
-    fromName: process.env.RESEND_FROM_NAME || 'Dominion City Uyo',
+    apiKey: str('RESEND_API_KEY'),
+    fromEmail: str('RESEND_FROM_EMAIL'),
+    fromName: str('RESEND_FROM_NAME'),
   },
   upload: {
-    dir: path.resolve(process.env.UPLOAD_DIR || './uploads'),
-    maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760', 10), // 10MB
+    dir: path.resolve(str('UPLOAD_DIR')),
+    maxFileSize: int('MAX_FILE_SIZE'),
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
+    origin: str('CORS_ORIGIN'),
   },
   rateLimit: {
-    max: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
-    timeWindow: parseInt(process.env.RATE_LIMIT_TIMEWINDOW || '900000', 10), // 15 minutes
+    max: int('RATE_LIMIT_MAX'),
+    timeWindow: int('RATE_LIMIT_TIMEWINDOW'),
   },
   church: {
-    name: process.env.CHURCH_NAME || 'Dominion City Uyo (Golden Heart)',
-    email: process.env.CHURCH_EMAIL || 'info@dominioncityuyo.org',
-    phone: process.env.CHURCH_PHONE || '',
-    address: process.env.CHURCH_ADDRESS || 'Uyo, Akwa Ibom State, Nigeria',
+    name: str('CHURCH_NAME'),
+    email: str('CHURCH_EMAIL'),
+    phone: str('CHURCH_PHONE'),
+    address: str('CHURCH_ADDRESS'),
   },
   notifications: {
-    absenceWarningThreshold: parseInt(process.env.ABSENCE_WARNING_THRESHOLD || '2', 10),
-    absenceCriticalThreshold: parseInt(process.env.ABSENCE_CRITICAL_THRESHOLD || '4', 10),
-    titheReminderThreshold: parseInt(process.env.TITHE_REMINDER_THRESHOLD || '2', 10),
+    absenceWarningThreshold: int('ABSENCE_WARNING_THRESHOLD'),
+    absenceCriticalThreshold: int('ABSENCE_CRITICAL_THRESHOLD'),
+    titheReminderThreshold: int('TITHE_REMINDER_THRESHOLD'),
   },
 };
+
+if (missing.length > 0 || invalid.length > 0) {
+  const lines = ['Invalid environment configuration:'];
+  if (missing.length > 0) {
+    lines.push(`  Missing or empty: ${missing.join(', ')}`);
+  }
+  if (invalid.length > 0) {
+    lines.push(`  Invalid: ${invalid.join(', ')}`);
+  }
+  lines.push('  See Backend/.env.example for the full list of required variables.');
+  throw new Error(lines.join('\n'));
+}

@@ -13,8 +13,9 @@ export const pool = new Pool({
 });
 
 pool.on('error', (err) => {
+  // Managed Postgres recycles idle connections; pg reconnects on the next
+  // query, so log and carry on rather than taking the whole process down.
   console.error('Unexpected error on idle client', err);
-  process.exit(-1);
 });
 
 export const query = async (text: string, params?: any[]) => {

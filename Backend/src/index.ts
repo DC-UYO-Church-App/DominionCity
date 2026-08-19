@@ -69,9 +69,20 @@ async function registerPlugins() {
 
 // Register routes
 async function registerRoutes() {
-  // Health check
-  fastify.get('/health', async () => {
-    return { status: 'ok', timestamp: new Date().toISOString() };
+  // Health check. Touches a real table so a reachable-but-unmigrated database
+  // reports unhealthy instead of returning ok while every route 500s.
+  fastify.get('/health', async (_request, reply) => {
+    try {
+      await pool.query('SELECT 1 FROM users LIMIT 1');
+      return { status: 'ok', database: 'ok', timestamp: new Date().toISOString() };
+    } catch (error) {
+      fastify.log.error({ err: error }, 'Health check failed');
+      return reply.status(503).send({
+        status: 'error',
+        database: 'unavailable',
+        timestamp: new Date().toISOString(),
+      });
+    }
   });
 
   // API routes
