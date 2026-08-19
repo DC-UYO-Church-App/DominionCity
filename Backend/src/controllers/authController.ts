@@ -5,6 +5,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { config } from '../config';
 import { EmailService } from '../config/email';
+import { renderWelcomeEmail } from '../templates/welcomeEmail';
+import { replyWithError } from '../utils/apiError';
 
 export class AuthController {
   static async register(request: FastifyRequest, reply: FastifyReply) {
@@ -12,8 +14,21 @@ export class AuthController {
       const { email, password, firstName, lastName, phoneNumber, dateOfBirth, address } =
         request.body as any;
 
-      if (!email || !password || !firstName || !lastName || !phoneNumber) {
-        return reply.status(400).send({ error: 'All required fields must be provided' });
+      const missingFields = Object.entries({
+        email,
+        password,
+        firstName,
+        lastName,
+        phoneNumber,
+      })
+        .filter(([, value]) => !value || String(value).trim() === '')
+        .map(([field]) => field);
+
+      if (missingFields.length > 0) {
+        return reply.status(400).send({
+          error: `Missing required ${missingFields.length === 1 ? 'field' : 'fields'}: ${missingFields.join(', ')}`,
+          fields: missingFields,
+        });
       }
 
       const existingUser = await UserService.getUserByEmail(email);
@@ -32,31 +47,15 @@ export class AuthController {
       });
 
       try {
-        const appBaseUrl = config.cors.origin || 'http://localhost:3001';
-        const logoUrl = `${appBaseUrl}/logo.png`;
+        const welcome = renderWelcomeEmail({ firstName: user.firstName });
         await EmailService.send({
           to: user.email,
-          subject: `Welcome to ${config.church.name}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; background:#f7f9fc; padding: 24px;">
-              <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);">
-                <div style="padding: 24px; text-align: center; border-bottom: 1px solid #eef2f7;">
-                  <img src="${logoUrl}" alt="${config.church.name}" style="height: 56px;" />
-                  <h2 style="margin: 16px 0 4px; color: #0f172a;">Welcome, ${user.firstName}!</h2>
-                  <p style="margin: 0; color: #64748b;">We are glad you joined ${config.church.name}.</p>
-                </div>
-                <div style="padding: 24px; color: #334155; line-height: 1.6;">
-                  <p>Your account has been created successfully. You can now sign in to the Golden Heart app and explore sermons, events, and more.</p>
-                  <p>If you need help, reach us at <a href="mailto:${config.church.email}">${config.church.email}</a>.</p>
-                </div>
-                <div style="padding: 16px 24px; background: #f8fafc; color: #94a3b8; font-size: 12px; text-align: center;">
-                  This is an automated message from ${config.church.name}.
-                </div>
-              </div>
-            </div>
-          `,
+          subject: welcome.subject,
+          html: welcome.html,
+          text: welcome.text,
         });
       } catch (error) {
+        // A failed welcome email must not fail the registration itself.
         console.error('Welcome email failed:', error);
       }
 
@@ -68,8 +67,7 @@ export class AuthController {
 
       reply.status(201).send({ user, token });
     } catch (error) {
-      console.error('Registration error:', error);
-      reply.status(500).send({ error: 'Registration failed' });
+      replyWithError(reply, 'Registration failed', error);
     }
   }
 
@@ -96,8 +94,7 @@ export class AuthController {
 
       reply.send({ user, token });
     } catch (error) {
-      console.error('Login error:', error);
-      reply.status(500).send({ error: 'Login failed' });
+      replyWithError(reply, 'Login failed', error);
     }
   }
 
@@ -111,8 +108,7 @@ export class AuthController {
 
       reply.send({ user });
     } catch (error) {
-      console.error('Get profile error:', error);
-      reply.status(500).send({ error: 'Failed to get profile' });
+      replyWithError(reply, 'Failed to get profile', error);
     }
   }
 
@@ -129,8 +125,7 @@ export class AuthController {
 
       reply.send({ user });
     } catch (error) {
-      console.error('Update profile error:', error);
-      reply.status(500).send({ error: 'Failed to update profile' });
+      replyWithError(reply, 'Failed to update profile', error);
     }
   }
 
@@ -171,8 +166,7 @@ export class AuthController {
 
       reply.send({ user, imageUrl });
     } catch (error) {
-      console.error('Upload profile image error:', error);
-      reply.status(500).send({ error: 'Failed to upload profile image' });
+      replyWithError(reply, 'Failed to upload profile image', error);
     }
   }
 }

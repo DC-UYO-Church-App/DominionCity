@@ -4,6 +4,7 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import fs from 'fs/promises';
 import path from 'path';
 import { config } from '../config';
+import { replyWithError } from '../utils/apiError';
 
 export class SermonController {
   static async createSermon(request: AuthenticatedRequest, reply: FastifyReply) {
@@ -68,8 +69,7 @@ export class SermonController {
 
       reply.status(201).send({ sermon });
     } catch (error) {
-      console.error('Create sermon error:', error);
-      reply.status(500).send({ error: 'Failed to create sermon' });
+      replyWithError(reply, 'Failed to create sermon', error);
     }
   }
 
@@ -85,8 +85,7 @@ export class SermonController {
 
       reply.send({ sermon });
     } catch (error) {
-      console.error('Get sermon error:', error);
-      reply.status(500).send({ error: 'Failed to get sermon' });
+      replyWithError(reply, 'Failed to get sermon', error);
     }
   }
 
@@ -105,8 +104,7 @@ export class SermonController {
 
       reply.send(result);
     } catch (error) {
-      console.error('Get all sermons error:', error);
-      reply.status(500).send({ error: 'Failed to get sermons' });
+      replyWithError(reply, 'Failed to get sermons', error);
     }
   }
 
@@ -122,8 +120,7 @@ export class SermonController {
 
       reply.send({ sermons });
     } catch (error) {
-      console.error('Search sermons error:', error);
-      reply.status(500).send({ error: 'Failed to search sermons' });
+      replyWithError(reply, 'Failed to search sermons', error);
     }
   }
 
@@ -144,8 +141,7 @@ export class SermonController {
 
       reply.send({ sermon });
     } catch (error) {
-      console.error('Update sermon error:', error);
-      reply.status(500).send({ error: 'Failed to update sermon' });
+      replyWithError(reply, 'Failed to update sermon', error);
     }
   }
 
@@ -161,8 +157,7 @@ export class SermonController {
 
       reply.send({ message: 'Sermon deleted successfully' });
     } catch (error) {
-      console.error('Delete sermon error:', error);
-      reply.status(500).send({ error: 'Failed to delete sermon' });
+      replyWithError(reply, 'Failed to delete sermon', error);
     }
   }
 }

@@ -5,6 +5,7 @@ import { EventStatus } from '../types';
 import fs from 'fs/promises';
 import path from 'path';
 import { config } from '../config';
+import { replyWithError } from '../utils/apiError';
 
 export class EventController {
   static async createEvent(request: AuthenticatedRequest, reply: FastifyReply) {
@@ -66,8 +67,7 @@ export class EventController {
 
       reply.status(201).send({ event });
     } catch (error) {
-      console.error('Create event error:', error);
-      reply.status(500).send({ error: 'Failed to create event' });
+      replyWithError(reply, 'Failed to create event', error);
     }
   }
 
@@ -83,8 +83,7 @@ export class EventController {
 
       reply.send({ event });
     } catch (error) {
-      console.error('Get event error:', error);
-      reply.status(500).send({ error: 'Failed to get event' });
+      replyWithError(reply, 'Failed to get event', error);
     }
   }
 
@@ -101,8 +100,7 @@ export class EventController {
 
       reply.send(result);
     } catch (error) {
-      console.error('Get events error:', error);
-      reply.status(500).send({ error: 'Failed to get events' });
+      replyWithError(reply, 'Failed to get events', error);
     }
   }
 
@@ -163,8 +161,7 @@ export class EventController {
 
       reply.send({ event });
     } catch (error) {
-      console.error('Update event error:', error);
-      reply.status(500).send({ error: 'Failed to update event' });
+      replyWithError(reply, 'Failed to update event', error);
     }
   }
 
@@ -180,8 +177,7 @@ export class EventController {
 
       reply.send({ message: 'Event deleted successfully' });
     } catch (error) {
-      console.error('Delete event error:', error);
-      reply.status(500).send({ error: 'Failed to delete event' });
+      replyWithError(reply, 'Failed to delete event', error);
     }
   }
 }

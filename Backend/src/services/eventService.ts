@@ -80,7 +80,12 @@ export class EventService {
 
     const [eventsResult, countResult] = await Promise.all([
       query(queryText, values),
-      query(countText, values.slice(0, paramCount - (filters?.limit ? 1 : 0) - (filters?.offset ? 1 : 0))),
+      // The count query has no LIMIT/OFFSET, so it must not receive their
+      // parameters — only the filter values that precede them.
+      query(
+        countText,
+        values.slice(0, values.length - (filters?.limit ? 1 : 0) - (filters?.offset ? 1 : 0))
+      ),
     ]);
 
     return {

@@ -23,14 +23,21 @@ export class EmailService {
       const text =
         options.text ??
         ((options.html ? options.html.replace(/<[^>]+>/g, '') : '') || ' ');
-      await resend.emails.send({
+      // The Resend SDK resolves with { data, error } rather than rejecting, so
+      // an API-level failure has to be surfaced explicitly.
+      const { data, error } = await resend.emails.send({
         from,
         to: options.to,
         subject: options.subject,
         text,
         html: options.html,
       });
-      console.log('Email sent successfully to:', options.to);
+
+      if (error) {
+        throw new Error(`Resend rejected the message: ${error.name} - ${error.message}`);
+      }
+
+      console.log('Email sent successfully to:', options.to, 'id:', data?.id);
     } catch (error) {
       console.error('Error sending email:', error);
       throw error;
@@ -44,7 +51,7 @@ export class EmailService {
       }
 
       const from = `${config.resend.fromName} <${config.resend.fromEmail}>`;
-      await Promise.all(
+      const results = await Promise.all(
         messages.map((msg) =>
           resend.emails.send({
             from,
@@ -57,6 +64,15 @@ export class EmailService {
           })
         )
       );
+
+      const failures = results.filter((result) => result.error);
+      if (failures.length > 0) {
+        throw new Error(
+          `Resend rejected ${failures.length} of ${messages.length} messages: ` +
+            failures.map((f) => f.error?.message).join('; ')
+        );
+      }
+
       console.log(`${messages.length} emails sent successfully`);
     } catch (error) {
       console.error('Error sending bulk emails:', error);
