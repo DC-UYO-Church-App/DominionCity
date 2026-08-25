@@ -119,9 +119,30 @@ export class AuthController {
     }
   }
 
+  /**
+   * Fields a member may change about themselves.
+   *
+   * Deliberately excludes `role`, `isActive`, `departmentId`, `cellGroupId` and
+   * `email`: the body used to be passed to UserService.updateUser untouched, so
+   * `{"role":"super_admin"}` on this route rewrote the caller's own role and
+   * handed them the whole admin surface on their next login.
+   */
+  private static readonly SELF_EDITABLE_FIELDS = [
+    'firstName',
+    'lastName',
+    'phoneNumber',
+    'address',
+    'dateOfBirth',
+    'profileImage',
+  ] as const;
+
   static async updateProfile(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
-      const updates = request.body as any;
+      const body = (request.body ?? {}) as Record<string, unknown>;
+      const allowed = AuthController.SELF_EDITABLE_FIELDS as readonly string[];
+      const updates = Object.fromEntries(
+        Object.entries(body).filter(([key]) => allowed.includes(key))
+      );
       const userId = request.user!.id;
 
       const user = await UserService.updateUser(userId, updates);
