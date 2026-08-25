@@ -1,5 +1,6 @@
 import { query } from '../config/database';
-import { Contribution, ContributionSource, ContributionStatus } from '../types';
+import { Contribution, ContributionSource, ContributionStatus, NotificationType } from '../types';
+import { NotificationService } from './notificationService';
 
 export interface ContributionRecord extends Contribution {
   sourceTitle: string | null;
@@ -128,7 +129,53 @@ export class ContributionService {
       return null;
     }
 
-    return this.mapDbRowToContribution(result.rows[0]);
+    const contribution = this.mapDbRowToContribution(result.rows[0]);
+
+    // Until now an admin's decision was invisible to the giver: they marked a
+    // payment and never heard back either way. Tell them.
+    await this.notifyGiverOfDecision(contribution).catch((error) =>
+      console.error('Failed to notify giver of contribution decision:', error)
+    );
+
+    return contribution;
+  }
+
+  /** Emails and in-app notifies the giver once their payment is reviewed. */
+  private static async notifyGiverOfDecision(contribution: Contribution): Promise<void> {
+    const sourceTable =
+      contribution.sourceType === ContributionSource.PROJECT ? 'projects' : 'programs';
+
+    const sourceResult = await query(
+      `SELECT title FROM ${sourceTable} WHERE id = $1`,
+      [contribution.sourceId]
+    );
+    const sourceTitle = sourceResult.rows[0]?.title || 'your giving';
+
+    const amount = new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: 'NGN',
+      maximumFractionDigits: 0,
+    }).format(Number(contribution.amount));
+
+    const confirmed = contribution.status === ContributionStatus.CONFIRMED;
+
+    await NotificationService.sendNotification({
+      userId: contribution.userId,
+      type: NotificationType.GENERAL,
+      title: confirmed ? 'Your giving has been confirmed' : 'We could not confirm your giving',
+      message: confirmed
+        ? `Thank you. Your gift of ${amount} toward "${sourceTitle}" has been received and confirmed. ` +
+          'God bless you for your faithfulness.'
+        : `We were unable to confirm your gift of ${amount} toward "${sourceTitle}". ` +
+          'If you believe this is a mistake, please get in touch and we will look into it.',
+      metadata: {
+        contributionId: contribution.id,
+        sourceType: contribution.sourceType,
+        sourceId: contribution.sourceId,
+        amount: contribution.amount,
+      },
+      emailAction: { label: 'View your giving', path: '/dashboard/giving' },
+    });
   }
 
   /** Aggregated data powering the admin Giving Page. */

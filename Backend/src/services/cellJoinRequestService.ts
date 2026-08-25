@@ -1,4 +1,4 @@
-import { query } from '../config/database';
+import { getClient, query } from '../config/database';
 import { NotificationService } from './notificationService';
 import { NotificationType } from '../types';
 
@@ -102,21 +102,27 @@ export class CellJoinRequestService {
   static async acceptRequest(requestId: string, leaderId: string): Promise<void> {
     const req = await this.getRequestAndVerifyLeader(requestId, leaderId);
 
-    // Assign user to the cell group and update request status in a transaction
-    await query('BEGIN');
+    // Assign user to the cell group and update request status in a transaction.
+    // This has to run on one checked-out client: `query()` goes through the
+    // pool, so BEGIN/COMMIT issued that way can land on different connections
+    // and leave the two updates outside any transaction at all.
+    const client = await getClient();
     try {
-      await query(
+      await client.query('BEGIN');
+      await client.query(
         `UPDATE cell_join_requests SET status = 'accepted', updated_at = NOW() WHERE id = $1`,
         [requestId]
       );
-      await query(
+      await client.query(
         `UPDATE users SET cell_group_id = $1 WHERE id = $2`,
         [req.cell_group_id, req.user_id]
       );
-      await query('COMMIT');
+      await client.query('COMMIT');
     } catch (err) {
-      await query('ROLLBACK');
+      await client.query('ROLLBACK');
       throw err;
+    } finally {
+      client.release();
     }
 
     // Notify the user
@@ -129,6 +135,7 @@ export class CellJoinRequestService {
       title: 'Join Request Accepted',
       message: `Great news! Your request to join "${cellGroupName}" has been accepted. Welcome to the family!`,
       metadata: { requestId, cellGroupId: req.cell_group_id },
+      emailAction: { label: 'View your cell group', path: '/dashboard/cell-groups' },
     }).catch((err) => console.error('Failed to notify user of acceptance:', err));
   }
 
@@ -149,6 +156,7 @@ export class CellJoinRequestService {
       title: 'Join Request Declined',
       message: `Your request to join "${cellGroupName}" was not accepted at this time. You may request to join another group.`,
       metadata: { requestId, cellGroupId: req.cell_group_id },
+      emailAction: { label: 'Find another cell group', path: '/dashboard/cell-groups' },
     }).catch((err) => console.error('Failed to notify user of rejection:', err));
   }
 

@@ -75,6 +75,27 @@ export class UserService {
     return this.mapDbRowToUserWithPassword(result.rows[0]);
   }
 
+  /**
+   * Case-insensitive email lookup, used by the password reset flow.
+   *
+   * Addresses are stored as typed, and the rest of the app matches exactly.
+   * Recovery is the one place that must not fail silently over capitalisation:
+   * someone who registered as "Grace@..." and types "grace@..." would
+   * otherwise get the same neutral acknowledgement and never receive a link.
+   */
+  static async getUserByEmailInsensitive(email: string): Promise<User | null> {
+    const result = await query(
+      `SELECT * FROM users WHERE LOWER(email) = LOWER($1) ORDER BY created_at LIMIT 1`,
+      [email]
+    );
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    return this.mapDbRowToUserWithPassword(result.rows[0]);
+  }
+
   static async getUserByPhoneNumber(phoneNumber: string): Promise<User | null> {
     const result = await query(
       `SELECT * FROM users WHERE phone_number = $1`,

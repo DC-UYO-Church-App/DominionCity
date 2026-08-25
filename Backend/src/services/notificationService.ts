@@ -1,6 +1,7 @@
 import { query } from '../config/database';
 import { Notification, NotificationType } from '../types';
 import { EmailService } from '../config/email';
+import { renderNotificationEmail } from '../templates/notificationEmail';
 
 export class NotificationService {
   static async sendNotification(data: {
@@ -9,6 +10,8 @@ export class NotificationService {
     title: string;
     message: string;
     metadata?: Record<string, any>;
+    /** Optional deep link for the emailed copy; not persisted. */
+    emailAction?: { label: string; path: string };
   }): Promise<Notification> {
     const result = await query(
       `INSERT INTO notifications (user_id, type, title, message, metadata)
@@ -28,20 +31,21 @@ export class NotificationService {
 
       if (userResult.rows.length > 0) {
         const user = userResult.rows[0];
+        // Rendered through the shared shell so notifications look like the
+        // rest of the church's mail, and so the message is escaped rather
+        // than interpolated straight into markup.
+        const message = renderNotificationEmail({
+          firstName: user.first_name || 'there',
+          title: data.title,
+          message: data.message,
+          action: data.emailAction,
+        });
+
         await EmailService.send({
           to: user.email,
-          subject: data.title,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #333;">${data.title}</h2>
-              <p style="color: #666; line-height: 1.6;">${data.message}</p>
-              <hr style="border: 1px solid #eee; margin: 20px 0;">
-              <p style="color: #999; font-size: 12px;">
-                This is an automated message from Dominion City Uyo. 
-                Please do not reply to this email.
-              </p>
-            </div>
-          `,
+          subject: message.subject,
+          html: message.html,
+          text: message.text,
         });
       }
     } catch (error) {

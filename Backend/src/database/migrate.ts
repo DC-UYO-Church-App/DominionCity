@@ -1,4 +1,4 @@
-import { pool } from '../config/database';
+import { getClient, pool } from '../config/database';
 import fs from 'fs';
 import path from 'path';
 
@@ -38,14 +38,21 @@ async function runMigrations() {
         }
 
         const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8');
-        await pool.query('BEGIN');
+
+        // One client for the whole transaction: pool.query() can hand each
+        // statement a different connection, which would leave a migration
+        // applied outside its BEGIN/COMMIT and unrollbackable on failure.
+        const client = await getClient();
         try {
-          await pool.query(sql);
-          await pool.query(`INSERT INTO schema_migrations (id) VALUES ($1)`, [file]);
-          await pool.query('COMMIT');
+          await client.query('BEGIN');
+          await client.query(sql);
+          await client.query(`INSERT INTO schema_migrations (id) VALUES ($1)`, [file]);
+          await client.query('COMMIT');
         } catch (error) {
-          await pool.query('ROLLBACK');
+          await client.query('ROLLBACK');
           throw error;
+        } finally {
+          client.release();
         }
       }
     }
