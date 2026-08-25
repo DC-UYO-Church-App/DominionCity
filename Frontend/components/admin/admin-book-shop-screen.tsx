@@ -286,8 +286,8 @@ export function AdminBookShopScreen() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-slate-800">Book Shop</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold text-slate-800 sm:text-2xl">Book Shop</h1>
           <button
             className="rounded-lg bg-[#3c6eea] px-5 py-2 text-sm font-semibold text-white hover:bg-[#325fd0]"
             onClick={() => {
@@ -318,9 +318,9 @@ export function AdminBookShopScreen() {
           ))}
         </div>
 
-        <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-800">Sold Books</h2>
+        <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-semibold text-slate-800 sm:text-lg">Sold Books</h2>
             <span className="text-xs text-slate-500">Last 7 days</span>
           </div>
           <div className="mt-6 h-64 w-full rounded-xl bg-gradient-to-b from-slate-50 to-white">
@@ -349,9 +349,9 @@ export function AdminBookShopScreen() {
         </Card>
 
         <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-          <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-800">Sold Books History</h2>
+          <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-base font-semibold text-slate-800 sm:text-lg">Sold Books History</h2>
               <span className="text-xs text-slate-500">Recent sales</span>
             </div>
             <div className="mt-6 space-y-4">
@@ -382,14 +382,14 @@ export function AdminBookShopScreen() {
                 </div>
               ))}
             </div>
-            <div className="mt-6 flex items-center justify-between text-sm text-slate-600">
+            <div className="mt-6 flex flex-col items-center justify-between gap-3 text-sm text-slate-600 sm:flex-row">
               <span>
                 Showing {pageItems.length === 0 ? 0 : startIndex + 1}-{startIndex + pageItems.length} of{" "}
                 {soldHistory.length}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 <button
-                  className="rounded-lg border border-slate-200 px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-[36px] items-center rounded-lg border border-slate-200 px-3 py-1.5 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
                 >
@@ -399,7 +399,7 @@ export function AdminBookShopScreen() {
                   Page {currentPage} of {totalPages}
                 </span>
                 <button
-                  className="rounded-lg border border-slate-200 px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-[36px] items-center rounded-lg border border-slate-200 px-3 py-1.5 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
                 >
@@ -409,9 +409,9 @@ export function AdminBookShopScreen() {
             </div>
           </Card>
 
-          <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-800">Bookshop Managers</h2>
+          <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-base font-semibold text-slate-800 sm:text-lg">Bookshop Managers</h2>
               <span className="text-xs text-slate-500">Active</span>
             </div>
             <div className="mt-6 space-y-4">

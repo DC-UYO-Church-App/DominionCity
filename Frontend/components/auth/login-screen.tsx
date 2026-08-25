@@ -52,7 +52,7 @@ export function LoginScreen() {
   }
 
   return (
-    <main className="w-full h-screen flex flex-col md:flex-row overflow-hidden">
+    <main className="flex min-h-[100dvh] w-full flex-col md:h-screen md:flex-row md:overflow-hidden">
       {/* Left Panel */}
       <section
         className="hidden md:flex md:w-1/2 relative items-center justify-center p-10 overflow-hidden"
@@ -96,16 +96,16 @@ export function LoginScreen() {
       </section>
 
       {/* Right Panel */}
-      <section className="w-full md:w-1/2 flex items-center justify-center p-6 bg-[#EFF6FF] relative">
+      <section className="relative flex w-full flex-1 items-center justify-center bg-[#EFF6FF] px-4 py-16 sm:px-6 md:w-1/2 md:py-6">
         {/* Mobile logo */}
         <div className="md:hidden absolute top-5 left-5 flex items-center gap-2">
           <img src="/logo.png" alt="Dominion City" className="h-7 w-auto" />
           <span className="text-lg font-bold text-[#1A3A6E]">DC Uyo</span>
         </div>
 
-        <div className="w-full max-w-[420px] bg-white p-8 rounded-xl shadow-lg border border-gray-200/60">
+        <div className="w-full max-w-[420px] rounded-xl border border-gray-200/60 bg-white p-5 shadow-lg sm:p-8">
           <header className="mb-6">
-            <h2 className="text-3xl font-bold text-[#1A3A6E] mb-1">Welcome Back</h2>
+            <h2 className="mb-1 text-2xl font-bold text-[#1A3A6E] sm:text-3xl">Welcome Back</h2>
             <p className="text-sm text-gray-500">
               Please enter your credentials to access the membership portal.
             </p>
@@ -137,11 +137,14 @@ export function LoginScreen() {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <div className="flex justify-between items-center">
-                <label htmlFor="password" className="block text-[11px] font-bold text-[#1A3A6E] uppercase tracking-wider">
+              <div className="flex items-center justify-between gap-3">
+                <label htmlFor="password" className="block text-[11px] font-bold uppercase tracking-wider text-[#1A3A6E]">
                   Password
                 </label>
-                <Link href="/forgot-password" className="text-[11px] font-semibold text-[#1E5EC8] hover:underline">
+                <Link
+                  href="/forgot-password"
+                  className="-my-2 -mr-1 inline-flex items-center px-1 py-2 text-[11px] font-semibold text-[#1E5EC8] hover:underline"
+                >
                   Forgot password?
                 </Link>
               </div>
@@ -158,12 +161,13 @@ export function LoginScreen() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-9 pr-11 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#1E5EC8] focus:ring-2 focus:ring-[#1E5EC8]/20 transition-all"
+                  className="w-full pl-9 pr-12 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#1E5EC8] focus:ring-2 focus:ring-[#1E5EC8]/20 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1A3A6E] transition-colors p-0.5"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-gray-400 transition-colors hover:text-[#1A3A6E]"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -171,13 +175,16 @@ export function LoginScreen() {
             </div>
 
             {/* Remember me */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 py-1">
               <input
                 id="remember"
                 type="checkbox"
-                className="w-4 h-4 text-[#1E5EC8] border-gray-300 rounded focus:ring-[#1E5EC8] cursor-pointer"
+                className="h-[18px] w-[18px] shrink-0 cursor-pointer rounded border-gray-300 text-[#1E5EC8] focus:ring-[#1E5EC8]"
               />
-              <label htmlFor="remember" className="text-sm text-gray-500 select-none cursor-pointer">
+              <label
+                htmlFor="remember"
+                className="flex min-h-[36px] cursor-pointer select-none items-center text-sm text-gray-500"
+              >
                 Keep me logged in for 30 days
               </label>
             </div>

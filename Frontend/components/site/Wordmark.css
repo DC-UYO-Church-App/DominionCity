@@ -1,11 +1,12 @@
-.wordmark { display: inline-flex; align-items: center; gap: 0.55rem; }
-.wordmark__mark { width: 30px; height: 30px; flex: none; }
+.wordmark { display: inline-flex; align-items: center; gap: 0.45rem; min-width: 0; }
+.wordmark__mark { width: clamp(24px, 6vw, 30px); height: clamp(24px, 6vw, 30px); flex: none; }
 .wordmark__text {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 1.32rem;
+  font-size: clamp(1.05rem, 3.6vw, 1.32rem);
   letter-spacing: -0.01em;
   line-height: 1;
+  white-space: nowrap;
   font-optical-sizing: auto;
 }
 .wordmark__name--alt { color: var(--accent-ink); }

@@ -29,9 +29,9 @@ export function MemberActivitiesScreen() {
   }, [activities])
 
   return (
-    <div className="space-y-6 pb-28">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#1A3A6E]">Weekly Activities</h1>
+        <h1 className="text-xl font-bold text-[#1A3A6E] sm:text-2xl">Weekly Activities</h1>
         <p className="text-sm text-gray-500">Our regular weekly programs and gatherings.</p>
       </div>
 

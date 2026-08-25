@@ -79,7 +79,7 @@ export function TithingScreen() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Tithing & Donations</h1>
+        <h1 className="text-xl font-bold sm:text-2xl">Tithing &amp; Donations</h1>
         <p className="text-muted-foreground">Give your tithes and offerings</p>
       </div>
 

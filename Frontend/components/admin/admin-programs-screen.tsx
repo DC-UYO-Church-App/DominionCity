@@ -205,8 +205,8 @@ export function AdminProgramsScreen() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-slate-800">Programs</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold text-slate-800 sm:text-2xl">Programs</h1>
           <Button
             className="rounded-lg bg-[#3c6eea] px-6 text-white hover:bg-[#325fd0]"
             onClick={() => {
@@ -219,21 +219,21 @@ export function AdminProgramsScreen() {
         </div>
 
         <Tabs defaultValue="national" className="space-y-4">
-          <TabsList className="w-full justify-start rounded-full bg-white p-1 shadow-sm">
-            <TabsTrigger value="national" className="rounded-full px-6">
+          <TabsList className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto hide-scrollbar rounded-full bg-white p-1 shadow-sm">
+            <TabsTrigger value="national" className="shrink-0 rounded-full px-4 sm:px-6">
               National Programs
             </TabsTrigger>
-            <TabsTrigger value="state" className="rounded-full px-6">
+            <TabsTrigger value="state" className="shrink-0 rounded-full px-4 sm:px-6">
               State Programs
             </TabsTrigger>
           </TabsList>
           <TabsContent value="national">
-            <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
               {renderList(grouped.national)}
             </Card>
           </TabsContent>
           <TabsContent value="state">
-            <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
               {renderList(grouped.state)}
             </Card>
           </TabsContent>
@@ -247,7 +247,7 @@ export function AdminProgramsScreen() {
             <DialogDescription>Members can support this program from their dashboard.</DialogDescription>
           </DialogHeader>
 
-          <Card className="rounded-2xl border-none bg-white p-8 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+          <Card className="rounded-2xl border-none bg-white p-0 shadow-none sm:p-6 sm:shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
             <div className="flex flex-col items-center gap-3">
               <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-500">
                 {coverPreview ? (

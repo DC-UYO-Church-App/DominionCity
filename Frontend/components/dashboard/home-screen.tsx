@@ -286,9 +286,9 @@ export function HomeScreen() {
   const sermonsToShow = recentSermons
 
   return (
-    <div className="space-y-6 pb-28">
+    <div className="space-y-6">
       {/* Welcome Banner */}
-      <section className="rounded-2xl p-6 text-white relative overflow-hidden shadow-lg min-h-[140px]">
+      <section className="relative min-h-[140px] overflow-hidden rounded-2xl p-5 text-white shadow-lg sm:p-6">
         <img
           src="/dark.jpg"
           alt=""
@@ -297,7 +297,7 @@ export function HomeScreen() {
         <div className="absolute inset-0 bg-[#1A3A6E]/80 pointer-events-none" />
         <div className="relative z-10">
           <p className="text-[11px] uppercase tracking-widest opacity-70 mb-1 font-semibold">{todayLabel}</p>
-          <h2 className="text-2xl font-bold mb-1">
+          <h2 className="mb-1 text-xl font-bold sm:text-2xl">
             {getGreeting()}, {firstName}
           </h2>
           <p className="text-sm opacity-80 max-w-[260px] leading-relaxed">
@@ -362,7 +362,7 @@ export function HomeScreen() {
       </div>
 
       {/* Cell Group + Ongoing Project + Upcoming Events in one line */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3 [&>*]:min-w-0">
 
         {/* My Cell Group */}
         <div className="bg-white rounded-xl p-5 shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100">

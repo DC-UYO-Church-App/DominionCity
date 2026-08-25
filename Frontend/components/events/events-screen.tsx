@@ -62,8 +62,8 @@ export function EventsScreen() {
             key={event.id}
             className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 text-slate-900 md:flex-row md:items-center md:justify-between"
           >
-            <div className="flex items-center gap-4">
-              <div className="h-20 w-28 overflow-hidden rounded-lg bg-slate-100">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+              <div className="h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-100 sm:h-20 sm:w-28">
                 {event.cover ? (
                   <img src={event.cover} alt={event.title} className="h-full w-full object-cover" />
                 ) : (
@@ -72,10 +72,12 @@ export function EventsScreen() {
                   </div>
                 )}
               </div>
-              <div>
-                <p className="font-semibold text-slate-900">{event.title}</p>
+              <div className="min-w-0">
+                <p className="break-words font-semibold text-slate-900">{event.title}</p>
                 <p className="text-sm text-slate-500">{event.eventDate.toLocaleString()}</p>
-                {event.address ? <p className="text-sm text-slate-500">{event.address}</p> : null}
+                {event.address ? (
+                  <p className="break-words text-sm text-slate-500">{event.address}</p>
+                ) : null}
               </div>
             </div>
             <Badge variant="outline" className="w-fit">
@@ -90,35 +92,35 @@ export function EventsScreen() {
   return (
     <div className="space-y-6 text-slate-100">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-white">Events</h1>
+        <h1 className="text-xl font-bold text-white sm:text-2xl">Events</h1>
         <p className="text-sm text-slate-400">All events added by the admin.</p>
       </div>
 
       <Tabs defaultValue="ongoing" className="space-y-4">
-        <TabsList className="w-full justify-start rounded-full bg-white p-1 shadow-sm text-slate-900">
-          <TabsTrigger value="ongoing" className="rounded-full px-6">
+        <TabsList className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto hide-scrollbar rounded-full bg-white p-1 shadow-sm text-slate-900">
+          <TabsTrigger value="ongoing" className="shrink-0 rounded-full px-4 sm:px-6">
             Ongoing Events
           </TabsTrigger>
-          <TabsTrigger value="past" className="rounded-full px-6">
+          <TabsTrigger value="past" className="shrink-0 rounded-full px-4 sm:px-6">
             Past Events
           </TabsTrigger>
-          <TabsTrigger value="cancelled" className="rounded-full px-6">
+          <TabsTrigger value="cancelled" className="shrink-0 rounded-full px-4 sm:px-6">
             Cancelled Events
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="ongoing">
-          <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+          <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
             {renderList(categorizedEvents.ongoing, "No ongoing events.")}
           </Card>
         </TabsContent>
         <TabsContent value="past">
-          <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+          <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
             {renderList(categorizedEvents.past, "No past events.")}
           </Card>
         </TabsContent>
         <TabsContent value="cancelled">
-          <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+          <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
             {renderList(categorizedEvents.cancelled, "No cancelled events.")}
           </Card>
         </TabsContent>

@@ -264,9 +264,9 @@ function CellModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+      <div className="max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl bg-white shadow-2xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-4 sm:px-6">
           <h2 className="text-base font-semibold text-slate-800">
             {mode === "create" ? "Create Cell Group" : "Edit Cell Group"}
           </h2>
@@ -275,7 +275,7 @@ function CellModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
+        <form onSubmit={handleSubmit} className="space-y-4 px-4 py-5 sm:px-6">
           {error && (
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
           )}
@@ -503,30 +503,30 @@ export function AdminCellsScreen() {
             <div key={cell.id} className="rounded-2xl bg-white p-5 shadow-sm">
               {/* Card header */}
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#3c6eea]/10">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#3c6eea]/10">
                     <Users className="h-5 w-5 text-[#3c6eea]" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-800 leading-tight">{cell.name}</h3>
+                    <h3 className="break-words font-semibold leading-tight text-slate-800">{cell.name}</h3>
                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
                       <Users className="h-3 w-3" />
                       {cell.memberCount} member{cell.memberCount !== 1 ? "s" : ""}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex shrink-0 items-center gap-1">
                   <button
                     type="button"
                     onClick={() => setEditCell(cell)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#3c6eea]"
+                    className="shrink-0 rounded-lg p-2.5 text-slate-400 hover:bg-slate-100 hover:text-[#3c6eea]"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(cell)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                    className="shrink-0 rounded-lg p-2.5 text-slate-400 hover:bg-red-50 hover:text-red-500"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -605,8 +605,8 @@ export function AdminCellsScreen() {
 
       {/* Delete confirm */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+          <div className="max-h-[calc(100dvh-2rem)] w-full max-w-sm overflow-y-auto overscroll-contain rounded-2xl bg-white p-5 shadow-2xl sm:p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
               <Trash2 className="h-5 w-5 text-red-500" />
             </div>

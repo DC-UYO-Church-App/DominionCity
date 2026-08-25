@@ -136,7 +136,7 @@ export function AttendanceScreen() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Attendance</h1>
+        <h1 className="text-xl font-bold sm:text-2xl">Attendance</h1>
         <p className="text-muted-foreground">Check-in and view your attendance history</p>
       </div>
 
@@ -206,13 +206,13 @@ export function AttendanceScreen() {
                 {history.map((record) => (
                   <div
                     key={record.id}
-                    className="flex items-center justify-between rounded-lg border border-border p-4"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border p-4"
                   >
-                    <div>
-                      <p className="font-semibold">{record.title}</p>
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold">{record.title}</p>
                       <p className="text-xs text-muted-foreground">{record.serviceDate}</p>
                     </div>
-                    <span className="text-xs font-semibold uppercase text-emerald-600">
+                    <span className="shrink-0 text-xs font-semibold uppercase text-emerald-600">
                       {record.status}
                     </span>
                   </div>
@@ -231,7 +231,7 @@ export function AttendanceScreen() {
             <DialogDescription>Choose your preferred check-in method</DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-4 py-4">
+          <div className="grid grid-cols-2 gap-3 py-4 sm:gap-4">
             <Button variant="outline" className="h-24 flex flex-col">
               <QrCode className="h-8 w-8 mb-2" />
               <span>Scan QR Code</span>

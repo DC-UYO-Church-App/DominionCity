@@ -71,14 +71,19 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen bg-[#EFF6FF] text-slate-900">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 h-14 border-b border-slate-200 bg-white">
-        <Button variant="ghost" size="icon" onClick={() => setIsDrawerOpen(true)} className="md:hidden">
+      <header className="sticky top-0 z-30 flex items-center justify-between gap-2 px-3 h-14 border-b border-slate-200 bg-white sm:px-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsDrawerOpen(true)}
+          className="-ml-1 shrink-0 md:hidden"
+        >
           <Menu className="h-5 w-5" />
           <span className="sr-only">Open menu</span>
         </Button>
-        <div className="flex items-center">
-          <img src="/logo.png" alt="Dominion City" className="h-8 w-auto mr-2" />
-          <h1 className="text-lg font-bold text-slate-900">Golden Heart</h1>
+        <div className="flex min-w-0 items-center">
+          <img src="/logo.png" alt="Dominion City" className="h-7 w-auto mr-2 sm:h-8" />
+          <h1 className="truncate text-base font-bold text-slate-900 sm:text-lg">Golden Heart</h1>
         </div>
         <nav className="hidden items-center gap-1 md:flex">
           {navLinks.map((item) => {
@@ -98,7 +103,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             )
           })}
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <button className="relative p-2 rounded-full hover:bg-slate-100 transition-colors">
             <Bell className="h-5 w-5 text-slate-600" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
@@ -134,11 +139,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Side Drawer (Mobile) */}
-      <SideDrawer isOpen={isDrawerOpen} setIsOpen={setIsDrawerOpen} />
+      <SideDrawer
+        isOpen={isDrawerOpen}
+        setIsOpen={setIsDrawerOpen}
+        profile={profile}
+        profileImage={profileImage}
+      />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        <div className="w-[80%] mx-auto py-6">{children}</div>
+      <main className="flex-1">
+        <div className="mx-auto w-full max-w-6xl px-4 py-4 pb-28 sm:px-6 sm:py-6 lg:w-[85%] lg:px-0">
+          {children}
+        </div>
       </main>
 
       {/* Bottom Navigation */}

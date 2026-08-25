@@ -145,8 +145,8 @@ export function AdminProjectsScreen() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-slate-800">Ongoing Projects</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold text-slate-800 sm:text-2xl">Ongoing Projects</h1>
           <Button
             className="rounded-lg bg-[#3c6eea] px-6 text-white hover:bg-[#325fd0]"
             onClick={() => {
@@ -158,7 +158,7 @@ export function AdminProjectsScreen() {
           </Button>
         </div>
 
-        <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+        <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
           {isLoading ? (
             <div className="py-10 text-center text-sm text-slate-400">Loading projects...</div>
           ) : projects.length === 0 ? (
@@ -231,7 +231,7 @@ export function AdminProjectsScreen() {
             <DialogDescription>Members will be able to give toward this project.</DialogDescription>
           </DialogHeader>
 
-          <Card className="rounded-2xl border-none bg-white p-8 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+          <Card className="rounded-2xl border-none bg-white p-0 shadow-none sm:p-6 sm:shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
             <div className="flex flex-col items-center gap-3">
               <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-500">
                 {coverPreview ? (

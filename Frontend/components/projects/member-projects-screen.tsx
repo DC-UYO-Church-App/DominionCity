@@ -36,9 +36,9 @@ export function MemberProjectsScreen() {
   }, [])
 
   return (
-    <div className="space-y-6 pb-28">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#1A3A6E]">Ongoing Projects</h1>
+        <h1 className="text-xl font-bold text-[#1A3A6E] sm:text-2xl">Ongoing Projects</h1>
         <p className="text-sm text-gray-500">Support the projects our church is building.</p>
       </div>
 

@@ -17,9 +17,9 @@ export function MemberSatelliteScreen() {
   }, [])
 
   return (
-    <div className="space-y-6 pb-28">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#1A3A6E]">My Satellite Churches</h1>
+        <h1 className="text-xl font-bold text-[#1A3A6E] sm:text-2xl">My Satellite Churches</h1>
         <p className="text-sm text-gray-500">Satellite churches assigned to you.</p>
       </div>
 

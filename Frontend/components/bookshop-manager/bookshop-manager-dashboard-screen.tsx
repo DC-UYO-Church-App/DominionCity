@@ -143,12 +143,12 @@ export function BookshopManagerDashboardScreen() {
 
   return (
     <div className="min-h-screen bg-[#f5f6fb] text-slate-900">
-      <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
-        <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="Dominion City" className="h-8 w-auto" />
+      <header className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:px-6 sm:py-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <img src="/logo.png" alt="Dominion City" className="h-7 w-auto shrink-0 sm:h-8" />
           <div>
             <p className="text-xs uppercase text-slate-400">Bookshop</p>
-            <h1 className="text-lg font-semibold text-slate-800">Manager Dashboard</h1>
+            <h1 className="truncate text-base font-semibold text-slate-800 sm:text-lg">Manager Dashboard</h1>
           </div>
         </div>
         <DropdownMenu open={isProfileMenuOpen} onOpenChange={setIsProfileMenuOpen}>
@@ -181,7 +181,7 @@ export function BookshopManagerDashboardScreen() {
         </DropdownMenu>
       </header>
 
-      <main className="space-y-6 px-6 py-6 pb-20">
+      <main className="space-y-6 px-4 py-4 pb-28 sm:px-6 sm:py-6">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {statCards.map((card) => (
             <Card
@@ -201,9 +201,9 @@ export function BookshopManagerDashboardScreen() {
           ))}
         </div>
 
-        <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-800">Sold Books</h2>
+        <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-semibold text-slate-800 sm:text-lg">Sold Books</h2>
             <span className="text-xs text-slate-500">Last 7 days</span>
           </div>
           <div className="mt-6 h-64 w-full rounded-xl bg-gradient-to-b from-slate-50 to-white">
@@ -237,9 +237,9 @@ export function BookshopManagerDashboardScreen() {
           </div>
         </Card>
 
-        <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-800">Sold Books History</h2>
+        <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-semibold text-slate-800 sm:text-lg">Sold Books History</h2>
             <span className="text-xs text-slate-500">Recent purchases</span>
           </div>
           <div className="mt-6 space-y-4">

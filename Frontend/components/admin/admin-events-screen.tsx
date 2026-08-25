@@ -186,8 +186,8 @@ export function AdminEventsScreen() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-slate-800">Events</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold text-slate-800 sm:text-2xl">Events</h1>
           <Button
             className="rounded-lg bg-[#3c6eea] px-6 text-white hover:bg-[#325fd0]"
             onClick={() => {
@@ -200,14 +200,14 @@ export function AdminEventsScreen() {
         </div>
 
         <Tabs defaultValue="ongoing" className="space-y-4">
-          <TabsList className="w-full justify-start rounded-full bg-white p-1 shadow-sm">
-            <TabsTrigger value="ongoing" className="rounded-full px-6">Ongoing Events</TabsTrigger>
-            <TabsTrigger value="past" className="rounded-full px-6">Past Events</TabsTrigger>
-            <TabsTrigger value="cancelled" className="rounded-full px-6">Cancelled Events</TabsTrigger>
+          <TabsList className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto hide-scrollbar rounded-full bg-white p-1 shadow-sm">
+            <TabsTrigger value="ongoing" className="shrink-0 rounded-full px-4 sm:px-6">Ongoing Events</TabsTrigger>
+            <TabsTrigger value="past" className="shrink-0 rounded-full px-4 sm:px-6">Past Events</TabsTrigger>
+            <TabsTrigger value="cancelled" className="shrink-0 rounded-full px-4 sm:px-6">Cancelled Events</TabsTrigger>
           </TabsList>
 
           <TabsContent value="ongoing">
-            <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
               {isLoading ? (
                 <div className="py-10 text-center text-sm text-slate-400">Loading events...</div>
               ) : categorizedEvents.ongoing.length === 0 ? (
@@ -259,7 +259,7 @@ export function AdminEventsScreen() {
             </Card>
           </TabsContent>
           <TabsContent value="past">
-            <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
               {isLoading ? (
                 <div className="py-10 text-center text-sm text-slate-400">Loading events...</div>
               ) : categorizedEvents.past.length === 0 ? (
@@ -308,7 +308,7 @@ export function AdminEventsScreen() {
             </Card>
           </TabsContent>
           <TabsContent value="cancelled">
-            <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
               {isLoading ? (
                 <div className="py-10 text-center text-sm text-slate-400">Loading events...</div>
               ) : categorizedEvents.cancelled.length === 0 ? (
@@ -363,7 +363,7 @@ export function AdminEventsScreen() {
             <DialogDescription>Fill in the event details below.</DialogDescription>
           </DialogHeader>
 
-          <Card className="rounded-2xl border-none bg-white p-8 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+          <Card className="rounded-2xl border-none bg-white p-0 shadow-none sm:p-6 sm:shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
             <div className="flex flex-col items-center gap-3">
               <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-500">
                 {coverPreview ? (

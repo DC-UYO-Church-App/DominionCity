@@ -122,8 +122,8 @@ export function AdminActivitiesScreen() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-slate-800">Weekly Activities</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold text-slate-800 sm:text-2xl">Weekly Activities</h1>
           <Button
             className="rounded-lg bg-[#3c6eea] px-6 text-white hover:bg-[#325fd0]"
             onClick={() => {
@@ -135,7 +135,7 @@ export function AdminActivitiesScreen() {
           </Button>
         </div>
 
-        <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+        <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
           {isLoading ? (
             <div className="py-10 text-center text-sm text-slate-400">Loading activities...</div>
           ) : activities.length === 0 ? (
@@ -196,7 +196,7 @@ export function AdminActivitiesScreen() {
             <DialogDescription>This appears in the members' activities section.</DialogDescription>
           </DialogHeader>
 
-          <Card className="rounded-2xl border-none bg-white p-8 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+          <Card className="rounded-2xl border-none bg-white p-0 shadow-none sm:p-6 sm:shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
             <div className="grid gap-6 md:grid-cols-2">
               <div>
                 <label className="text-sm font-semibold text-slate-600">Activity Title</label>

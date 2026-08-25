@@ -70,7 +70,7 @@ export function RegisterScreen() {
   return (
     <main className="min-h-screen flex flex-col md:flex-row">
       {/* Left Panel */}
-      <section className="relative w-full md:w-5/12 h-64 md:h-auto overflow-hidden bg-[#0a1f44] flex items-center justify-center">
+      <section className="relative flex w-full items-center justify-center overflow-hidden bg-[#0a1f44] md:h-auto md:w-5/12">
         {/* Background image */}
         <div className="absolute inset-0 z-0">
           <img src={SANCTUARY_IMG} alt="" className="w-full h-full object-cover opacity-60" />
@@ -78,14 +78,14 @@ export function RegisterScreen() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 p-10 text-center md:text-left">
-          <div className="inline-flex items-center justify-center bg-[#34466d] p-4 rounded-xl mb-6 shadow-xl">
+        <div className="relative z-10 px-6 py-10 text-center sm:px-10 md:text-left">
+          <div className="mb-4 inline-flex items-center justify-center rounded-xl bg-[#34466d] p-3 shadow-xl sm:p-4 md:mb-6">
             <img src="/logo.png" alt="Dominion City" className="w-10 h-10 object-contain" />
           </div>
-          <h1 className="text-5xl font-bold text-white leading-tight mb-4 tracking-tight">
+          <h1 className="mb-3 text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl md:mb-4 md:text-5xl">
             Dominion City Uyo
           </h1>
-          <p className="text-base text-[#7687b2] max-w-md leading-relaxed">
+          <p className="mx-auto max-w-md text-sm leading-relaxed text-[#7687b2] sm:text-base md:mx-0">
             Raising leaders that transform society. Join our community and experience a life of dignity and purpose.
           </p>
 
@@ -100,10 +100,10 @@ export function RegisterScreen() {
       </section>
 
       {/* Right Panel */}
-      <section className="w-full md:w-7/12 flex items-center justify-center p-6 md:p-10 bg-[#fbf8fc]">
-        <div className="w-full max-w-2xl bg-white p-8 md:p-10 rounded-xl shadow-lg border border-gray-200/50">
+      <section className="flex w-full items-center justify-center bg-[#fbf8fc] px-4 py-8 sm:px-6 md:w-7/12 md:p-10">
+        <div className="w-full max-w-2xl rounded-xl border border-gray-200/50 bg-white p-5 shadow-lg sm:p-8 md:p-10">
           <header className="mb-8">
-            <h2 className="text-3xl font-bold text-[#00081e] mb-1">Create Account</h2>
+            <h2 className="mb-1 text-2xl font-bold text-[#00081e] sm:text-3xl">Create Account</h2>
             <p className="text-sm text-gray-500">
               Fill in the details below to register as a member of Dominion City Uyo.
             </p>
@@ -165,7 +165,7 @@ export function RegisterScreen() {
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => setAgreed(e.target.checked)}
-                className="mt-0.5 w-4 h-4 text-[#415e94] border-gray-300 rounded focus:ring-[#415e94] cursor-pointer flex-shrink-0"
+                className="mt-0.5 h-[18px] w-[18px] shrink-0 cursor-pointer rounded border-gray-300 text-[#415e94] focus:ring-[#415e94]"
               />
               <label htmlFor="terms" className="text-sm text-gray-500 cursor-pointer select-none leading-relaxed">
                 I agree to the{" "}

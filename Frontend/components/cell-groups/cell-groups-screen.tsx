@@ -212,7 +212,7 @@ export function CellGroupsScreen() {
   // ── Loading skeleton ──────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="pb-28 animate-pulse space-y-6">
+      <div className="animate-pulse space-y-6">
         <div className="h-24 bg-white rounded-xl" />
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           <div className="md:col-span-4 h-80 bg-white rounded-xl" />
@@ -226,7 +226,7 @@ export function CellGroupsScreen() {
   // ── No cell group assigned ────────────────────────────────────────────────
   if (!cellGroup) {
     return (
-      <div className="pb-28 flex flex-col items-center justify-center py-20 text-center">
+      <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="w-16 h-16 bg-[#1A3A6E]/10 rounded-full flex items-center justify-center mb-4">
           <Users className="h-8 w-8 text-[#1A3A6E]/40" />
         </div>
@@ -239,14 +239,14 @@ export function CellGroupsScreen() {
   }
 
   return (
-    <div className="pb-28">
+    <div>
       {/* ── Page Header ─────────────────────────────────────────────────── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
           <span className="inline-block bg-[#a5c1fe] text-[#314e83] px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider mb-2">
             Member Portal
           </span>
-          <h1 className="text-3xl font-bold text-[#0A1F44] mb-1.5">My Cell Group</h1>
+          <h1 className="text-2xl font-bold text-[#0A1F44] mb-1.5 sm:text-3xl">My Cell Group</h1>
           <div className="flex items-center gap-1.5 text-gray-500">
             <MapPin className="h-4 w-4 text-[#415e94] flex-shrink-0" />
             <p className="text-base font-medium">
@@ -256,16 +256,16 @@ export function CellGroupsScreen() {
           </div>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <a
             href={leader?.phoneNumber ? `mailto:${leader?.email}` : "#"}
-            className="px-5 py-2.5 border-2 border-[#415e94] text-[#415e94] rounded-lg font-bold hover:bg-[#415e94]/5 transition-colors flex items-center gap-2 text-sm"
+            className="flex items-center justify-center gap-2 rounded-lg border-2 border-[#415e94] px-5 py-2.5 text-sm font-bold text-[#415e94] transition-colors hover:bg-[#415e94]/5"
           >
-            <Mail className="h-4 w-4" />
+            <Mail className="h-4 w-4 shrink-0" />
             Contact Leadership
           </a>
-          <button className="px-5 py-2.5 bg-[#0A1F44] text-white rounded-lg font-bold hover:bg-[#0A1F44]/90 transition-all flex items-center gap-2 text-sm shadow-md">
-            <ArrowLeftRight className="h-4 w-4" />
+          <button className="flex items-center justify-center gap-2 rounded-lg bg-[#0A1F44] px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:bg-[#0A1F44]/90">
+            <ArrowLeftRight className="h-4 w-4 shrink-0" />
             Request Move
           </button>
         </div>
@@ -275,7 +275,7 @@ export function CellGroupsScreen() {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
         {/* Cell Leader Card */}
-        <div className="md:col-span-4 bg-white rounded-xl p-6 shadow-sm border border-gray-200/50 flex flex-col items-center text-center">
+        <div className="md:col-span-4 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200/50 flex flex-col items-center text-center">
           <div className="relative mb-4">
             <img
               src={leaderAvatar || FALLBACK_LEADER}
@@ -508,27 +508,27 @@ export function CellGroupsScreen() {
 
         {/* Members Table */}
         <div className="md:col-span-12 bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden">
-          <div className="p-5 border-b border-gray-100 flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <div className="flex flex-col justify-between gap-4 border-b border-gray-100 p-4 sm:p-5 md:flex-row md:items-center">
             <div>
-              <h3 className="text-xl font-bold text-[#0A1F44]">Cell Members</h3>
+              <h3 className="text-lg font-bold text-[#0A1F44] sm:text-xl">Cell Members</h3>
               <p className="text-sm text-gray-500 mt-0.5">
                 You are connected with {members.length} {members.length === 1 ? "person" : "others"} in this group.
               </p>
             </div>
-            <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 focus-within:border-[#415e94] focus-within:ring-2 focus-within:ring-[#415e94]/20 transition-all">
+            <div className="flex w-full items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-all focus-within:border-[#415e94] focus-within:ring-2 focus-within:ring-[#415e94]/20 md:w-auto">
               <Search className="h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search members..."
                 value={memberSearch}
                 onChange={(e) => setMemberSearch(e.target.value)}
-                className="bg-transparent border-none focus:ring-0 text-sm outline-none w-40"
+                className="w-full min-w-0 border-none bg-transparent text-sm outline-none focus:ring-0 md:w-40"
               />
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full min-w-[720px] text-left">
               <thead className="bg-[#0A1F44] text-white text-[11px] font-bold uppercase tracking-widest">
                 <tr>
                   <th className="px-6 py-4">Member</th>
@@ -598,8 +598,8 @@ export function CellGroupsScreen() {
 
       {/* ── Confirmation Modal ───────────────────────────────────────────── */}
       {confirmAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+          <div className="max-h-[calc(100dvh-2rem)] w-full max-w-sm overflow-y-auto overscroll-contain rounded-2xl bg-white p-5 shadow-2xl sm:p-6">
             <div className={`flex h-12 w-12 items-center justify-center rounded-full ${confirmAction.type === "accept" ? "bg-emerald-100" : "bg-red-100"}`}>
               {confirmAction.type === "accept"
                 ? <UserCheck className="h-5 w-5 text-emerald-600" />

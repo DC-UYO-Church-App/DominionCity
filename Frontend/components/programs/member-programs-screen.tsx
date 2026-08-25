@@ -39,9 +39,9 @@ export function MemberProgramsScreen() {
   const list = useMemo(() => programs.filter((p) => p.scope === tab), [programs, tab])
 
   return (
-    <div className="space-y-6 pb-28">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#1A3A6E]">Programs</h1>
+        <h1 className="text-xl font-bold text-[#1A3A6E] sm:text-2xl">Programs</h1>
         <p className="text-sm text-gray-500">National and state programs across the church.</p>
       </div>
 

@@ -39,20 +39,20 @@ export function MemberGivingScreen() {
   }, [contributions])
 
   return (
-    <div className="space-y-6 pb-28">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#1A3A6E]">My Giving</h1>
+        <h1 className="text-xl font-bold text-[#1A3A6E] sm:text-2xl">My Giving</h1>
         <p className="text-sm text-gray-500">Your contributions to projects and programs.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.08)]">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Total Given</p>
-          <p className="mt-1 text-lg font-bold text-emerald-600">{naira(totals.confirmed)}</p>
+          <p className="mt-1 text-base font-bold text-emerald-600 sm:text-lg">{naira(totals.confirmed)}</p>
         </div>
         <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.08)]">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Awaiting Confirmation</p>
-          <p className="mt-1 text-lg font-bold text-amber-600">{naira(totals.pending)}</p>
+          <p className="mt-1 text-base font-bold text-amber-600 sm:text-lg">{naira(totals.pending)}</p>
         </div>
       </div>
 

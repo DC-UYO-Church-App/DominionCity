@@ -104,7 +104,7 @@ export function AdminGivingScreen() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-slate-800">Giving</h1>
+        <h1 className="text-xl font-semibold text-slate-800 sm:text-2xl">Giving</h1>
 
         {/* Summary */}
         <div className="grid gap-4 sm:grid-cols-3">
@@ -113,36 +113,38 @@ export function AdminGivingScreen() {
               key={c.label}
               className="flex items-center gap-4 rounded-2xl border-none bg-white p-5 shadow-[0_12px_30px_rgba(15,23,42,0.08)]"
             >
-              <div className={`flex h-12 w-12 items-center justify-center rounded-full ${c.tint}`}>
+              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${c.tint}`}>
                 <c.icon className="h-5 w-5" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{c.label}</p>
-                <p className="text-xl font-bold text-slate-800">{isLoading ? "—" : c.value}</p>
+                <p className="break-words text-lg font-bold text-slate-800 sm:text-xl">
+                  {isLoading ? "—" : c.value}
+                </p>
               </div>
             </Card>
           ))}
         </div>
 
         <Tabs defaultValue="pending" className="space-y-4">
-          <TabsList className="w-full justify-start rounded-full bg-white p-1 shadow-sm">
-            <TabsTrigger value="pending" className="rounded-full px-6">
+          <TabsList className="h-auto w-full max-w-full justify-start gap-1 overflow-x-auto hide-scrollbar rounded-full bg-white p-1 shadow-sm">
+            <TabsTrigger value="pending" className="shrink-0 rounded-full px-4 sm:px-6">
               Pending {pending.length > 0 ? `(${pending.length})` : ""}
             </TabsTrigger>
-            <TabsTrigger value="top" className="rounded-full px-6">
+            <TabsTrigger value="top" className="shrink-0 rounded-full px-4 sm:px-6">
               Top Givers
             </TabsTrigger>
-            <TabsTrigger value="breakdown" className="rounded-full px-6">
+            <TabsTrigger value="breakdown" className="shrink-0 rounded-full px-4 sm:px-6">
               By Project / Program
             </TabsTrigger>
-            <TabsTrigger value="givers" className="rounded-full px-6">
+            <TabsTrigger value="givers" className="shrink-0 rounded-full px-4 sm:px-6">
               All Givers
             </TabsTrigger>
           </TabsList>
 
           {/* Pending confirmations */}
           <TabsContent value="pending">
-            <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
               {isLoading ? (
                 <div className="py-10 text-center text-sm text-slate-400">Loading...</div>
               ) : pending.length === 0 ? (
@@ -154,8 +156,8 @@ export function AdminGivingScreen() {
                       key={c.id}
                       className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 md:flex-row md:items-center md:justify-between"
                     >
-                      <div>
-                        <p className="font-semibold text-slate-800">
+                      <div className="min-w-0">
+                        <p className="break-words font-semibold text-slate-800">
                           {c.giverName}{" "}
                           {c.isAnonymous && (
                             <span className="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
@@ -163,14 +165,14 @@ export function AdminGivingScreen() {
                             </span>
                           )}
                         </p>
-                        <p className="text-sm text-slate-500">
+                        <p className="break-words text-sm text-slate-500">
                           {naira(Number(c.amount))} · {c.sourceType} · {c.sourceTitle || "—"}
                         </p>
                         <p className="text-xs text-slate-400">
                           Marked paid {new Date(c.createdAt).toLocaleString()}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex shrink-0 items-center gap-2">
                         <Button
                           className="bg-emerald-500 text-white hover:bg-emerald-600"
                           disabled={processingId === c.id}
@@ -196,7 +198,7 @@ export function AdminGivingScreen() {
 
           {/* Top givers */}
           <TabsContent value="top">
-            <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
               {isLoading ? (
                 <div className="py-10 text-center text-sm text-slate-400">Loading...</div>
               ) : !stats?.topGivers?.length ? (
@@ -225,7 +227,7 @@ export function AdminGivingScreen() {
           {/* Breakdown */}
           <TabsContent value="breakdown">
             <div className="grid gap-4 lg:grid-cols-2">
-              <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+              <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
                 <div className="mb-4 flex items-center gap-2">
                   <FolderKanban className="h-4 w-4 text-[#3c6eea]" />
                   <h3 className="font-semibold text-slate-800">Projects</h3>
@@ -243,7 +245,7 @@ export function AdminGivingScreen() {
                   </ul>
                 )}
               </Card>
-              <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+              <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
                 <div className="mb-4 flex items-center gap-2">
                   <CalendarDays className="h-4 w-4 text-[#3c6eea]" />
                   <h3 className="font-semibold text-slate-800">Programs</h3>
@@ -266,7 +268,7 @@ export function AdminGivingScreen() {
 
           {/* All givers */}
           <TabsContent value="givers">
-            <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
               {isLoading ? (
                 <div className="py-10 text-center text-sm text-slate-400">Loading...</div>
               ) : !stats?.givers?.length ? (

@@ -127,7 +127,7 @@ export function MessagesScreen() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#0E1330]">Sermons & Media</h1>
+        <h1 className="text-xl font-bold text-[#0E1330] sm:text-2xl">Sermons & Media</h1>
         <p className="text-gray-600">Watch and listen to church sermons</p>
       </div>
 
@@ -172,10 +172,10 @@ export function MessagesScreen() {
       </div>
 
       <Tabs defaultValue="all">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="all">All Sermons</TabsTrigger>
-          <TabsTrigger value="video">Video Sermons</TabsTrigger>
-          <TabsTrigger value="audio">Audio Sermons</TabsTrigger>
+        <TabsList className="grid h-auto w-full grid-cols-3">
+          <TabsTrigger value="all" className="whitespace-normal px-2 py-1.5 text-xs sm:text-sm">All Sermons</TabsTrigger>
+          <TabsTrigger value="video" className="whitespace-normal px-2 py-1.5 text-xs sm:text-sm">Video Sermons</TabsTrigger>
+          <TabsTrigger value="audio" className="whitespace-normal px-2 py-1.5 text-xs sm:text-sm">Audio Sermons</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="mt-6">
@@ -183,7 +183,7 @@ export function MessagesScreen() {
             {filteredSermons.map((sermon) => (
               <Card key={sermon.id} className="overflow-hidden hover:shadow-md transition-shadow">
                 <div className="flex flex-col sm:flex-row">
-                  <div className="relative w-full sm:w-48 h-32 sm:h-auto">
+                  <div className="relative h-32 w-full shrink-0 sm:h-auto sm:w-48">
                     <img
                       src={sermon.thumbnail || "/placeholder.svg"}
                       alt={sermon.title}
@@ -227,16 +227,16 @@ export function MessagesScreen() {
 
                   <div className="flex-1 p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg mb-1 line-clamp-2">{sermon.title}</h3>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="mb-1 line-clamp-2 text-base font-semibold sm:text-lg">{sermon.title}</h3>
                         <p className="text-sm text-gray-600 mb-2 line-clamp-2">{sermon.description}</p>
                       </div>
-                      <Button variant="ghost" size="sm" onClick={() => handleDownload(sermon)} className="ml-2">
+                      <Button variant="ghost" size="sm" onClick={() => handleDownload(sermon)} className="ml-2 shrink-0">
                         <Download className="h-4 w-4" />
                       </Button>
                     </div>
 
-                    <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
+                    <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
                       <div className="flex items-center">
                         <User className="h-4 w-4 mr-1" />
                         {sermon.speaker}
@@ -257,7 +257,7 @@ export function MessagesScreen() {
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <Badge variant="outline">{sermon.series}</Badge>
                       <div className="flex gap-2">
                         <Button
@@ -288,7 +288,7 @@ export function MessagesScreen() {
               .map((sermon) => (
                 <Card key={sermon.id} className="overflow-hidden hover:shadow-md transition-shadow">
                   <div className="flex flex-col sm:flex-row">
-                    <div className="relative w-full sm:w-48 h-32 sm:h-auto">
+                    <div className="relative h-32 w-full shrink-0 sm:h-auto sm:w-48">
                       <img
                         src={sermon.thumbnail || "/placeholder.svg"}
                         alt={sermon.title}
@@ -319,13 +319,13 @@ export function MessagesScreen() {
 
                     <div className="flex-1 p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg mb-1">{sermon.title}</h3>
-                          <p className="text-sm text-gray-600 mb-2">{sermon.description}</p>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="mb-1 break-words text-base font-semibold sm:text-lg">{sermon.title}</h3>
+                          <p className="mb-2 break-words text-sm text-gray-600">{sermon.description}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
+                      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
                         <div className="flex items-center">
                           <User className="h-4 w-4 mr-1" />
                           {sermon.speaker}
@@ -364,7 +364,7 @@ export function MessagesScreen() {
               .map((sermon) => (
                 <Card key={sermon.id} className="overflow-hidden hover:shadow-md transition-shadow">
                   <div className="flex flex-col sm:flex-row">
-                    <div className="relative w-full sm:w-48 h-32 sm:h-auto">
+                    <div className="relative h-32 w-full shrink-0 sm:h-auto sm:w-48">
                       <img
                         src={sermon.thumbnail || "/placeholder.svg"}
                         alt={sermon.title}
@@ -395,16 +395,16 @@ export function MessagesScreen() {
 
                     <div className="flex-1 p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg mb-1">{sermon.title}</h3>
-                          <p className="text-sm text-gray-600 mb-2">{sermon.description}</p>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="mb-1 break-words text-base font-semibold sm:text-lg">{sermon.title}</h3>
+                          <p className="mb-2 break-words text-sm text-gray-600">{sermon.description}</p>
                         </div>
-                        <Button variant="ghost" size="sm" onClick={() => handleDownload(sermon)} className="ml-2">
+                        <Button variant="ghost" size="sm" onClick={() => handleDownload(sermon)} className="ml-2 shrink-0">
                           <Download className="h-4 w-4" />
                         </Button>
                       </div>
 
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
+                      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
                         <div className="flex items-center">
                           <User className="h-4 w-4 mr-1" />
                           {sermon.speaker}

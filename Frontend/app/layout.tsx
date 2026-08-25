@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next/dist/lib/metadata/types/metadata-interface"
+import type { Metadata, Viewport } from "next/dist/lib/metadata/types/metadata-interface"
 import { Fraunces, Hanken_Grotesk, Poppins } from "next/font/google"
 import Script from "next/script"
 import "./globals.css"
@@ -27,6 +27,14 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
   variable: "--font-poppins",
 })
+
+// Explicit viewport so the notch/home-indicator safe areas are addressable
+// (`env(safe-area-inset-*)`) and phones never zoom the layout out to desktop.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+}
 
 export const metadata: Metadata = {
   title: "Dominion City Uyo HQ - The wealthy place",

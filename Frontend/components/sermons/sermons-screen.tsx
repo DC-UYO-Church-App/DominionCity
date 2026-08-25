@@ -199,17 +199,17 @@ export function SermonsScreen() {
   }, [currentPage, totalPages])
 
   return (
-    <div className="pb-28">
+    <div>
       {/* Page Header */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-[#0A1F44] mb-1">Sermon Library</h2>
-        <p className="text-base text-gray-500 max-w-2xl">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="mb-1 text-2xl font-bold text-[#0A1F44] sm:text-3xl">Sermon Library</h2>
+        <p className="max-w-2xl text-sm text-gray-500 sm:text-base">
           Access our archive of transformative messages. Grow in your faith through the word of God shared at Dominion City Uyo.
         </p>
       </div>
 
       {/* Filters */}
-      <section className="bg-white p-5 rounded-xl shadow-sm mb-8 border border-gray-200/40">
+      <section className="mb-6 rounded-xl border border-gray-200/40 bg-white p-4 shadow-sm sm:mb-8 sm:p-5">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
           {/* Search */}
           <div className="flex flex-col gap-1">
@@ -319,15 +319,15 @@ export function SermonsScreen() {
               </div>
 
               {/* Content */}
-              <div className="p-5 flex flex-col flex-1">
-                <h3 className="text-[#0A1F44] font-bold text-base mb-1 leading-snug">{sermon.title}</h3>
+              <div className="flex flex-1 flex-col p-4 sm:p-5">
+                <h3 className="mb-1 break-words text-base font-bold leading-snug text-[#0A1F44]">{sermon.title}</h3>
                 <p className="text-sm text-gray-500 mb-4 leading-relaxed flex-1">{sermon.description}</p>
 
                 <div className="pt-3 border-t border-gray-100 flex flex-col gap-3">
                   {/* Meta */}
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-[#415e94]">{sermon.speaker}</span>
-                    <span className="text-gray-400 text-xs">{sermon.date}</span>
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
+                    <span className="min-w-0 break-words font-semibold text-[#415e94]">{sermon.speaker}</span>
+                    <span className="shrink-0 text-xs text-gray-400">{sermon.date}</span>
                   </div>
 
                   {/* Actions */}
@@ -358,15 +358,15 @@ export function SermonsScreen() {
 
       {/* Pagination */}
       {!isLoading && filteredSermons.length > 0 && (
-        <div className="flex items-center justify-between border-t border-gray-200 pt-5">
-          <p className="text-sm text-gray-500">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-200 pt-5 sm:flex-row">
+          <p className="text-center text-sm text-gray-500 sm:text-left">
             Showing{" "}
             <span className="font-bold">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to{" "}
             <span className="font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, filteredSermons.length)}</span> of{" "}
             <span className="font-bold">{filteredSermons.length}</span> sermons
           </p>
 
-          <div className="flex gap-1.5">
+          <div className="flex flex-wrap items-center justify-center gap-1.5">
             <button
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}

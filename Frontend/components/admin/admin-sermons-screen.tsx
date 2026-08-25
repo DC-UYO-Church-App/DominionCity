@@ -162,8 +162,8 @@ export function AdminSermonsScreen() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-slate-800">Sermons</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold text-slate-800 sm:text-2xl">Sermons</h1>
           <Button
             className="rounded-lg bg-[#3c6eea] px-6 text-white hover:bg-[#325fd0]"
             onClick={() => {
@@ -190,7 +190,7 @@ export function AdminSermonsScreen() {
 
         <div className="space-y-3">
           <p className="text-sm font-semibold text-slate-700">Uploaded Sermons</p>
-          <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+          <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
             {isLoading ? (
               <div className="py-10 text-center text-sm text-slate-400">Loading sermons...</div>
             ) : listItems.length === 0 ? (

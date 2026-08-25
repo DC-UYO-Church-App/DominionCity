@@ -139,8 +139,8 @@ export function AdminSatelliteScreen() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-slate-800">Satellite Churches</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold text-slate-800 sm:text-2xl">Satellite Churches</h1>
           <Button
             className="rounded-lg bg-[#3c6eea] px-6 text-white hover:bg-[#325fd0]"
             onClick={() => {
@@ -152,7 +152,7 @@ export function AdminSatelliteScreen() {
           </Button>
         </div>
 
-        <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+        <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
           {isLoading ? (
             <div className="py-10 text-center text-sm text-slate-400">Loading...</div>
           ) : churches.length === 0 ? (
@@ -212,8 +212,8 @@ export function AdminSatelliteScreen() {
             <DialogDescription>Assign it to a member to give them a satellite dashboard.</DialogDescription>
           </DialogHeader>
 
-          <Card className="rounded-2xl border-none bg-white p-8 shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
-            <div className="grid gap-6">
+          <Card className="rounded-2xl border-none bg-white p-0 shadow-none sm:p-6 sm:shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <div className="grid gap-5 sm:gap-6">
               <div>
                 <label className="text-sm font-semibold text-slate-600">Church Name</label>
                 <input
@@ -235,10 +235,10 @@ export function AdminSatelliteScreen() {
               <div>
                 <label className="text-sm font-semibold text-slate-600">Assign to Member</label>
                 {assignedUserId ? (
-                  <div className="mt-2 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
-                    <span className="text-slate-700">{assignedLabel || "Selected member"}</span>
+                  <div className="mt-2 flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+                    <span className="min-w-0 break-words text-slate-700">{assignedLabel || "Selected member"}</span>
                     <button
-                      className="text-xs font-semibold text-red-500 hover:underline"
+                      className="shrink-0 text-xs font-semibold text-red-500 hover:underline"
                       onClick={() => {
                         setAssignedUserId("")
                         setAssignedLabel("")

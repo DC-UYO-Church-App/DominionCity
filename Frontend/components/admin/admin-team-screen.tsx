@@ -231,11 +231,11 @@ function AddMemberModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-100">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 bg-white p-4 sm:p-6 border-b border-slate-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#1A3A6E]/10 flex items-center justify-center">
               <UserPlus className="h-5 w-5 text-[#1A3A6E]" />
@@ -376,10 +376,10 @@ function EditRolesModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="flex items-center justify-between p-6 border-b border-slate-100">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 bg-white p-4 sm:p-6 border-b border-slate-100">
           <div>
             <h2 className="text-lg font-bold text-slate-900">Edit Roles</h2>
             <p className="text-xs text-slate-500">{member.firstName} {member.lastName}</p>
@@ -459,7 +459,7 @@ export function AdminTeamScreen() {
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Team</h1>
+            <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">Team</h1>
             <p className="text-sm text-slate-500 mt-0.5">Manage church leadership and assigned roles</p>
           </div>
           <button
@@ -527,7 +527,7 @@ export function AdminTeamScreen() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
+              <table className="w-full min-w-[720px] text-left">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100">
                     <th className="px-5 py-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Member</th>

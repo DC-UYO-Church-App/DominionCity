@@ -82,13 +82,13 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <div className="flex justify-between items-center p-4">
-        <div className="flex items-center">
-          <div className="w-10 h-10 rounded-full bg-[#0E1330] flex items-center justify-center mr-3">
+      <div className="flex items-center justify-between gap-3 p-4">
+        <div className="flex min-w-0 items-center">
+          <div className="mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0E1330]">
             <span className="text-sm font-bold text-white">GH</span>
           </div>
           <div>
-            <h1 className="text-lg font-bold text-[#0E1330]">Golden Heart</h1>
+            <h1 className="truncate text-base font-bold text-[#0E1330] sm:text-lg">Golden Heart</h1>
             <p className="text-xs text-gray-600">Dominion City Church</p>
           </div>
         </div>
@@ -108,11 +108,11 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
             {slides.map((slide, index) => (
               <div key={slide.id} className="w-full flex-shrink-0 flex flex-col">
                 {/* Image/Icon Section */}
-                <div className={cn("flex-1 flex flex-col items-center justify-center p-8 text-white", slide.color)}>
-                  <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center mb-6">
-                    <slide.icon className="h-12 w-12 text-white" />
+                <div className={cn("flex flex-1 flex-col items-center justify-center p-6 text-white sm:p-8", slide.color)}>
+                  <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/20 sm:mb-6 sm:h-24 sm:w-24">
+                    <slide.icon className="h-10 w-10 text-white sm:h-12 sm:w-12" />
                   </div>
-                  <div className="w-full max-w-sm h-48 bg-white/10 rounded-lg mb-6 flex items-center justify-center">
+                  <div className="mb-4 flex h-40 w-full max-w-sm items-center justify-center rounded-lg bg-white/10 sm:mb-6 sm:h-48">
                     <img
                       src={slide.image || "/placeholder.svg"}
                       alt={slide.title}
@@ -122,10 +122,10 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
                 </div>
 
                 {/* Content Section */}
-                <div className="bg-white p-8 text-center">
-                  <h2 className="text-2xl font-bold text-[#0E1330] mb-2">{slide.title}</h2>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">{slide.subtitle}</h3>
-                  <p className="text-gray-600 leading-relaxed max-w-sm mx-auto">{slide.description}</p>
+                <div className="bg-white p-6 text-center sm:p-8">
+                  <h2 className="mb-2 text-xl font-bold text-[#0E1330] sm:text-2xl">{slide.title}</h2>
+                  <h3 className="mb-3 text-base font-semibold text-gray-700 sm:mb-4 sm:text-lg">{slide.subtitle}</h3>
+                  <p className="mx-auto max-w-sm text-sm leading-relaxed text-gray-600 sm:text-base">{slide.description}</p>
                 </div>
               </div>
             ))}
@@ -133,21 +133,27 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
         </div>
 
         {/* Navigation Dots */}
-        <div className="flex justify-center space-x-2 py-4 bg-white">
+        <div className="flex justify-center bg-white py-2">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={cn(
-                "w-3 h-3 rounded-full transition-colors duration-200",
-                currentSlide === index ? "bg-[#0E1330]" : "bg-gray-300",
-              )}
-            />
+              aria-label={`Go to slide ${index + 1}`}
+              aria-current={currentSlide === index ? "true" : undefined}
+              className="flex h-11 w-11 items-center justify-center"
+            >
+              <span
+                className={cn(
+                  "h-3 w-3 rounded-full transition-colors duration-200",
+                  currentSlide === index ? "bg-[#0E1330]" : "bg-gray-300",
+                )}
+              />
+            </button>
           ))}
         </div>
 
         {/* Bottom Navigation */}
-        <div className="bg-white p-6 border-t">
+        <div className="border-t bg-white p-4 sm:p-6">
           <div className="flex justify-between items-center">
             <Button variant="outline" onClick={prevSlide} disabled={currentSlide === 0} className="flex items-center">
               <ChevronLeft className="h-4 w-4 mr-1" />
@@ -172,12 +178,12 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
       <div className="bg-gray-50 p-6">
         <div className="text-center">
           <p className="text-sm text-gray-600 mb-4">Already have an account?</p>
-          <div className="flex gap-3 justify-center">
+          <div className="flex justify-center gap-3">
             <Button variant="outline" className="flex-1 max-w-[120px]" onClick={handleGetStarted}>
               Sign In
             </Button>
-            <Link href="/register">
-              <Button variant="outline" className="flex-1 max-w-[120px]">
+            <Link href="/register" className="flex-1 max-w-[120px]">
+              <Button variant="outline" className="w-full">
                 Register
               </Button>
             </Link>

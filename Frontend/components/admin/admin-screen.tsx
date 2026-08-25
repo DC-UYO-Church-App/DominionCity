@@ -114,7 +114,7 @@ export function AdminScreen() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-slate-800">Dashboard</h1>
+        <h1 className="text-xl font-semibold text-slate-800 sm:text-2xl">Dashboard</h1>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {statCards.map((card) => (
@@ -133,10 +133,10 @@ export function AdminScreen() {
           ))}
         </div>
 
-        <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Members Detail</h2>
-            <button className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500">
+        <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-semibold sm:text-lg">Members Detail</h2>
+            <button className="inline-flex min-h-[36px] items-center rounded-full border border-slate-200 px-3 py-1.5 text-xs text-slate-500">
               March <span className="ml-1 inline-block">▾</span>
             </button>
           </div>
@@ -181,14 +181,15 @@ export function AdminScreen() {
           </div>
         </Card>
 
-        <Card className="rounded-2xl border-none bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Event Details</h2>
-            <button className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500">
+        <Card className="rounded-2xl border-none bg-white p-4 sm:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-semibold sm:text-lg">Event Details</h2>
+            <button className="inline-flex min-h-[36px] items-center rounded-full border border-slate-200 px-3 py-1.5 text-xs text-slate-500">
               March <span className="ml-1 inline-block">▾</span>
             </button>
           </div>
-          <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">
+          <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200">
+            <div className="min-w-[640px]">
             <div className="grid grid-cols-[2fr_2fr_2fr_1fr] gap-4 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-500">
               <span>Event Title</span>
               <span>Location</span>
@@ -208,15 +209,15 @@ export function AdminScreen() {
                     key={event.id}
                     className="grid grid-cols-[2fr_2fr_2fr_1fr] gap-4 border-t border-slate-200 px-4 py-4 text-sm text-slate-600"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 overflow-hidden rounded-lg bg-slate-200">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-200">
                         {event.cover ? (
                           <img src={event.cover} alt={event.title} className="h-full w-full object-cover" />
                         ) : null}
                       </div>
-                      {event.title || "Untitled Event"}
+                      <span className="min-w-0 break-words">{event.title || "Untitled Event"}</span>
                     </div>
-                    <span>{event.address || "TBA"}</span>
+                    <span className="break-words">{event.address || "TBA"}</span>
                     <span>
                       {event.eventDate.toLocaleDateString("en-US", {
                         month: "2-digit",
@@ -236,6 +237,7 @@ export function AdminScreen() {
                 )
               })
             )}
+            </div>
           </div>
         </Card>
       </div>

@@ -133,7 +133,20 @@
 @media (max-width: 48rem) {
   .site-header__bar,
   .site-header.is-top .site-header__bar { width: calc(100% - 1.5rem); }
-  .site-header__bar { border-radius: 18px; }
+  .site-header__bar { border-radius: 18px; gap: var(--space-sm); }
+}
+
+/* Phones: the wordmark, the gold auth pill and the Menu button together are
+   wider than the bar, and the overflow pushed Menu off the right edge — the
+   one control a phone visitor needs. The auth links live in the menu panel
+   too, so below 40rem the pill stands down and Menu keeps its place. */
+@media (max-width: 40rem) {
+  .site-header__auth { display: none; }
+}
+
+@media (max-width: 30rem) {
+  .menu__word { display: none; }
+  .menu__toggle { padding: 0.55rem; }
 }
 
 @media (min-width: 60rem) {

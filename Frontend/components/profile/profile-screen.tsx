@@ -180,7 +180,7 @@ export function ProfileScreen() {
     }`
 
   return (
-    <div className="space-y-6 pb-28">
+    <div className="space-y-6">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-[11px] text-gray-400 font-semibold uppercase tracking-widest">
         <Link href="/dashboard" className="hover:text-[#1A3A6E] transition-colors">
@@ -193,7 +193,7 @@ export function ProfileScreen() {
       {/* Profile Header */}
       <section className="bg-white rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
         <div className="h-28 bg-[#0a1f44] w-full" />
-        <div className="relative flex flex-col md:flex-row items-end gap-4 -mt-14 px-6 pb-6">
+        <div className="relative -mt-14 flex flex-col items-start gap-4 px-4 pb-6 sm:px-6 md:flex-row md:items-end">
           {/* Avatar */}
           <div className="relative flex-shrink-0 group">
             <div className="w-28 h-28 rounded-full border-4 border-white ring-4 ring-[#0a1f44]/10 overflow-hidden bg-gray-100 shadow-md">
@@ -221,9 +221,9 @@ export function ProfileScreen() {
           </div>
 
           {/* Name & meta */}
-          <div className="flex-1 pb-1">
+          <div className="min-w-0 flex-1 pb-1">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <h2 className="text-2xl font-bold text-[#00081e]">{fullName}</h2>
+              <h2 className="break-words text-xl font-bold text-[#00081e] sm:text-2xl">{fullName}</h2>
               <span className="inline-flex items-center px-3 py-0.5 bg-[#a5c1fe]/30 text-[#28467b] text-xs rounded-full font-bold tracking-wide w-fit">
                 {roleLabel}
               </span>
@@ -277,7 +277,7 @@ export function ProfileScreen() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left: Personal Information */}
         <div className="lg:col-span-7">
-          <div className="bg-white rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100 p-6 h-full">
+          <div className="bg-white rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100 p-4 sm:p-6 h-full">
             <h3 className="text-lg font-bold text-[#0a1f44] mb-5 flex items-center gap-2">
               <div className="w-7 h-7 rounded-full bg-[#a5c1fe]/30 flex items-center justify-center">
                 <Edit className="h-3.5 w-3.5 text-[#415e94]" />
@@ -358,7 +358,7 @@ export function ProfileScreen() {
 
         {/* Right: Academy Progress */}
         <div className="lg:col-span-5">
-          <div className="bg-white rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100 p-6 h-full">
+          <div className="bg-white rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100 p-4 sm:p-6 h-full">
             <h3 className="text-lg font-bold text-[#0a1f44] mb-5 flex items-center gap-2">
               <div className="w-7 h-7 rounded-full bg-[#a5c1fe]/30 flex items-center justify-center">
                 <GraduationCap className="h-3.5 w-3.5 text-[#415e94]" />

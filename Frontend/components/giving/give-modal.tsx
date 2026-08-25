@@ -60,8 +60,8 @@ export function GiveModal({ open, onClose, sourceTitle, actionLabel = "I've Paid
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={close} />
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+      <div className="relative max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl bg-white shadow-2xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-gray-100 bg-white px-5 py-4">
           <div>
             <h3 className="text-base font-bold text-[#0A1F44]">Give to Support</h3>
             <p className="text-[11px] text-gray-400">{sourceTitle}</p>
