@@ -38,6 +38,42 @@ export const authenticate = async (
   request.user.role = row.role as UserRole;
 };
 
+/**
+ * Roles allowed to read another member's personal records.
+ *
+ * Pastoral oversight is legitimate; a fellow member's curiosity is not.
+ */
+export const PASTORAL_ROLES: UserRole[] = [
+  UserRole.SUPER_ADMIN,
+  UserRole.ADMIN,
+  UserRole.PASTOR,
+  UserRole.HOD,
+];
+
+/**
+ * Guard for any handler that takes a subject's id from the client.
+ *
+ * Returns true when the caller may proceed. When it returns false it has
+ * already sent the 403, so the caller must simply return.
+ */
+export const canAccessUserRecords = (
+  request: AuthenticatedRequest,
+  reply: FastifyReply,
+  subjectUserId: string,
+  allowedRoles: UserRole[] = PASTORAL_ROLES
+): boolean => {
+  const caller = request.user;
+  if (!caller) {
+    reply.status(401).send({ error: 'Unauthorized' });
+    return false;
+  }
+  if (caller.id === subjectUserId || allowedRoles.includes(caller.role)) {
+    return true;
+  }
+  reply.status(403).send({ error: 'Forbidden: you can only access your own records' });
+  return false;
+};
+
 export const authorize = (...roles: UserRole[]) => {
   return async (request: AuthenticatedRequest, reply: FastifyReply) => {
     if (!request.user) {

@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { AttendanceService } from '../services/attendanceService';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest, canAccessUserRecords } from '../middleware/auth';
 import { AttendanceStatus } from '../types';
 
 export class AttendanceController {
@@ -34,6 +34,8 @@ export class AttendanceController {
       const { userId } = request.params as any;
       const { startDate, endDate } = request.query as any;
 
+      if (!canAccessUserRecords(request, reply, userId)) return;
+
       const attendance = await AttendanceService.getAttendanceByUser(
         userId,
         startDate ? new Date(startDate) : undefined,
@@ -63,6 +65,8 @@ export class AttendanceController {
   static async getAttendanceStats(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const { userId } = request.params as any;
+
+      if (!canAccessUserRecords(request, reply, userId)) return;
 
       const stats = await AttendanceService.getAttendanceStats(userId);
 
