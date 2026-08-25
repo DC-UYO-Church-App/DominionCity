@@ -63,9 +63,18 @@ async function registerPlugins() {
   });
 
   // Static files
+  // Uploads are member-supplied bytes served back from our own origin, so
+  // they are sent with the browser told not to interpret them: no MIME
+  // sniffing, no script execution, and download rather than render. Belt and
+  // braces alongside the extension being derived from the validated type.
   await fastify.register(fastifyStatic, {
     root: config.upload.dir,
     prefix: '/uploads/',
+    setHeaders(res) {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+      res.setHeader('Content-Disposition', 'attachment');
+    },
   });
 
   // WebSocket

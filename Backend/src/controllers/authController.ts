@@ -10,6 +10,7 @@ import { renderPasswordResetEmail } from '../templates/passwordResetEmail';
 import { renderPasswordChangedEmail } from '../templates/passwordChangedEmail';
 import { PasswordResetService } from '../services/passwordResetService';
 import { replyWithError } from '../utils/apiError';
+import { buildStoredFilename } from '../utils/multipart';
 
 /** Kept in step with PasswordResetService's TTL, for the copy in the email. */
 const RESET_LINK_TTL_MINUTES = 60;
@@ -179,8 +180,7 @@ export class AuthController {
 
       await fs.mkdir(config.upload.dir, { recursive: true });
 
-      const safeName = file.filename.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const filename = `${request.user!.id}-${Date.now()}-${safeName}`;
+      const filename = buildStoredFilename(request.user!.id, file.filename, file.mimetype);
       const filePath = path.join(config.upload.dir, filename);
 
       const chunks: Buffer[] = [];
