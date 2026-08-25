@@ -1,8 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ContributionService } from '../services/contributionService';
-import { NotificationService } from '../services/notificationService';
 import { AuthenticatedRequest } from '../middleware/auth';
-import { ContributionSource, ContributionStatus, NotificationType } from '../types';
+import { ContributionSource, ContributionStatus } from '../types';
 
 export class GivingController {
   /** Admin Giving Page: totals, per-project/program breakdown, top givers. */
@@ -74,21 +73,8 @@ export class GivingController {
           .send({ error: 'Pending contribution not found or already processed' });
       }
 
-      // Let the giver know their payment was reviewed.
-      try {
-        const confirmed = status === ContributionStatus.CONFIRMED;
-        await NotificationService.sendNotification({
-          userId: contribution.userId,
-          type: NotificationType.GENERAL,
-          title: confirmed ? 'Payment Confirmed' : 'Payment Not Confirmed',
-          message: confirmed
-            ? `Your giving of ${contribution.amount} has been confirmed. Thank you for your support!`
-            : `Your giving of ${contribution.amount} could not be confirmed. Please contact the church office.`,
-          metadata: { contributionId: contribution.id, status },
-        });
-      } catch (notifyError) {
-        console.error('Failed to notify giver:', notifyError);
-      }
+      // The giver is notified by ContributionService.setStatus, which names
+      // the project or program and formats the amount as currency.
 
       reply.send({ contribution });
     } catch (error) {
