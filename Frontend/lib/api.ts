@@ -27,9 +27,9 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<any> {
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string> | undefined),
     };
 
     if (this.token) {
@@ -95,7 +95,7 @@ class ApiClient {
     const formData = new FormData();
     formData.append('file', file);
 
-    const headers: HeadersInit = {};
+    const headers: Record<string, string> = {};
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
@@ -166,7 +166,7 @@ class ApiClient {
       formData.append('confirmPassword', data.confirmPassword);
       formData.append('profileImage', data.profileImage);
 
-      const headers: HeadersInit = {};
+      const headers: Record<string, string> = {};
       if (this.token) {
         headers['Authorization'] = `Bearer ${this.token}`;
       }
@@ -228,7 +228,7 @@ class ApiClient {
       if (data.summary) formData.append('summary', data.summary);
       formData.append('cover', data.coverFile);
 
-      const headers: HeadersInit = {};
+      const headers: Record<string, string> = {};
       if (this.token) {
         headers['Authorization'] = `Bearer ${this.token}`;
       }
@@ -294,7 +294,7 @@ class ApiClient {
       if (data.summary) formData.append('summary', data.summary);
       formData.append('cover', data.coverFile);
 
-      const headers: HeadersInit = {};
+      const headers: Record<string, string> = {};
       if (this.token) {
         headers['Authorization'] = `Bearer ${this.token}`;
       }
@@ -350,7 +350,7 @@ class ApiClient {
     if (data.category) formData.append('category', data.category);
     if (data.thumbnailFile) formData.append('thumbnail', data.thumbnailFile);
 
-    const headers: HeadersInit = {};
+    const headers: Record<string, string> = {};
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
@@ -403,7 +403,7 @@ class ApiClient {
       if (data.status) formData.append('status', data.status);
       formData.append('cover', data.coverFile);
 
-      const headers: HeadersInit = {};
+      const headers: Record<string, string> = {};
       if (this.token) {
         headers['Authorization'] = `Bearer ${this.token}`;
       }
@@ -458,7 +458,7 @@ class ApiClient {
       if (data.status) formData.append('status', data.status);
       formData.append('cover', data.coverFile);
 
-      const headers: HeadersInit = {};
+      const headers: Record<string, string> = {};
       if (this.token) {
         headers['Authorization'] = `Bearer ${this.token}`;
       }
@@ -709,7 +709,7 @@ class ApiClient {
       formData.append(fileField, file);
     }
 
-    const headers: HeadersInit = {};
+    const headers: Record<string, string> = {};
     if (this.token) {
       headers["Authorization"] = `Bearer ${this.token}`;
     }
