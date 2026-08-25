@@ -20,9 +20,27 @@ export class TitheController {
         return reply.status(400).send({ error: 'User ID, amount, frequency, and payment method are required' });
       }
 
+      // The subject used to be whatever the body said, with no role guard, so
+      // any member could file a financial record against anyone. Recording on
+      // someone else's behalf is a finance-office job.
+      const caller = request.user!;
+      if (userId !== caller.id && !GIVING_ROLES.includes(caller.role)) {
+        return reply
+          .status(403)
+          .send({ error: 'Forbidden: you can only record your own giving' });
+      }
+
+      // parseFloat accepts "-50000", "1e400" and "12abc". The column has no
+      // CHECK constraint, so negatives used to land in the ledger and skew
+      // every total built on top of it.
+      const parsedAmount = Number(amount);
+      if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+        return reply.status(400).send({ error: 'Amount must be a positive number' });
+      }
+
       const tithe = await TitheService.recordTithe({
         userId,
-        amount: parseFloat(amount),
+        amount: parsedAmount,
         frequency: frequency as TitheFrequency,
         paymentDate: new Date(paymentDate || Date.now()),
         paymentMethod,
