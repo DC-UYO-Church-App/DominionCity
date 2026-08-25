@@ -40,8 +40,13 @@ async function registerPlugins() {
   });
 
   // JWT
+  // JWT_EXPIRES_IN was read from the environment but never handed to a
+  // signer, so issued tokens carried only `iat` and stayed valid forever —
+  // a token stolen once could never be aged out, and signing out did nothing
+  // server-side.
   await fastify.register(fastifyJwt, {
     secret: config.jwt.secret,
+    sign: { expiresIn: config.jwt.expiresIn },
   });
 
   // Multipart (file uploads)
