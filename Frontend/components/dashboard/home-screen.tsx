@@ -1,24 +1,46 @@
 "use client"
 
+/* ============================================================================
+   MEMBER HOME — "the order of service"
+   ----------------------------------------------------------------------------
+   The page is arranged the way a bulletin is, and in the order a member
+   actually needs it:
+
+     1. Where we are        — the date and a greeting, set on the page itself.
+     2. What is next        — the one deep panel on the page. Church Center and
+                              Planning Center both hang their whole product on
+                              this; so does this screen.
+     3. Your rhythm         — honest figures, hairline-divided, no growth arrows.
+                              A member's attendance is pastoral information, not
+                              a KPI, so it is never dressed as one.
+     4. Your people         — cell group and the project the church is building.
+     5. Keep growing        — events and sermons, the reward at the bottom.
+
+   What was removed and why: a fabricated notifications feed (four hardcoded
+   items), an invented "+5.2%" trend and a hardcoded "04 unread messages". None
+   were connected to anything. Real notifications live behind the top-bar bell.
+
+   Data paths are unchanged from the previous screen except for two fixes noted
+   at `unwrapStats` — the stats endpoints were being read one level too high.
+   ========================================================================== */
+
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
-  Bell,
-  Calendar,
-  Clock,
-  Play,
-  Users,
-  TrendingUp,
-  Mail,
-  CheckCircle2,
-  BookOpen,
   ArrowRight,
-  CreditCard,
+  BookOpen,
+  CalendarDays,
+  CheckSquare,
+  Clock,
+  ExternalLink,
+  HandCoins,
+  Loader2,
   MapPin,
   Navigation,
+  Play,
+  Sparkles,
+  Users,
   X,
-  Loader2,
-  ExternalLink,
 } from "lucide-react"
 import { apiClient } from "@/lib/api"
 
@@ -28,6 +50,18 @@ const IMG_LEADERSHIP =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuD-lLWudXBvwPJWwnWZHIUzjPD1Gurz5i9gX25MH9GpULaCRdZATwPaZeheBFNlCWADfcHcWV4sbaRuK015uROfqFLlVSMRwn62s5Zd8bBdh8KTltLa3xT9hvi1ggV1AVdvhoEPmuwOiviT06xu5zLsOeGBjFB2AfqyZrah9j2h0pRfySVyitOooWrPlUhKujOUmZyhE_P2nLeHIRhPjCEayFlxRsURsUnDiYfrE1QV94a0M8ptjivM-pFEj9v0fZsxN4ZZey3VvQ"
 const IMG_COMMUNITY =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCpHaroF2BnDeuXUG4dKQTPHp-Zrya9UyM5M8wnZUSCc4e6m9abz5ZkTzLG9PoB7qgx4hslDkeUBMZogGf-S6VBw9g6s39c48oDkImhkORdHs7dTBacVA226FnKV2RGQVAK2pXvmTorNcpeEoSivpvSOmLTJmDXZqxst_TQ0xsQZyRY-18xqGCmXrTKoaUdEV8AxOScrL_fBN2VUorumyAH9AL7o3G9tW_V-TV217YjxJ9VQehM7eeaGWQLt0h3p3WYTXLwyMVaIA"
+
+/* The stats endpoints answer `{ stats: {...} }`. The old screen stored the
+   envelope and then read `.attendanceRate` — a field the API has never sent
+   (it sends `percentage`) — so both figures rendered "—" whatever the record
+   said. Unwrap once, here, and use the real field names. */
+const unwrapStats = (res: any) => res?.stats ?? res ?? null
+
+const naira = new Intl.NumberFormat("en-NG", {
+  style: "currency",
+  currency: "NGN",
+  maximumFractionDigits: 0,
+})
 
 export function HomeScreen() {
   const [firstName, setFirstName] = useState("Member")
@@ -43,7 +77,6 @@ export function HomeScreen() {
   const [nearbyGroups, setNearbyGroups] = useState<any[]>([])
   const [nearbyLoading, setNearbyLoading] = useState(false)
   const [nearbyError, setNearbyError] = useState<string | null>(null)
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [userCellGroupId, setUserCellGroupId] = useState<string | null>(null)
   const [myJoinRequest, setMyJoinRequest] = useState<any>(null)
   const [joiningCellId, setJoiningCellId] = useState<string | null>(null)
@@ -52,11 +85,11 @@ export function HomeScreen() {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api"
   const uploadsBaseUrl = apiBaseUrl.replace(/\/api$/, "")
 
-  const todayLabel = new Date().toLocaleDateString("en-US", {
+  const today = new Date()
+  const todayLabel = today.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
-    year: "numeric",
   })
 
   const getGreeting = () => {
@@ -66,12 +99,15 @@ export function HomeScreen() {
     return "Good evening"
   }
 
-  const getNextWeekday = (weekday: number) => {
-    const today = new Date()
-    const daysAhead = (weekday + 7 - today.getDay()) % 7 || 7
-    const next = new Date(today)
-    next.setDate(today.getDate() + daysAhead)
-    next.setHours(0, 0, 0, 0)
+  /* The weekly services are synthesised rather than fetched, so they carry the
+     start times published on the public site (data/site.ts). Zeroing the clock
+     here is what used to make every Sunday announce itself as "12:00 AM". */
+  const getNextWeekday = (weekday: number, hour: number, minute = 0) => {
+    const now = new Date()
+    const daysAhead = (weekday + 7 - now.getDay()) % 7 || 7
+    const next = new Date(now)
+    next.setDate(now.getDate() + daysAhead)
+    next.setHours(hour, minute, 0, 0)
     return next
   }
 
@@ -92,9 +128,8 @@ export function HomeScreen() {
         if (!user) return
         if (user.firstName) setFirstName(user.firstName)
         if (user.id) {
-          setCurrentUserId(user.id)
-          apiClient.getAttendanceStats(user.id).then(setAttendanceStats).catch(() => {})
-          apiClient.getTitheStats(user.id).then(setTitheStats).catch(() => {})
+          apiClient.getAttendanceStats(user.id).then((r) => setAttendanceStats(unwrapStats(r))).catch(() => {})
+          apiClient.getTitheStats(user.id).then((r) => setTitheStats(unwrapStats(r))).catch(() => {})
           apiClient.getMyJoinRequest().then((r) => setMyJoinRequest(r?.joinRequest ?? null)).catch(() => {})
         }
         if (user.cellGroupId) {
@@ -140,15 +175,27 @@ export function HomeScreen() {
           .sort((a: any, b: any) => a.eventDate - b.eventDate)
 
         const fixed = [
-          { id: "weekly-sunday", title: "Sunday Service", eventDate: getNextWeekday(0), cover: IMG_WORSHIP },
-          { id: "weekly-wednesday", title: "Midweek Service", eventDate: getNextWeekday(3), cover: IMG_LEADERSHIP },
+          {
+            id: "weekly-sunday",
+            title: "Sunday Service",
+            location: "Dominion City Uyo HQ",
+            eventDate: getNextWeekday(0, 8),
+            cover: IMG_WORSHIP,
+          },
+          {
+            id: "weekly-wednesday",
+            title: "Word & Prayer",
+            location: "Dominion City Uyo HQ",
+            eventDate: getNextWeekday(3, 17, 30),
+            cover: IMG_LEADERSHIP,
+          },
         ]
 
         setUpcomingEvents(
           [...fixed, ...events]
             .filter((e) => e.eventDate && e.eventDate >= now)
             .sort((a, b) => a.eventDate - b.eventDate)
-            .slice(0, 4),
+            .slice(0, 6),
         )
       })
       .catch(() => setUpcomingEvents([]))
@@ -200,11 +247,7 @@ export function HomeScreen() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const res = await apiClient.getNearestCellGroups(
-            pos.coords.latitude,
-            pos.coords.longitude,
-            6,
-          )
+          const res = await apiClient.getNearestCellGroups(pos.coords.latitude, pos.coords.longitude, 6)
           setNearbyGroups(res?.cellGroups || res || [])
         } catch {
           setNearbyError("Could not load nearby cell groups. Please try again.")
@@ -234,458 +277,472 @@ export function HomeScreen() {
     }
   }
 
-  const attendanceRate = attendanceStats?.attendanceRate
-    ? `${Math.round(attendanceStats.attendanceRate)}%`
-    : "—"
+  /* ---- Derived figures — every one of them from a real record ---- */
+  const attended = attendanceStats?.attended ?? null
+  const totalServices = attendanceStats?.totalServices ?? null
+  const attendancePct =
+    typeof attendanceStats?.percentage === "number" ? Math.round(attendanceStats.percentage) : null
+  const missed = attendanceStats?.consecutiveAbsences ?? 0
 
-  const lastTitheDate = titheStats?.lastPaymentDate
+  const givenTotal = typeof titheStats?.totalAmount === "number" ? titheStats.totalAmount : null
+  const giftCount = titheStats?.totalPayments ?? 0
+  const lastGift = titheStats?.lastPaymentDate
     ? new Date(titheStats.lastPaymentDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-    : "No record"
+    : null
 
-  const titheStatus = titheStats?.lastPaymentDate ? "Active" : "Inactive"
+  /* A cell meets on a named day; turn that into the actual next date so the
+     card answers "when do I next see my people" rather than restating the rule. */
+  const DAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+  const cellDayIndex = cellGroup?.meetingDay ? DAYS.indexOf(String(cellGroup.meetingDay).toLowerCase()) : -1
+  const nextCellMeeting =
+    cellDayIndex >= 0
+      ? (() => {
+          const now = new Date()
+          const ahead = (cellDayIndex + 7 - now.getDay()) % 7
+          const next = new Date(now)
+          next.setDate(now.getDate() + ahead)
+          return next
+        })()
+      : null
 
-  const staticNotifications = [
-    {
-      id: 1,
-      Icon: CheckCircle2,
-      color: "bg-blue-100 text-blue-600",
-      title: "Attendance Recorded",
-      message: "Your attendance for Sunday Service has been marked.",
-      time: "2 hours ago",
-      unread: true,
-    },
-    {
-      id: 2,
-      Icon: CreditCard,
-      color: "bg-green-100 text-green-600",
-      title: "Tithe Reminder",
-      message: "This week's tithe reminder — don't forget to give.",
-      time: "Yesterday",
-      unread: true,
-    },
-    {
-      id: 3,
-      Icon: Calendar,
-      color: "bg-amber-100 text-amber-600",
-      title: "Upcoming Event",
-      message: "Friday Night Fire starts in 2 days. See you there!",
-      time: "2 days ago",
-      unread: false,
-    },
-    {
-      id: 4,
-      Icon: Bell,
-      color: "bg-[#1A3A6E]/10 text-[#1A3A6E]",
-      title: "General Announcement",
-      message: "New building project updates — check the notice board.",
-      time: "3 days ago",
-      unread: false,
-    },
-  ]
-
-  const sermonsToShow = recentSermons
+  const nextUp = upcomingEvents[0] || null
+  const daysAway = nextUp
+    ? Math.round((new Date(nextUp.eventDate).setHours(0, 0, 0, 0) - today.setHours(0, 0, 0, 0)) / 86400000)
+    : null
+  const whenLabel = daysAway === 0 ? "Today" : daysAway === 1 ? "Tomorrow" : nextUp
+    ? new Date(nextUp.eventDate).toLocaleDateString("en-US", { weekday: "long" })
+    : null
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Banner */}
-      <section className="relative min-h-[140px] overflow-hidden rounded-2xl p-5 text-white shadow-lg sm:p-6">
-        <img
-          src="/dark.jpg"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-[#1A3A6E]/80 pointer-events-none" />
-        <div className="relative z-10">
-          <p className="text-[11px] uppercase tracking-widest opacity-70 mb-1 font-semibold">{todayLabel}</p>
-          <h2 className="mb-1 text-xl font-bold sm:text-2xl">
-            {getGreeting()}, {firstName}
-          </h2>
-          <p className="text-sm opacity-80 max-w-[260px] leading-relaxed">
-            Welcome back to Dominion City Uyo. Here's what's happening today.
-          </p>
+    <div>
+      {/* ---- 1. Where we are ---- */}
+      <header className="mb-[var(--space-lg)]">
+        <p className="dash-label">{todayLabel}</p>
+        <h2 className="mt-1 font-[family-name:var(--font-display)] text-[length:var(--step-3)] font-medium leading-[1.05] tracking-[-0.015em]">
+          {getGreeting()}, {firstName}.
+        </h2>
+      </header>
+
+      {/* ---- 2. What is next ---- */}
+      <section className="dash-panel" aria-labelledby="next-h">
+        <p className="dash-label">Next gathering</p>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-[var(--space-md)]">
+          <div className="min-w-0">
+            {nextUp ? (
+              <>
+                <p className="dash-figure">
+                  {whenLabel}
+                  <span className="dash-figure__unit !text-[var(--text-invert-soft)]">
+                    {new Date(nextUp.eventDate).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </p>
+                <h3 id="next-h" className="mt-2 text-[length:var(--step-1)] font-semibold">
+                  {nextUp.title}
+                </h3>
+                <p className="mt-0.5 text-sm text-[var(--text-invert-soft)]">
+                  {nextUp.location || "Dominion City Uyo HQ"}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="dash-figure">This Sunday</p>
+                <h3 id="next-h" className="mt-2 text-[length:var(--step-1)] font-semibold">
+                  {eventsLoading ? "Checking the calendar…" : "Sunday Service"}
+                </h3>
+                <p className="mt-0.5 text-sm text-[var(--text-invert-soft)]">Dominion City Uyo HQ</p>
+              </>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Link href="/dashboard/attendance" className="dash-btn dash-btn--primary">
+              <CheckSquare />
+              Mark attendance
+            </Link>
+            <Link href="/dashboard/events" className="dash-btn dash-btn--ghost">
+              All events
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          {
-            Icon: CheckCircle2,
-            label: "Attendance Rate",
-            value: attendanceRate,
-            sub: "+5.2%",
-            subColor: "text-green-600",
-            SubIcon: TrendingUp,
-          },
-          {
-            Icon: CreditCard,
-            label: "Tithe Status",
-            value: titheStatus,
-            sub: `Last: ${lastTitheDate}`,
-            subColor: "text-gray-400",
-            SubIcon: null,
-          },
-          {
-            Icon: Calendar,
-            label: "Upcoming Events",
-            value: eventsLoading ? "—" : String(upcomingEvents.length),
-            sub: "This month",
-            subColor: "text-gray-400",
-            SubIcon: null,
-          },
-          {
-            Icon: Mail,
-            label: "Unread Messages",
-            value: "04",
-            sub: "Needs attention",
-            subColor: "text-red-500",
-            SubIcon: null,
-          },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-white rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100 flex flex-col items-center text-center"
-          >
-            <div className="w-9 h-9 rounded-full bg-[#1A3A6E]/10 flex items-center justify-center mb-2">
-              <stat.Icon className="h-4 w-4 text-[#1A3A6E]" />
-            </div>
-            <p className="text-[9px] uppercase tracking-wider text-gray-400 font-semibold leading-tight">
-              {stat.label}
-            </p>
-            <p className="text-lg font-bold text-[#1A3A6E] mt-1 leading-none">{stat.value}</p>
-            <span className={`text-[10px] mt-1.5 font-medium flex items-center gap-0.5 ${stat.subColor}`}>
-              {stat.SubIcon && <stat.SubIcon className="h-3 w-3" />}
-              {stat.sub}
-            </span>
+      {/* ---- 3. Your rhythm ---- */}
+      <div className="dash-section">
+        <div className="dash-section__row">
+          <div>
+            <h3 className="dash-section__title">Your rhythm</h3>
+            <p className="dash-section__note">Your own record, kept quietly.</p>
           </div>
-        ))}
+        </div>
       </div>
 
-      {/* Cell Group + Ongoing Project + Upcoming Events in one line */}
-      <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3 [&>*]:min-w-0">
-
-        {/* My Cell Group */}
-        <div className="bg-white rounded-xl p-5 shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-[#1A3A6E]">
-              {isLeaderOfCell ? "My Cell (Leader)" : "My Cell Group"}
-            </h3>
-            <Users className="h-5 w-5 text-[#1A3A6E]/40" />
-          </div>
-          {cellGroup ? (
-            <>
-              {isLeaderOfCell && (
-                <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full mb-2">
-                  You are the leader
-                </span>
-              )}
-              <p className="font-bold text-gray-800">{cellGroup.name}</p>
-              <p className="text-sm text-gray-500 mt-1">
-                Meeting: {cellGroup.meetingDay}s @ {cellGroup.meetingTime}
-              </p>
-              {cellGroup.address && (
-                <p className="text-xs text-gray-400 mt-1 truncate">{cellGroup.address}</p>
-              )}
-            </>
-          ) : (
-            <div className="flex flex-col items-center text-center py-2">
-              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-2">
-                <Users className="h-5 w-5 text-gray-400" />
-              </div>
-              <p className="text-sm font-semibold text-gray-700">No active cell group yet</p>
-              <p className="text-xs text-gray-400 mt-1 leading-relaxed">
-                Find and join a cell group closer to you.
-              </p>
-            </div>
-          )}
-          {cellGroup ? (
-            <Link
-              href="/dashboard/cell-groups"
-              className="mt-4 text-[#1E5EC8] text-sm font-semibold flex items-center gap-1 hover:underline"
-            >
-              {isLeaderOfCell ? "View My Cell" : "View Details"}
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          ) : (
-            <button
-              onClick={findNearbyGroups}
-              className="mt-4 text-[#1E5EC8] text-sm font-semibold flex items-center gap-1 hover:underline"
-            >
-              <Navigation className="h-4 w-4" />
-              Find a Cell Group Near Me
-            </button>
-          )}
+      <div className="dash-strip">
+        <div className="dash-stat">
+          <p className="dash-label">Attendance</p>
+          <p className="dash-figure dash-figure--sm">
+            {attendancePct === null ? "—" : `${attendancePct}`}
+            {attendancePct !== null && <span className="dash-figure__unit">%</span>}
+          </p>
+          <p className="dash-stat__foot">
+            {attended !== null && totalServices
+              ? `${attended} of ${totalServices} services`
+              : "No record yet"}
+          </p>
         </div>
 
-        {/* Ongoing Project */}
-        {featuredProject && (
-          <div className="bg-white rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden">
-            <div className="h-32 bg-[#1A3A6E]/10">
+        <div className="dash-stat">
+          <p className="dash-label">Given to date</p>
+          <p className="dash-figure dash-figure--sm">
+            {givenTotal === null ? "—" : naira.format(givenTotal)}
+          </p>
+          <p className="dash-stat__foot">
+            {lastGift ? `${giftCount} gifts · last ${lastGift}` : "No record yet"}
+          </p>
+        </div>
+
+        <div className="dash-stat">
+          <p className="dash-label">Cell group</p>
+          <p className="dash-figure dash-figure--sm dash-figure--text">
+            {cellGroup ? cellGroup.name : "—"}
+          </p>
+          <p className="dash-stat__foot">
+            {cellGroup
+              ? `${cellGroup.meetingDay}s · ${cellGroup.meetingTime}`
+              : "Not joined yet"}
+          </p>
+        </div>
+
+        <div className="dash-stat">
+          <p className="dash-label">Coming up</p>
+          <p className="dash-figure dash-figure--sm">
+            {eventsLoading ? "—" : upcomingEvents.length}
+          </p>
+          <p className="dash-stat__foot">gatherings on the calendar</p>
+        </div>
+      </div>
+
+      {/* A pastoral note, not a red alert — and only when the record says so. */}
+      {missed >= 3 && (
+        <p className="mt-3 flex items-start gap-2 rounded-[var(--dash-radius)] border border-[var(--line)] bg-[var(--dash-surface)] p-3 text-sm text-[var(--text-soft)]">
+          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-ink)]" />
+          <span>
+            We&apos;ve missed you the last {missed} services — there is a seat with your name on it
+            whenever you&apos;re ready.
+          </span>
+        </p>
+      )}
+
+      {/* ---- 4. Your people ---- */}
+      <div className="dash-section">
+        <div className="dash-section__row">
+          <h3 className="dash-section__title">Your people</h3>
+        </div>
+      </div>
+
+      <div className="grid gap-[var(--space-sm)] md:grid-cols-2">
+        {/* Cell group */}
+        <section className="dash-card flex flex-col">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="dash-label">{isLeaderOfCell ? "Cell you lead" : "My cell group"}</p>
+              {cellGroup ? (
+                <h4 className="mt-1.5 font-[family-name:var(--font-display)] text-[length:var(--step-1)] font-medium">
+                  {cellGroup.name}
+                </h4>
+              ) : null}
+            </div>
+            {isLeaderOfCell && <span className="dash-badge dash-badge--gold">Leader</span>}
+          </div>
+
+          {cellGroup ? (
+            <>
+              <p className="mt-2 text-sm text-[var(--text-soft)]">
+                Meets {cellGroup.meetingDay}s at {cellGroup.meetingTime}
+              </p>
+              {cellGroup.address && (
+                <p className="mt-1 truncate text-sm text-[var(--text-faint)]">{cellGroup.address}</p>
+              )}
+              {nextCellMeeting && (
+                <p className="mt-4 flex items-center gap-2 text-sm">
+                  <CalendarDays className="h-4 w-4 shrink-0 text-[var(--accent-ink)]" />
+                  <span>
+                    Next meeting{" "}
+                    <strong className="font-semibold">
+                      {nextCellMeeting.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
+                    </strong>
+                  </span>
+                </p>
+              )}
+              <Link href="/dashboard/cell-groups" className="dash-section__link mt-auto pt-4">
+                {isLeaderOfCell ? "Open my cell" : "View details"}
+                <ArrowRight />
+              </Link>
+            </>
+          ) : (
+            <div className="dash-empty my-auto">
+              <span className="dash-empty__icon">
+                <Users className="h-5 w-5" />
+              </span>
+              <p className="dash-empty__title">You&apos;re not in a cell yet</p>
+              <p className="dash-empty__note">
+                Cells are where a big church becomes a small one. There is almost certainly one on
+                your street.
+              </p>
+              <button onClick={findNearbyGroups} className="dash-btn dash-btn--primary mt-1">
+                <Navigation />
+                Find one near me
+              </button>
+            </div>
+          )}
+        </section>
+
+        {/* Project the church is building */}
+        {featuredProject ? (
+          <section className="dash-card dash-card--flush flex flex-col overflow-hidden">
+            <div className="dash-media h-36">
               {resolveImageUrl(featuredProject.imageUrl) ? (
-                <img
-                  src={resolveImageUrl(featuredProject.imageUrl) as string}
-                  alt={featuredProject.title}
-                  className="w-full h-full object-cover"
-                />
+                <img src={resolveImageUrl(featuredProject.imageUrl) as string} alt="" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center">
-                  <TrendingUp className="h-7 w-7 text-[#1A3A6E]/25" />
-                </div>
+                <HandCoins className="dash-media__ph h-7 w-7" />
               )}
             </div>
-            <div className="p-5">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-[#1A3A6E]">Ongoing Project</h3>
-                <Link
-                  href="/dashboard/projects"
-                  className="text-[#1E5EC8] text-sm font-semibold flex items-center gap-1 hover:underline"
-                >
-                  See More
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-              <p className="mt-2 font-bold text-gray-800">{featuredProject.title}</p>
+            <div className="flex flex-1 flex-col p-[var(--space-sm)]">
+              <p className="dash-label">What we&apos;re building</p>
+              <h4 className="mt-1.5 font-[family-name:var(--font-display)] text-[length:var(--step-1)] font-medium">
+                {featuredProject.title}
+              </h4>
               {featuredProject.description && (
-                <p className="mt-1 text-sm text-gray-500 line-clamp-2 leading-relaxed">
+                <p className="mt-1.5 line-clamp-2 text-sm text-[var(--text-soft)]">
                   {featuredProject.description}
                 </p>
               )}
+              <div className="mt-auto flex items-center gap-3 pt-4">
+                <Link href="/dashboard/giving" className="dash-btn dash-btn--ink">
+                  <HandCoins />
+                  Give
+                </Link>
+                <Link href="/dashboard/projects" className="dash-section__link">
+                  All projects
+                  <ArrowRight />
+                </Link>
+              </div>
             </div>
-          </div>
+          </section>
+        ) : (
+          <section className="dash-card flex flex-col justify-center">
+            <div className="dash-empty">
+              <span className="dash-empty__icon">
+                <HandCoins className="h-5 w-5" />
+              </span>
+              <p className="dash-empty__title">Give to the work</p>
+              <p className="dash-empty__note">
+                Tithes and offerings, recorded and receipted — wherever you are.
+              </p>
+              <Link href="/dashboard/giving" className="dash-btn dash-btn--primary mt-1">
+                Give now
+              </Link>
+            </div>
+          </section>
         )}
+      </div>
 
-        {/* Upcoming Events */}
-        <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-bold text-[#1A3A6E]">Upcoming Events</h3>
-          <Link href="/dashboard/events" className="text-[#1E5EC8] text-sm font-semibold hover:underline">
-            See All
+      {/* ---- 5. Keep growing: events ---- */}
+      <div className="dash-section">
+        <div className="dash-section__row">
+          <h3 className="dash-section__title">On the calendar</h3>
+          <Link href="/dashboard/events" className="dash-section__link">
+            See all
+            <ArrowRight />
           </Link>
         </div>
-        <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
-          {eventsLoading ? (
-            <>
-              <div className="min-w-[260px] flex-shrink-0 bg-white rounded-xl h-52 animate-pulse border border-gray-100" />
-              <div className="min-w-[260px] flex-shrink-0 bg-white rounded-xl h-52 animate-pulse border border-gray-100" />
-            </>
-          ) : upcomingEvents.length === 0 ? (
-            <p className="text-sm text-gray-400">No upcoming events.</p>
-          ) : (
-            upcomingEvents.map((event) => (
-              <div
-                key={event.id}
-                className="min-w-[260px] flex-shrink-0 bg-white rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-md transition-all"
-              >
-                <div className="h-32 bg-[#1A3A6E]/10 relative">
-                  {event.cover ? (
-                    <img
-                      src={event.cover}
-                      alt={event.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <img src={IMG_COMMUNITY} alt={event.title} className="w-full h-full object-cover" />
-                  )}
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] font-bold text-[#1A3A6E] shadow-sm">
-                    {event.eventDate
-                      .toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                      .toUpperCase()}
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h4 className="font-semibold text-gray-900 text-sm leading-tight">{event.title}</h4>
-                  {event.description && (
-                    <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{event.description}</p>
-                  )}
-                  <div className="flex items-center text-xs text-gray-400 mt-2.5 gap-1">
+      </div>
+
+      <div className="dash-rail-x">
+        {eventsLoading ? (
+          [0, 1, 2].map((i) => <div key={i} className="dash-skeleton h-56 rounded-[var(--dash-radius)]" />)
+        ) : upcomingEvents.length === 0 ? (
+          <div className="dash-card dash-empty w-full">
+            <span className="dash-empty__icon">
+              <CalendarDays className="h-5 w-5" />
+            </span>
+            <p className="dash-empty__title">Nothing on the calendar yet</p>
+            <p className="dash-empty__note">Sunday and midweek services carry on as always.</p>
+          </div>
+        ) : (
+          upcomingEvents.map((event) => (
+            <Link
+              key={event.id}
+              href="/dashboard/events"
+              className="dash-card dash-card--flush dash-card--link"
+            >
+              <div className="dash-media h-32">
+                {event.cover ? (
+                  <img src={event.cover} alt="" />
+                ) : (
+                  <img src={IMG_COMMUNITY} alt="" />
+                )}
+              </div>
+              <div className="flex gap-3 p-[var(--space-sm)]">
+                <span className="dash-date">
+                  <span className="dash-date__m">
+                    {new Date(event.eventDate).toLocaleDateString("en-US", { month: "short" })}
+                  </span>
+                  <span className="dash-date__d">
+                    {new Date(event.eventDate).getDate()}
+                  </span>
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-semibold leading-snug">{event.title}</span>
+                  <span className="mt-1 flex items-center gap-1 text-xs text-[var(--text-soft)]">
                     <Clock className="h-3 w-3" />
-                    <span>
-                      {event.eventDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-                    </span>
+                    {new Date(event.eventDate).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
                     {event.location && (
                       <>
-                        <span className="mx-1">·</span>
+                        <span aria-hidden="true">·</span>
                         <span className="truncate">{event.location}</span>
                       </>
                     )}
-                  </div>
-                </div>
+                  </span>
+                </span>
               </div>
-            ))
-          )}
-        </div>
+            </Link>
+          ))
+        )}
+      </div>
+
+      {/* ---- 5b. Keep growing: sermons ---- */}
+      <div className="dash-section">
+        <div className="dash-section__row">
+          <h3 className="dash-section__title">Recent teaching</h3>
+          <Link href="/dashboard/sermons" className="dash-section__link">
+            The library
+            <ArrowRight />
+          </Link>
         </div>
       </div>
 
-      {/* Recent Sermons */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-bold text-[#1A3A6E]">Recent Sermons</h3>
-          <Link href="/dashboard/sermons" className="text-[#1E5EC8] text-sm font-semibold hover:underline">
-            View Library
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {sermonsLoading
-            ? [1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-xl border border-gray-100 animate-pulse">
-                  <div className="aspect-video bg-gray-100 rounded-t-xl" />
-                  <div className="p-2 space-y-1.5">
-                    <div className="h-3 bg-gray-100 rounded w-4/5" />
-                    <div className="h-2.5 bg-gray-100 rounded w-3/5" />
-                  </div>
-                </div>
-              ))
-            : sermonsToShow.length === 0
-            ? (
-                <div className="col-span-3 py-8 text-center text-sm text-gray-400">
-                  No sermons available yet.
-                </div>
-              )
-            : sermonsToShow.map((sermon: any) => (
-                <Link
-                  key={sermon.id}
-                  href="/dashboard/sermons"
-                  className="bg-white p-2 rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100 group block"
-                >
-                  <div className="aspect-video bg-[#1A3A6E]/10 rounded-lg overflow-hidden relative mb-2">
-                    {sermon.thumbnail ? (
-                      <img
-                        src={sermon.thumbnail}
-                        alt={sermon.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <BookOpen className="h-7 w-7 text-[#1A3A6E]/25" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
-                      <Play className="h-8 w-8 text-white fill-white" />
-                    </div>
-                  </div>
-                  <p className="text-xs font-semibold text-gray-900 line-clamp-1 px-1 leading-snug">
-                    {sermon.title}
-                  </p>
-                  <p className="text-[10px] text-gray-400 px-1 mt-0.5">
-                    {sermon.sermonDate
-                      ? new Date(sermon.sermonDate).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })
-                      : sermon.date ?? ""}{" "}
-                    · {sermon.preacher}
-                  </p>
-                </Link>
-              ))}
-        </div>
-      </div>
-
-      {/* Notifications Feed */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-bold text-[#1A3A6E]">Notifications</h3>
-          <Link href="/dashboard/notifications" className="text-[#1E5EC8] text-sm font-semibold hover:underline">
-            See All
-          </Link>
-        </div>
-        <div className="bg-white rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-gray-100 divide-y divide-gray-100 overflow-hidden">
-          {staticNotifications.map((item) => (
-            <div
-              key={item.id}
-              className="p-4 hover:bg-gray-50 transition-colors cursor-pointer flex gap-3 items-start"
+      <div className="grid grid-cols-2 gap-[var(--space-sm)] md:grid-cols-3">
+        {sermonsLoading ? (
+          [0, 1, 2].map((i) => (
+            <div key={i} className="dash-skeleton aspect-[4/3] rounded-[var(--dash-radius)]" />
+          ))
+        ) : recentSermons.length === 0 ? (
+          <div className="dash-card dash-empty col-span-full">
+            <span className="dash-empty__icon">
+              <BookOpen className="h-5 w-5" />
+            </span>
+            <p className="dash-empty__title">No sermons published yet</p>
+            <p className="dash-empty__note">Sunday&apos;s teaching appears here once it is uploaded.</p>
+          </div>
+        ) : (
+          recentSermons.map((sermon: any) => (
+            <Link
+              key={sermon.id}
+              href="/dashboard/sermons"
+              className="dash-card dash-card--flush dash-card--link group"
             >
-              <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${item.color}`}
-              >
-                <item.Icon className="h-4 w-4" />
+              <div className="dash-media aspect-video">
+                {sermon.thumbnail ? (
+                  <img src={sermon.thumbnail} alt="" />
+                ) : (
+                  <BookOpen className="dash-media__ph h-7 w-7" />
+                )}
+                <span className="absolute inset-0 grid place-items-center bg-[rgba(14,19,48,0.45)] opacity-0 transition-opacity group-hover:opacity-100">
+                  <Play className="h-9 w-9 fill-[var(--c-daybreak)] text-[var(--c-daybreak)]" />
+                </span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900">{item.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">{item.message}</p>
-                <p className="text-[10px] text-gray-400 mt-1">{item.time}</p>
+              <div className="p-3">
+                <p className="line-clamp-2 text-sm font-semibold leading-snug">{sermon.title}</p>
+                <p className="mt-1 text-xs text-[var(--text-soft)]">
+                  {sermon.sermonDate
+                    ? new Date(sermon.sermonDate).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : sermon.date ?? ""}
+                  {sermon.preacher ? ` · ${sermon.preacher}` : ""}
+                </p>
               </div>
-              {item.unread && <span className="w-2 h-2 bg-[#1E5EC8] rounded-full flex-shrink-0 mt-1.5" />}
-            </div>
-          ))}
-        </div>
-        <button className="w-full mt-3 py-3 bg-gray-50 text-[#1A3A6E] text-sm font-semibold rounded-xl hover:bg-gray-100 transition-colors border border-gray-100">
-          View All Notifications
-        </button>
+            </Link>
+          ))
+        )}
       </div>
 
-      {/* ── Nearby Cell Groups Modal ─────────────────────────────────────── */}
+      {/* ---- Nearby cell groups ---- */}
       {showNearbyModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setShowNearbyModal(false)}
-          />
-
-          {/* Sheet */}
-          <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full bg-[#1A3A6E]/10 flex items-center justify-center">
-                  <Navigation className="h-4 w-4 text-[#1A3A6E]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-[#0A1F44] text-base">Cell Groups Near You</h3>
-                  <p className="text-[11px] text-gray-400">Sorted by distance</p>
-                </div>
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-[rgba(14,19,48,0.55)] p-0 sm:items-center sm:p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="nearby-h"
+        >
+          <div className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-t-[var(--dash-radius-lg)] bg-[var(--dash-surface)] sm:rounded-[var(--dash-radius-lg)]">
+            <div className="flex items-start justify-between gap-3 border-b border-[var(--line)] p-[var(--space-sm)]">
+              <div>
+                <p className="dash-label">Cell groups</p>
+                <h3
+                  id="nearby-h"
+                  className="mt-1 font-[family-name:var(--font-display)] text-[length:var(--step-1)] font-medium"
+                >
+                  Closest to you
+                </h3>
               </div>
               <button
                 onClick={() => setShowNearbyModal(false)}
-                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                className="dash-icon-btn"
+                aria-label="Close"
               >
-                <X className="h-5 w-5 text-gray-400" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Body */}
-            <div className="overflow-y-auto flex-1">
+            <div className="min-h-0 flex-1 overflow-y-auto">
               {nearbyLoading && (
-                <div className="flex flex-col items-center justify-center py-14 gap-3">
-                  <Loader2 className="h-7 w-7 animate-spin text-[#1A3A6E]" />
-                  <p className="text-sm text-gray-500">Getting your location…</p>
+                <div className="dash-empty py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-[var(--accent-ink)]" />
+                  <p className="dash-empty__note">Finding your location…</p>
                 </div>
               )}
 
               {nearbyError && !nearbyLoading && (
-                <div className="flex flex-col items-center justify-center py-14 px-6 text-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
-                    <MapPin className="h-6 w-6 text-red-400" />
-                  </div>
-                  <p className="text-sm font-semibold text-gray-700">{nearbyError}</p>
-                  <button
-                    onClick={findNearbyGroups}
-                    className="text-sm text-[#1E5EC8] font-semibold hover:underline"
-                  >
-                    Try Again
+                <div className="dash-empty py-12">
+                  <span className="dash-empty__icon">
+                    <MapPin className="h-5 w-5" />
+                  </span>
+                  <p className="dash-empty__title">{nearbyError}</p>
+                  <button onClick={findNearbyGroups} className="dash-btn mt-1">
+                    Try again
                   </button>
                 </div>
               )}
 
               {!nearbyLoading && !nearbyError && nearbyGroups.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-14 px-6 text-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                    <Users className="h-6 w-6 text-gray-400" />
-                  </div>
-                  <p className="text-sm font-semibold text-gray-700">No cell groups found nearby</p>
-                  <p className="text-xs text-gray-400">Contact the church office to be assigned to a group.</p>
+                <div className="dash-empty py-12">
+                  <span className="dash-empty__icon">
+                    <Users className="h-5 w-5" />
+                  </span>
+                  <p className="dash-empty__title">No cell groups found nearby</p>
+                  <p className="dash-empty__note">
+                    The church office can assign you to the closest group.
+                  </p>
                 </div>
               )}
 
               {!nearbyLoading && nearbyGroups.length > 0 && (
-                <ul className="divide-y divide-gray-100">
+                <ul className="dash-list">
                   {nearbyGroups.map((group: any) => {
-                    const distKm = typeof group.distance === "number"
-                      ? group.distance < 1
-                        ? `${Math.round(group.distance * 1000)} m`
-                        : `${group.distance.toFixed(1)} km`
-                      : null
+                    const distKm =
+                      typeof group.distance === "number"
+                        ? group.distance < 1
+                          ? `${Math.round(group.distance * 1000)} m`
+                          : `${group.distance.toFixed(1)} km`
+                        : null
                     const mapsUrl = group.address
                       ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(group.address)}`
                       : null
@@ -697,73 +754,53 @@ export function HomeScreen() {
 
                     let joinBtn: React.ReactNode
                     if (alreadyInCell) {
-                      joinBtn = (
-                        <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full whitespace-nowrap">
-                          In a cell
-                        </span>
-                      )
+                      joinBtn = <span className="dash-badge">In a cell</span>
                     } else if (pendingThisCell) {
-                      joinBtn = (
-                        <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full whitespace-nowrap">
-                          Request sent
-                        </span>
-                      )
+                      joinBtn = <span className="dash-badge dash-badge--gold">Request sent</span>
                     } else if (pendingOtherCell) {
-                      joinBtn = (
-                        <span className="text-[11px] font-semibold text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full whitespace-nowrap">
-                          Request pending
-                        </span>
-                      )
+                      joinBtn = <span className="dash-badge">Request pending</span>
                     } else {
                       joinBtn = (
                         <button
                           onClick={() => handleJoinCell(group.id)}
                           disabled={isJoiningThis}
-                          className="text-[11px] font-bold text-white bg-[#1E5EC8] hover:bg-[#1A3A6E] px-2.5 py-1 rounded-full whitespace-nowrap transition-colors disabled:opacity-60 flex items-center gap-1"
+                          className="dash-btn dash-btn--primary !min-h-0 !px-3 !py-1.5 !text-xs disabled:opacity-60"
                         >
-                          {isJoiningThis && (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          )}
-                          Join Cell
+                          {isJoiningThis && <Loader2 className="h-3 w-3 animate-spin" />}
+                          Ask to join
                         </button>
                       )
                     }
 
                     return (
-                      <li key={group.id} className="px-5 py-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-start gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-full bg-[#1A3A6E]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <Users className="h-4 w-4 text-[#1A3A6E]" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-bold text-[#0A1F44] text-sm">{group.name}</p>
-                              <p className="text-xs text-gray-500 mt-0.5">
-                                {group.meetingDay}s @ {group.meetingTime}
-                              </p>
-                              {group.address && (
-                                <p className="text-xs text-gray-400 mt-0.5 truncate">{group.address}</p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                            {distKm && (
-                              <span className="text-[11px] font-bold text-[#1E5EC8] bg-blue-50 px-2 py-0.5 rounded-full whitespace-nowrap">
-                                {distKm} away
-                              </span>
+                      <li key={group.id}>
+                        <div className="dash-row">
+                          <span className="dash-row__icon">
+                            <Users />
+                          </span>
+                          <span className="dash-row__body">
+                            <span className="dash-row__title block">{group.name}</span>
+                            <span className="dash-row__meta block">
+                              {group.meetingDay}s · {group.meetingTime}
+                              {distKm ? ` · ${distKm} away` : ""}
+                            </span>
+                            {group.address && (
+                              <span className="dash-row__meta block truncate">{group.address}</span>
                             )}
+                          </span>
+                          <span className="flex flex-none flex-col items-end gap-1.5">
                             {joinBtn}
                             {mapsUrl && (
                               <a
                                 href={mapsUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[11px] text-gray-400 hover:text-[#1E5EC8] flex items-center gap-0.5 transition-colors"
+                                className="flex items-center gap-1 text-xs text-[var(--text-soft)] hover:text-[var(--accent-ink)]"
                               >
                                 Directions <ExternalLink className="h-3 w-3" />
                               </a>
                             )}
-                          </div>
+                          </span>
                         </div>
                       </li>
                     )
@@ -772,19 +809,19 @@ export function HomeScreen() {
               )}
             </div>
 
-            {/* Footer */}
-            <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
+            <div className="border-t border-[var(--line)] bg-[var(--dash-surface-2)] px-[var(--space-sm)] py-3">
               {myJoinRequest ? (
-                <p className="text-[11px] text-amber-600 text-center font-medium">
-                  Your request to join &quot;{myJoinRequest.cellGroupName}&quot; is pending. You&apos;ll be notified when the leader responds.
+                <p className="text-center text-xs text-[var(--text-soft)]">
+                  Your request to join &quot;{myJoinRequest.cellGroupName}&quot; is with the leader —
+                  you&apos;ll be notified when they respond.
                 </p>
               ) : userCellGroupId ? (
-                <p className="text-[11px] text-emerald-600 text-center font-medium">
-                  You are already a member of a cell group.
+                <p className="text-center text-xs text-[var(--text-soft)]">
+                  You already belong to a cell group.
                 </p>
               ) : (
-                <p className="text-[11px] text-gray-400 text-center">
-                  Tap &quot;Join Cell&quot; to send a request to the cell leader.
+                <p className="text-center text-xs text-[var(--text-soft)]">
+                  Asking to join sends a note to that cell&apos;s leader.
                 </p>
               )}
             </div>

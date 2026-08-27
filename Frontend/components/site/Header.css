@@ -114,18 +114,44 @@
 .menu__bars::after { bottom: 0; }
 .menu__panel {
   position: absolute; right: 0; top: calc(100% + 0.6rem);
-  min-width: 220px;
+  width: max-content; min-width: 240px; max-width: min(84vw, 320px);
   background: var(--bg); color: var(--text);
   border: 1px solid var(--line); border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lift);
   padding: 0.5rem;
 }
 .menu__panel ul { list-style: none; margin: 0; padding: 0; }
-.menu__panel a {
+.menu__panel ul a {
   display: block; padding: 0.7rem 0.8rem; border-radius: var(--radius);
   text-decoration: none; font-weight: 500; color: var(--text);
 }
-.menu__panel a:hover { background: var(--bg-soft); }
+.menu__panel ul a:hover { background: var(--bg-soft); }
+.menu__panel ul a[aria-current="page"] { color: var(--accent-ink); font-weight: 600; }
+
+/* Auth block — the phone's only sign-in affordance, so it reads as buttons
+   with a 44px touch target, not as two more rows of the nav list. */
+.menu__auth {
+  display: grid; gap: 0.5rem;
+  margin-top: 0.5rem; padding-top: 0.65rem;
+  border-top: 1px solid var(--line);
+}
+.menu__btn {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 46px; padding: 0.6rem 1rem;
+  border: 1px solid var(--line); border-radius: 999px;
+  font-weight: 700; font-size: var(--step--1); letter-spacing: 0.01em;
+  text-decoration: none; color: var(--text);
+  transition: background var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out);
+}
+.menu__btn:hover { background: var(--bg-soft); }
+.menu__btn--primary {
+  color: var(--c-nightfall);
+  background: linear-gradient(160deg, var(--accent), var(--accent-brass));
+  border-color: transparent;
+  box-shadow: var(--shadow-lift);
+}
+.menu__btn--primary:hover { background: var(--accent); }
+.menu__btn:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
 .menu[open] .menu__bars::before { box-shadow: none; top: 5px; transform: rotate(45deg); }
 .menu[open] .menu__bars::after { bottom: 5px; transform: rotate(-45deg); }
 
@@ -136,12 +162,21 @@
   .site-header__bar { border-radius: 18px; gap: var(--space-sm); }
 }
 
+/* Tablets: the pill still fits, but tightened so it never crowds Menu. */
+@media (max-width: 48rem) {
+  .site-header__authlink { padding: 0.55em 0.85em; }
+  .site-header__auth { min-height: 40px; }
+}
+
 /* Phones: the wordmark, the gold auth pill and the Menu button together are
    wider than the bar, and the overflow pushed Menu off the right edge — the
-   one control a phone visitor needs. The auth links live in the menu panel
+   one control a phone visitor needs. The auth buttons live in the menu panel
    too, so below 40rem the pill stands down and Menu keeps its place. */
 @media (max-width: 40rem) {
   .site-header__auth { display: none; }
+  /* Panel hangs from the toggle but spans the bar, so the buttons are wide
+     and thumb-friendly rather than a narrow dropdown in the corner. */
+  .menu__panel { max-width: none; width: calc(100vw - 2.5rem); }
 }
 
 @media (max-width: 30rem) {
