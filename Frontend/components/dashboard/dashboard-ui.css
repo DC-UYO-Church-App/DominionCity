@@ -492,3 +492,193 @@ a.dash-row:hover { background: var(--dash-surface-2); }
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ============================================================================
+   BENTO DASHBOARD + DATA VISUALISATION
+   ----------------------------------------------------------------------------
+   Colour here was validated, not chosen by eye. The categorical trio was run
+   through the six checks against this surface:
+
+     #3A5BB5 firmament · #C98A2E brass · #0F8F76 sage
+     lightness band PASS · chroma floor PASS · CVD separation PASS
+     (worst adjacent ΔE 10.3 protan / 21.0 normal) · contrast PASS/WARN
+
+   The WARN is on the brass at 2.86:1, which obliges visible relief — so every
+   chart using it ships a legend and direct labels rather than leaning on the
+   fill. Brand navy (#0E1330) is deliberately NOT a mark colour: at L 0.363 it
+   sits below the band and reads as near-black against cream. It stays what it
+   has always been — ink and chrome.
+   ========================================================================== */
+.dash {
+  --viz-1: #3A5BB5;
+  --viz-2: #C98A2E;
+  --viz-3: #0F8F76;
+
+  /* Sequential ramp for magnitude: one hue, monotonically darkening. Step 0 is
+     a neutral, not a pale blue — "no record" is an absence, not a low value. */
+  --viz-c0: #EDE7D8;
+  --viz-c1: #D6DFF3;
+  --viz-c2: #A9BCE8;
+  --viz-c3: #6E8DD6;
+  --viz-c4: #33488F;
+
+  --viz-grid: color-mix(in oklab, var(--c-nightfall) 10%, transparent);
+  --viz-track: color-mix(in oklab, var(--c-nightfall) 7%, transparent);
+}
+
+/* ---- Bento grid --------------------------------------------------------- */
+.bento {
+  display: grid; gap: 0.85rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 60rem) { .bento { grid-template-columns: repeat(12, minmax(0, 1fr)); } }
+
+.bento__cell { grid-column: span 2; }
+@media (min-width: 60rem) {
+  .b-3 { grid-column: span 3; }
+  .b-4 { grid-column: span 4; }
+  .b-5 { grid-column: span 5; }
+  .b-6 { grid-column: span 6; }
+  .b-8 { grid-column: span 8; }
+}
+
+/* Every tile is the same object: surface, hairline, one radius, its own head. */
+.tile {
+  background: var(--dash-surface);
+  border: 1px solid var(--line);
+  border-radius: var(--dash-radius);
+  padding: 0.9rem 1rem 1rem;
+  display: flex; flex-direction: column; min-width: 0;
+}
+.tile__head {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.tile__title {
+  margin: 0; font-size: 0.86rem; font-weight: 600; letter-spacing: -0.005em;
+  display: inline-flex; align-items: center; gap: 0.45rem;
+}
+.tile__title svg { width: 0.95rem; height: 0.95rem; color: var(--accent-ink); }
+.tile__tools { margin-left: auto; display: inline-flex; align-items: center; gap: 0.3rem; }
+
+/* Segmented control — the reference's period pills. */
+.seg { display: inline-flex; background: var(--dash-surface-2); border-radius: 999px; padding: 2px; }
+.seg__btn {
+  border: 0; cursor: pointer; background: transparent; color: var(--text-soft);
+  font: inherit; font-size: 0.72rem; font-weight: 600;
+  padding: 0.25rem 0.6rem; border-radius: 999px;
+  transition: background var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+}
+.seg__btn[aria-pressed="true"] { background: var(--bg-invert); color: var(--text-invert); }
+
+.tile__ghost {
+  display: grid; place-items: center; width: 1.7rem; height: 1.7rem;
+  border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--dash-surface-2); color: var(--text-soft);
+}
+.tile__ghost:hover { color: var(--text); }
+.tile__ghost svg { width: 0.9rem; height: 0.9rem; }
+
+/* ---- KPI tile ----------------------------------------------------------- */
+.kpi { display: flex; align-items: flex-start; gap: 0.7rem; }
+.kpi__icon {
+  flex: none; display: grid; place-items: center;
+  width: 2.1rem; height: 2.1rem; border-radius: 10px;
+  background: var(--dash-surface-2); color: var(--accent-ink);
+}
+.kpi__icon svg { width: 1rem; height: 1rem; }
+.kpi__val {
+  margin: 0.1rem 0 0; font-family: var(--font-display);
+  font-size: var(--step-2); font-weight: 500; line-height: 1;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+}
+.kpi__foot { margin: 0.2rem 0 0; font-size: 0.74rem; color: var(--text-soft); }
+
+/* ---- Shared viz chrome -------------------------------------------------- */
+.viz-wrap { position: relative; }
+.viz-empty { margin: auto 0; text-align: center; font-size: 0.82rem; color: var(--text-soft); }
+.viz-grid { stroke: var(--viz-grid); stroke-width: 1; }
+.viz-axis { fill: var(--text-faint); font-size: 10px; font-family: var(--font-body); }
+
+.viz-tip {
+  position: absolute; transform: translate(-50%, -140%);
+  background: var(--bg-invert); color: var(--text-invert);
+  font-size: 0.72rem; padding: 0.3rem 0.55rem; border-radius: 6px;
+  white-space: nowrap; pointer-events: none; z-index: 2;
+}
+.viz-tip--bar { top: -0.25rem; right: 0; left: auto; transform: none; }
+
+/* Gauge */
+.viz-gauge { display: grid; justify-items: center; }
+.viz-gauge svg { width: 100%; max-width: 9.5rem; }
+.viz-gauge__track { fill: none; stroke: var(--viz-track); stroke-width: 12; }
+.viz-gauge__fill {
+  fill: none; stroke: var(--viz-1); stroke-width: 12; stroke-linecap: round;
+  transition: stroke-dasharray var(--dur-3) var(--ease-rise);
+}
+.viz-gauge__val {
+  fill: var(--text); font-family: var(--font-display); font-size: 26px; font-weight: 500;
+  text-anchor: middle; font-variant-numeric: tabular-nums;
+}
+.viz-gauge__lab { fill: var(--text-soft); font-size: 10px; text-anchor: middle; font-family: var(--font-body); }
+.viz-gauge__cap { margin: 0.5rem 0 0; font-size: 0.76rem; color: var(--text-soft); text-align: center; }
+
+/* Trend line */
+.viz-line { fill: none; stroke: var(--viz-1); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.viz-area { fill: url(#vizFade); }
+.viz-dot { fill: var(--dash-surface); stroke: var(--viz-1); stroke-width: 2; cursor: pointer; transition: r var(--dur-1) var(--ease-out); }
+.viz-callout { fill: var(--bg-invert); }
+.viz-callout__t { fill: var(--text-invert); font-size: 10px; font-weight: 600; font-family: var(--font-body); }
+
+/* Bars */
+.viz-bars { display: flex; align-items: flex-end; gap: 0.4rem; height: 9rem; }
+.viz-bars__col { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100%; }
+.viz-bars__track { flex: 1; display: flex; align-items: flex-end; }
+/* 4px rounded data-end, square where it meets the baseline. */
+.viz-bars__bar {
+  width: 100%; border-radius: 4px 4px 2px 2px;
+  background: var(--viz-1);
+  transition: height var(--dur-3) var(--ease-rise), background var(--dur-1) var(--ease-out);
+}
+.viz-bars__bar.is-current { background: var(--viz-2); box-shadow: inset 0 0 0 2px var(--dash-surface); }
+.viz-bars__col:hover .viz-bars__bar { background: color-mix(in oklab, var(--viz-1) 78%, var(--c-nightfall)); }
+.viz-bars__val {
+  position: absolute; left: 50%; top: -1.15rem; transform: translateX(-50%);
+  font-size: 0.66rem; font-weight: 700; color: var(--text); white-space: nowrap;
+}
+.viz-bars__bar { position: relative; }
+.viz-bars__lab { margin-top: 0.35rem; font-size: 0.66rem; color: var(--text-faint); text-align: center; }
+
+/* Heatmap */
+.viz-heat__grid { display: grid; gap: 3px; align-items: center; }
+.viz-heat__col, .viz-heat__row { font-size: 0.64rem; color: var(--text-faint); }
+.viz-heat__col { text-align: center; }
+.viz-heat__row { text-align: left; padding-right: 0.4rem; }
+.viz-heat__cell { aspect-ratio: 1; border-radius: 3px; display: block; }
+.viz-c0 { background: var(--viz-c0); }
+.viz-c1 { background: var(--viz-c1); }
+.viz-c2 { background: var(--viz-c2); }
+.viz-c3 { background: var(--viz-c3); }
+.viz-c4 { background: var(--viz-c4); }
+.viz-heat__key { display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; margin-top: 0.8rem; }
+.viz-heat__keyitem { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.66rem; color: var(--text-soft); }
+.viz-heat__sw { width: 0.65rem; height: 0.65rem; border-radius: 2px; }
+
+/* Meter */
+.viz-meter__track { height: 0.55rem; border-radius: 999px; background: var(--viz-track); overflow: hidden; }
+.viz-meter__fill { height: 100%; border-radius: 999px; background: var(--viz-1); transition: width var(--dur-3) var(--ease-rise); }
+.viz-meter__foot { display: flex; justify-content: space-between; margin-top: 0.4rem; font-size: 0.72rem; color: var(--text-soft); }
+
+/* ---- Feature tile (the reference's promo card) --------------------------- */
+.promo {
+  position: relative; overflow: hidden;
+  border-radius: var(--dash-radius); padding: 1rem;
+  background: linear-gradient(150deg, var(--c-firmament), var(--c-nightfall) 60%, var(--c-nightfall-2));
+  color: var(--text-invert);
+  display: flex; flex-direction: column; min-height: 100%;
+}
+.promo::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(80% 60% at 85% 0%, rgba(230,182,92,0.22), transparent 62%);
+}
+.promo > * { position: relative; z-index: 1; }
