@@ -74,9 +74,14 @@ export default function Header() {
                   {nav.map((item) => (
                     <li key={item.href}><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a></li>
                   ))}
-                  <li><a href="/login">Log in</a></li>
-                  <li><a href="/register">Register</a></li>
                 </ul>
+                {/* Below 40rem the gold auth pill stands down (it pushed Menu
+                    off the bar), so these are the only Log in / Register on a
+                    phone — they get to be real buttons, not another list row. */}
+                <div className="menu__auth">
+                  <a className="menu__btn menu__btn--primary" href="/register">Create an account</a>
+                  <a className="menu__btn" href="/login">Log in</a>
+                </div>
               </div>
             </details>
           </div>

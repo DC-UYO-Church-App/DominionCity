@@ -6,6 +6,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { config } from '../config';
 import { replyWithError } from '../utils/apiError';
+import { buildStoredFilename } from '../utils/multipart';
 
 export class EventController {
   static async createEvent(request: AuthenticatedRequest, reply: FastifyReply) {
@@ -26,8 +27,7 @@ export class EventController {
               continue;
             }
             await fs.mkdir(config.upload.dir, { recursive: true });
-            const safeName = part.filename.replace(/[^a-zA-Z0-9._-]/g, '_');
-            const filename = `${request.user!.id}-${Date.now()}-${safeName}`;
+            const filename = buildStoredFilename(request.user!.id, part.filename, part.mimetype);
             const filePath = path.join(config.upload.dir, filename);
             const buffer = await part.toBuffer();
             await fs.writeFile(filePath, buffer);
@@ -123,8 +123,7 @@ export class EventController {
               continue;
             }
             await fs.mkdir(config.upload.dir, { recursive: true });
-            const safeName = part.filename.replace(/[^a-zA-Z0-9._-]/g, '_');
-            const filename = `${request.user!.id}-${Date.now()}-${safeName}`;
+            const filename = buildStoredFilename(request.user!.id, part.filename, part.mimetype);
             const filePath = path.join(config.upload.dir, filename);
             const buffer = await part.toBuffer();
             await fs.writeFile(filePath, buffer);

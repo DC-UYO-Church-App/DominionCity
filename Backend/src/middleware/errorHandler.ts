@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply, FastifyError } from 'fastify';
+import { config } from '../config';
 
 export const errorHandler = (
   error: FastifyError,
@@ -49,9 +50,16 @@ export const errorHandler = (
     });
   }
 
-  // Default error (unexpected server-side failures)
-  return reply.status(statusCode >= 500 ? statusCode : 500).send({
-    error: 'Internal server error',
-    message: error.message,
-  });
+  // Default error (unexpected server-side failures).
+  //
+  // The cause is withheld in production: these are largely Postgres errors,
+  // whose messages name tables, columns and constraints. utils/apiError.ts
+  // already guards this way; the global handler did not, so anything thrown
+  // outside a controller's own try/catch leaked internals to the client.
+  const body: { error: string; message?: string } = { error: 'Internal server error' };
+  if (config.server.nodeEnv !== 'production') {
+    body.message = error.message;
+  }
+
+  return reply.status(statusCode >= 500 ? statusCode : 500).send(body);
 };

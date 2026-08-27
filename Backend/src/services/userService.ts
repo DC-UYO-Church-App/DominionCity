@@ -2,6 +2,27 @@ import { query } from '../config/database';
 import { User, UserRole } from '../types';
 import { hashPassword, comparePassword } from '../utils/password';
 
+/**
+ * The only columns `updateUser` will write, mapped from their API field names.
+ *
+ * `password` is absent by design — it is written solely by
+ * PasswordResetService, which hashes first. `email` is absent because changing
+ * it needs a re-verification flow that does not exist yet.
+ */
+const UPDATABLE_COLUMNS: Record<string, string> = {
+  firstName: 'first_name',
+  lastName: 'last_name',
+  phoneNumber: 'phone_number',
+  role: 'role',
+  departmentId: 'department_id',
+  cellGroupId: 'cell_group_id',
+  dateOfBirth: 'date_of_birth',
+  address: 'address',
+  isFirstTimer: 'is_first_timer',
+  profileImage: 'profile_image',
+  isActive: 'is_active',
+};
+
 export class UserService {
   static async createUser(userData: {
     email: string;
@@ -161,8 +182,14 @@ export class UserService {
     let paramCount = 1;
 
     Object.entries(updates).forEach(([key, value]) => {
-      if (value !== undefined) {
-        fields.push(`${this.camelToSnake(key)} = $${paramCount}`);
+      // The column name is looked up, never derived from the key. Deriving it
+      // put caller-controlled text directly into the SET clause: a key like
+      // "address = (select password from users where role='super_admin'), name"
+      // built a valid statement that copied another user's hash into a field
+      // the attacker could then read back. Unknown keys are ignored.
+      const column = UPDATABLE_COLUMNS[key];
+      if (column && value !== undefined) {
+        fields.push(`${column} = $${paramCount}`);
         values.push(value);
         paramCount++;
       }
@@ -245,10 +272,6 @@ export class UserService {
     );
 
     return result.rowCount !== null && result.rowCount > 0;
-  }
-
-  private static camelToSnake(str: string): string {
-    return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
   }
 
   private static mapDbRowToUser(row: any): Omit<User, 'password'> {

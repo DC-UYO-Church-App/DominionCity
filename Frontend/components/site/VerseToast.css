@@ -1,0 +1,321 @@
+/* Verse cloud — the scripture that hangs at the edge of every public page.
+   Sits just under the fixed header (z-index 50) so the nav and its mobile
+   drawer always win. Desktop: a cloud on a gold cord down the right-hand
+   margin. Small screens: it unhooks and docks to the bottom of the viewport. */
+
+.verse-cloud {
+  --cloud-top:    #1B2455;   /* matches the first stop of the body gradient  */
+  --cloud-bottom: #0A0E28;   /* ...and the last, so the puffs read seamless  */
+  --cloud-glow:   rgba(230, 182, 92, 0.34);
+
+  position: fixed;
+  right: clamp(0.85rem, 2vw, 1.75rem);
+  top: 50%;
+  z-index: 45;
+  width: clamp(16.5rem, 23vw, 20.5rem);
+  transform: translateY(-50%);
+  animation: verse-bob 7s var(--ease-out) infinite;
+  /* The rim and glow are drop-shadows rather than borders so they trace the
+     merged silhouette of body + lobes — one cloud, not a card wearing bubbles. */
+  filter:
+    drop-shadow(0 0 1px rgba(230, 182, 92, 0.55))
+    drop-shadow(0 0 20px rgba(230, 182, 92, 0.16))
+    drop-shadow(0 26px 44px rgba(14, 19, 48, 0.28));
+}
+
+/* The cord it hangs from — a hairline of gold fading up into the page. */
+.verse-cloud::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.35rem);
+  width: 1px;
+  height: 36vh;
+  background: linear-gradient(to bottom, transparent, var(--accent) 92%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ---- Cloud lobes -------------------------------------------------------- */
+/* One element per edge; each circle is repeated with spread-adjusted
+   box-shadows, so every lobe is exactly the same flat colour as the body it
+   bulges out of and no seam is ever visible. Decorative only. */
+.verse-cloud__puffs {
+  position: absolute; inset: 0; pointer-events: none;
+  /* Shares the body's entrance so the whole cloud arrives as one shape. */
+  animation: verse-cloud-in var(--dur-3) var(--ease-rise) both;
+}
+
+.verse-cloud__puffs::before,
+.verse-cloud__puffs::after { content: ""; position: absolute; border-radius: 50%; }
+
+.verse-cloud__puffs::before {
+  top: -1.15rem; left: 9%;
+  width: 3.7rem; height: 3.7rem;
+  background: var(--cloud-top);
+  box-shadow:
+    4.3rem 0.3rem 0 -0.3rem var(--cloud-top),
+    7.9rem -0.3rem 0 -0.8rem var(--cloud-top);
+}
+
+.verse-cloud__puffs::after {
+  bottom: -0.7rem; left: 21%;
+  width: 3rem; height: 3rem;
+  background: var(--cloud-bottom);
+  box-shadow: 5.6rem 0.3rem 0 -0.55rem var(--cloud-bottom);
+}
+
+/* ---- Body --------------------------------------------------------------- */
+.verse-cloud__body {
+  position: relative;
+  z-index: 1;
+  padding: var(--space-sm) var(--space-sm) 0.85rem;
+  border-radius: 30px 30px 30px 30px / 26px 26px 26px 26px;
+  background: linear-gradient(165deg, var(--cloud-top) 0%, #101740 55%, var(--cloud-bottom) 100%);
+  color: var(--text-invert);
+  animation: verse-cloud-in var(--dur-3) var(--ease-rise) both;
+}
+
+/* A whisper of dawn light across the top of the cloud. */
+.verse-cloud__body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(120% 70% at 20% 0%, rgba(230, 182, 92, 0.16), transparent 62%);
+  pointer-events: none;
+}
+
+/* ---- Head --------------------------------------------------------------- */
+.verse-cloud__head {
+  position: relative;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  margin-bottom: 0.7rem;
+}
+
+.verse-cloud__eyebrow {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  font-family: var(--font-body);
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent);
+}
+
+.verse-cloud__spark {
+  font-size: 0.8rem; line-height: 1;
+  animation: verse-twinkle 3.2s ease-in-out infinite;
+}
+
+.verse-cloud__close {
+  flex: none;
+  width: 1.6rem; height: 1.6rem;
+  display: grid; place-items: center;
+  font-size: 1.05rem; line-height: 1;
+  color: var(--text-invert-soft);
+  background: rgba(247, 242, 231, 0.07);
+  border: 1px solid var(--line-invert);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out);
+}
+.verse-cloud__close:hover { color: var(--text-invert); background: rgba(247, 242, 231, 0.16); }
+
+/* ---- The passage -------------------------------------------------------- */
+.verse-cloud__quote {
+  position: relative;
+  margin: 0;
+  padding-left: 0.15rem;
+  min-height: 7.5rem;              /* holds its height as verses swap */
+  animation: verse-swap var(--dur-2) var(--ease-rise) both;
+}
+
+/* Oversized opening quote, set behind the text. */
+.verse-cloud__quote::before {
+  content: "\201C";
+  position: absolute;
+  top: -1.6rem; left: -0.5rem;
+  font-family: var(--font-display);
+  font-size: 4.5rem; line-height: 1;
+  color: var(--accent);
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.verse-cloud__text {
+  position: relative;
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+  font-weight: 450;
+  line-height: 1.45;
+  color: var(--text-invert);
+  text-wrap: pretty;
+}
+
+.verse-cloud__ref {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.72rem; font-weight: 700; font-style: normal;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent);
+}
+.verse-cloud__ref::before { content: "— "; opacity: 0.6; }
+
+/* ---- Foot: the four-second timer + manual advance ----------------------- */
+.verse-cloud__foot {
+  display: flex; align-items: center; gap: 0.75rem;
+  margin-top: 0.85rem; padding-top: 0.7rem;
+  border-top: 1px solid var(--line-invert);
+}
+
+.verse-cloud__timer {
+  flex: 1 1 auto; height: 2px; border-radius: 2px;
+  background: rgba(247, 242, 231, 0.14);
+  overflow: hidden;
+}
+
+.verse-cloud__timer-fill {
+  display: block; height: 100%;
+  background: linear-gradient(to right, var(--accent-brass), var(--accent));
+  transform-origin: left center;
+  animation: verse-tick linear both;   /* duration is set inline (4s) */
+}
+.verse-cloud.is-paused .verse-cloud__timer-fill { animation-play-state: paused; }
+.verse-cloud.is-still .verse-cloud__timer { visibility: hidden; }
+
+.verse-cloud__next {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.2rem 0.1rem;
+  font-family: var(--font-body);
+  font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-invert-soft);
+  background: none; border: 0; cursor: pointer;
+  transition: color var(--dur-1) var(--ease-out);
+}
+.verse-cloud__next:hover { color: var(--accent); }
+.verse-cloud__next span { transition: transform var(--dur-1) var(--ease-out); }
+.verse-cloud__next:hover span { transform: translateX(3px); }
+
+/* ---- Collapsed tab ------------------------------------------------------ */
+.verse-cloud__reopen {
+  position: fixed;
+  right: 0; top: 50%;
+  z-index: 45;
+  transform: translateY(-50%);
+  display: inline-flex; flex-direction: column; align-items: center; gap: 0.35rem;
+  padding: 0.85rem 0.55rem;
+  font-family: var(--font-body);
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--c-nightfall);
+  background: linear-gradient(160deg, var(--accent), var(--accent-brass));
+  border: 0; border-radius: 14px 0 0 14px;
+  cursor: pointer;
+  box-shadow: 0 12px 32px -12px rgba(14, 19, 48, 0.5);
+  transition: padding-right var(--dur-1) var(--ease-out);
+}
+.verse-cloud__reopen:hover { padding-right: 0.9rem; }
+.verse-cloud__reopen-label { writing-mode: vertical-rl; }
+
+/* ---- Focus (matches the site-wide ring) --------------------------------- */
+.verse-cloud button:focus-visible,
+.verse-cloud__reopen:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- Motion ------------------------------------------------------------- */
+@keyframes verse-bob {
+  0%, 100% { transform: translateY(calc(-50% - 6px)); }
+  50%      { transform: translateY(calc(-50% + 6px)); }
+}
+
+@keyframes verse-cloud-in {
+  from { opacity: 0; transform: translateX(26px) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes verse-swap {
+  from { opacity: 0; transform: translateY(12px); filter: blur(3px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes verse-tick {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes verse-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.82); }
+}
+
+/* ---- Docked layout for narrow screens -----------------------------------
+   Here the cloud sits over the content instead of out in the margin, so it is
+   deliberately smaller than the desktop card — tighter padding, smaller type,
+   one lobe instead of five — and it tucks itself away while the page scrolls
+   (see `is-tucked`), leaving only its crown peeking above the bottom edge. */
+@media (max-width: 760px) {
+  .verse-cloud {
+    right: 0.7rem; left: 0.7rem;
+    top: auto; bottom: max(0.75rem, env(safe-area-inset-bottom));
+    /* Hugs the right edge on wide-but-docked screens (small tablets); on a
+       phone the max-width is wider than the gap, so it simply fills it. */
+    width: auto; max-width: 24rem; margin-inline: auto 0;
+    transform: none;
+    animation: none;
+    transition: transform var(--dur-2) var(--ease-rise);
+  }
+  .verse-cloud::before { display: none; }              /* no cord when docked */
+  .verse-cloud__body,
+  .verse-cloud__puffs { animation-name: verse-cloud-in-up; }
+  .verse-cloud__body { padding: 0.7rem 0.9rem 0.6rem; border-radius: 24px / 21px; overflow: hidden; }
+  .verse-cloud__head { margin-bottom: 0.45rem; }
+  .verse-cloud__eyebrow { font-size: 0.63rem; }
+  .verse-cloud__quote { min-height: 4rem; }    /* docked card stays steadier */
+  .verse-cloud__quote::before { font-size: 3.4rem; top: -1.15rem; }
+  .verse-cloud__text { font-size: 0.97rem; line-height: 1.4; margin-bottom: 0.45rem; }
+  .verse-cloud__ref { font-size: 0.66rem; }
+
+  /* The footer costs a whole row of a phone's screen, so it dissolves: the
+     timer becomes a hairline along the bottom edge of the cloud and Next
+     tucks into the corner beside the reference. */
+  .verse-cloud__foot { display: contents; }
+  .verse-cloud__timer {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 3px; border-radius: 0; background: rgba(247, 242, 231, 0.1);
+  }
+  .verse-cloud__next { position: absolute; right: 0.9rem; bottom: 0.5rem; }
+  .verse-cloud__puffs::before { top: -0.7rem; left: 6%; width: 2.7rem; height: 2.7rem; }
+  .verse-cloud__puffs::after { display: none; }
+
+  /* Out of the reader's way while the page is moving. The crown stays in view
+     so it still reads as the verse cloud waiting, not as something that left. */
+  .verse-cloud.is-tucked {
+    transform: translateY(calc(100% - 2.5rem));
+    cursor: pointer;
+  }
+
+  @keyframes verse-cloud-in-up {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: none; }
+  }
+}
+
+/* ---- Stillness ---------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .verse-cloud,
+  .verse-cloud__body,
+  .verse-cloud__puffs,
+  .verse-cloud__quote,
+  .verse-cloud__spark,
+  .verse-cloud__timer-fill { animation: none !important; }
+  .verse-cloud { transition: none; }
+}
+/* Keep the centred offset the bob animation was supplying — but not on the
+   docked layout above, which is positioned from the bottom instead. */
+@media (prefers-reduced-motion: reduce) and (min-width: 761px) {
+  .verse-cloud { transform: translateY(-50%); }
+}

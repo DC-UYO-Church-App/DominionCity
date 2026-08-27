@@ -1,0 +1,684 @@
+/* ============================================================================
+   DOMINION CITY — DASHBOARD DESIGN SYSTEM
+   ----------------------------------------------------------------------------
+   The member area used to be a generic blue SaaS admin panel (#EFF6FF canvas,
+   #1E5EC8 actions) bolted onto a warm, editorial church site. This layer makes
+   the two one product: the marketing site's tokens, type and rhythm, arranged
+   into the patterns that member-facing church software actually needs.
+
+   THE CONCEPT — "the order of service".
+   A church bulletin, not an analytics console. Members do not come here to read
+   KPIs about themselves; they come to find out what is next, who they belong to
+   and what to do about it. So the page reads top to bottom as an order of
+   service — Today, Your rhythm, Your people, Keep growing — on cream paper,
+   with one deep navy rail holding the room together and gold used the way a
+   church uses gold: sparingly, on the thing that matters.
+
+   Borrowed deliberately:
+     · Planning Center / Church Center — the next service is the spine of the
+       product; members see next steps, not dashboards of themselves.
+     · Breeze ChMS — people first: names and faces outrank numbers.
+     · Pushpay & Tithe.ly — giving reads like considered finance: big, calm,
+       tabular figures with an honest "last gift" instead of a growth arrow.
+     · Subsplash — media as the reward at the bottom of the page, never the top.
+
+   HOW TO USE IT
+   Structural skin lives in `dash-*` classes; one-off layout stays in Tailwind
+   utilities alongside them. Converting a legacy screen means swapping its
+   white/blue card markup for `.dash-card` + `.dash-section`, not rewriting it.
+   ========================================================================== */
+
+/* ---- 1. Scope & canvas --------------------------------------------------
+   The tokens live on :root, NOT on .dash. Radix renders sheets, dropdowns and
+   dialogs through a portal into <body> — outside .dash — so anything scoped to
+   .dash is undefined in them. A gradient built on undefined custom properties
+   is invalid, and an invalid background computes to transparent: that is
+   exactly how the drawer lost its skin. Tokens must outlive their scope. */
+:root {
+  /* Surfaces sit a touch above the cream page rather than being pure white —
+     paper on paper, so hairlines do the separating instead of shadows. */
+  --dash-surface:      #FDFBF5;
+  --dash-surface-2:    #F3EDDE;
+  --dash-rail:         var(--c-nightfall);
+  --dash-rail-2:       var(--c-nightfall-2);
+  --dash-radius:       14px;
+  --dash-radius-lg:    20px;
+  --dash-rail-w:       17rem;
+  --dash-gutter:       clamp(1rem, 1rem + 1.2vw, 2.25rem);
+}
+
+.dash {
+  min-height: 100svh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+/* ---- 2. Shell ----------------------------------------------------------- */
+.dash__shell { display: flex; min-height: 100svh; }
+
+.dash__main {
+  flex: 1 1 auto;
+  min-width: 0;                        /* lets long tables/rails scroll, not push */
+  display: flex; flex-direction: column;
+}
+
+.dash__content {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 78rem;
+  margin-inline: auto;
+  padding: var(--dash-gutter);
+  /* Room for the floating tab bar on phones; desktop gets the rail instead. */
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+}
+@media (min-width: 1024px) { .dash__content { padding-bottom: var(--space-xl); } }
+
+/* ---- 3. The rail (desktop navigation) -----------------------------------
+   The old header offered four links and hid Attendance, Sermons, Cell Groups
+   and Profile behind a mobile-only drawer — unreachable on a laptop. Every
+   destination now lives in one persistent, grouped rail. */
+/* `.dash-rail` is SKIN ONLY and sets no `display` — it is worn both by the
+   desktop <aside> and by the phone drawer, which have opposite display rules.
+   Whoever wears it adds one of the two layout modifiers below. */
+.dash-rail {
+  background: linear-gradient(180deg, var(--dash-rail) 0%, var(--dash-rail-2) 100%);
+  color: var(--text-invert);
+  overscroll-behavior: contain;
+}
+
+/* Desktop sidebar. */
+.dash-rail--aside {
+  display: none;
+  position: sticky; top: 0;
+  flex: 0 0 var(--dash-rail-w);
+  height: 100svh;
+  padding: var(--space-md) 0.9rem var(--space-sm);
+  overflow-y: auto;
+}
+@media (min-width: 1024px) { .dash-rail--aside { display: flex; flex-direction: column; } }
+
+/* Phone/tablet drawer. Compound selectors (0,2,0) so these beat the sheet's
+   own single-class utilities — `bg-background`, `p-6` — whichever order the
+   bundler happens to emit the two stylesheets in. Nothing here may depend on
+   source order, because the drawer's markup is not ours. */
+.dash-rail.dash-rail--drawer {
+  display: flex; flex-direction: column;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;                    /* the inner list does the scrolling */
+  border-right: 1px solid var(--line-invert);
+}
+/* NB: there is deliberately no `display: none` here for desktop. Hiding the
+   panel would leave Radix's overlay behind — dimming and click-blocking a page
+   that already has its rail. The drawer is closed by state instead; see the
+   matchMedia effect in dashboard-layout.tsx. */
+
+.dash-rail__brand {
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 0.35rem 0.6rem var(--space-md);
+  text-decoration: none; color: inherit;
+}
+.dash-rail__brand img { height: 2rem; width: auto; }
+.dash-rail__wordmark { display: grid; line-height: 1.15; }
+.dash-rail__name {
+  font-family: var(--font-display); font-size: 1.05rem; font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.dash-rail__sub {
+  font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--accent);
+}
+
+.dash-rail__group { margin-bottom: var(--space-sm); }
+.dash-rail__label {
+  padding: 0 0.75rem 0.5rem;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--text-invert-soft); opacity: 0.75;
+}
+
+.dash-rail__link {
+  position: relative;
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.62rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.9rem; font-weight: 500;
+  color: var(--text-invert-soft);
+  text-decoration: none;
+  transition: color var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out);
+}
+.dash-rail__link:hover { color: var(--text-invert); background: rgba(247, 242, 231, 0.07); }
+.dash-rail__link svg { width: 1.05rem; height: 1.05rem; flex: none; opacity: 0.85; }
+
+/* Active: gold text and a struck gold bar in the gutter — the same gesture the
+   site uses to mark the current page, so the two halves feel authored once. */
+.dash-rail__link[aria-current="page"] {
+  color: var(--text-invert);
+  background: rgba(247, 242, 231, 0.1);
+  font-weight: 600;
+}
+.dash-rail__link[aria-current="page"]::before {
+  content: ""; position: absolute; left: -0.9rem; top: 50%;
+  width: 3px; height: 1.4rem; margin-top: -0.7rem;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
+}
+.dash-rail__link[aria-current="page"] svg { opacity: 1; color: var(--accent); }
+
+.dash-rail__foot { margin-top: auto; padding-top: var(--space-sm); }
+
+/* ---- 4. Top bar --------------------------------------------------------- */
+.dash-top {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: 0.75rem;
+  min-height: 4rem;
+  padding-inline: var(--dash-gutter);
+  background: color-mix(in oklab, var(--bg) 86%, transparent);
+  -webkit-backdrop-filter: saturate(1.4) blur(12px);
+  backdrop-filter: saturate(1.4) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.dash-top__title {
+  font-family: var(--font-display);
+  font-size: var(--step-1); font-weight: 500; letter-spacing: -0.012em;
+  margin: 0; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dash-top__spacer { flex: 1 1 auto; }
+
+/* `.dash-icon-btn` sets `display`, so pairing it with Tailwind's `lg:hidden`
+   is a same-specificity race decided by bundle order. This compound rule wins
+   outright. */
+.dash-icon-btn.dash-only-mobile { display: inline-grid; }
+@media (min-width: 1024px) { .dash-icon-btn.dash-only-mobile { display: none; } }
+
+.dash-icon-btn {
+  position: relative;
+  display: inline-grid; place-items: center;
+  width: 2.4rem; height: 2.4rem; flex: none;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  color: var(--text-soft);
+  background: transparent;
+  cursor: pointer;
+  transition: color var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out),
+              border-color var(--dur-1) var(--ease-out);
+}
+.dash-icon-btn:hover { color: var(--text); background: var(--dash-surface-2); border-color: var(--line); }
+.dash-icon-btn__dot {
+  position: absolute; top: 0.45rem; right: 0.5rem;
+  width: 0.45rem; height: 0.45rem; border-radius: 50%;
+  background: var(--accent-warm);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+/* ---- 5. Surfaces -------------------------------------------------------- */
+.dash-card {
+  background: var(--dash-surface);
+  border: 1px solid var(--line);
+  border-radius: var(--dash-radius);
+  padding: var(--space-sm);
+}
+.dash-card--flush { padding: 0; overflow: hidden; }
+.dash-card--link {
+  display: block; text-decoration: none; color: inherit;
+  transition: border-color var(--dur-2) var(--ease-out),
+              transform var(--dur-2) var(--ease-rise),
+              box-shadow var(--dur-2) var(--ease-out);
+}
+.dash-card--link:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--accent-brass) 55%, var(--line));
+  box-shadow: var(--shadow-lift);
+}
+
+/* The one deep surface on the page — reserved for what is next. */
+.dash-panel {
+  position: relative; overflow: hidden;
+  border-radius: var(--dash-radius-lg);
+  background: linear-gradient(150deg, var(--c-firmament) 0%, var(--c-nightfall) 55%, var(--c-nightfall-2) 100%);
+  color: var(--text-invert);
+  padding: var(--space-md);
+}
+.dash-panel::after {          /* first light across the top-left corner */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(90% 60% at 12% 0%, rgba(230, 182, 92, 0.18), transparent 60%);
+}
+.dash-panel > * { position: relative; z-index: 1; }
+
+/* ---- 6. Section headings ------------------------------------------------ */
+.dash-section { margin-block: var(--space-lg) var(--space-sm); }
+.dash-section:first-child { margin-top: 0; }
+.dash-section__row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.dash-section__title {
+  font-family: var(--font-display);
+  font-size: var(--step-2); font-weight: 460; letter-spacing: -0.014em;
+  margin: 0; color: var(--text);
+}
+.dash-section__note { margin: 0.25rem 0 0; color: var(--text-soft); font-size: var(--step--1); }
+.dash-section__link {
+  flex: none;
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent-ink); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 0.35rem;
+}
+.dash-section__link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.dash-section__link svg { width: 0.9rem; height: 0.9rem; transition: transform var(--dur-1) var(--ease-out); }
+.dash-section__link:hover svg { transform: translateX(2px); }
+
+/* Small caps label used above figures and inside cards. */
+.dash-label {
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--text-soft);
+}
+.dash-panel .dash-label { color: var(--accent); }
+
+/* ---- 7. Figures ---------------------------------------------------------
+   Set like the site's service times: display serif, tabular, no growth arrows.
+   A member's attendance is not a KPI and must never be dressed as one. */
+.dash-figure {
+  font-family: var(--font-display);
+  font-size: var(--step-3); font-weight: 480; line-height: 1;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+  color: var(--text);
+}
+.dash-figure--sm { font-size: var(--step-2); }
+/* For stats whose value is a name rather than a number: smaller, and allowed
+   to wrap to a second line instead of truncating. */
+.dash-figure--text {
+  font-size: var(--step-1); line-height: 1.2; letter-spacing: -0.01em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.dash-panel .dash-figure { color: var(--text-invert); }
+.dash-figure__unit { font-size: 0.5em; font-weight: 600; margin-left: 0.1em; color: var(--text-soft); }
+
+.dash-stat { display: grid; gap: 0.4rem; align-content: start; }
+.dash-stat__foot { font-size: 0.78rem; color: var(--text-soft); margin: 0; }
+
+/* A quiet strip of figures divided by hairlines rather than four boxed tiles. */
+.dash-strip {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  background: var(--dash-surface);
+  border: 1px solid var(--line);
+  border-radius: var(--dash-radius);
+  overflow: hidden;
+}
+.dash-strip > * { padding: var(--space-sm); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.dash-strip > :nth-child(-n + 2) { border-top: 0; }
+.dash-strip > :nth-child(2n + 1) { border-left: 0; }
+@media (min-width: 900px) {
+  .dash-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .dash-strip > * { border-top: 0; border-left: 1px solid var(--line); }
+  .dash-strip > :first-child { border-left: 0; }
+}
+
+/* ---- 8. Rows & lists ---------------------------------------------------- */
+.dash-list { list-style: none; margin: 0; padding: 0; }
+.dash-row {
+  display: flex; align-items: flex-start; gap: 0.85rem;
+  padding: 0.85rem var(--space-sm);
+  border-top: 1px solid var(--line);
+  text-decoration: none; color: inherit;
+}
+.dash-list > :first-child .dash-row, .dash-row:first-child { border-top: 0; }
+a.dash-row:hover { background: var(--dash-surface-2); }
+.dash-row__icon {
+  flex: none; display: grid; place-items: center;
+  width: 2.25rem; height: 2.25rem; border-radius: 999px;
+  background: var(--dash-surface-2); color: var(--accent-ink);
+}
+.dash-row__icon svg { width: 1.05rem; height: 1.05rem; }
+.dash-row__body { min-width: 0; flex: 1 1 auto; }
+.dash-row__title { margin: 0; font-weight: 600; font-size: 0.95rem; line-height: 1.35; }
+.dash-row__meta { margin: 0.15rem 0 0; font-size: 0.82rem; color: var(--text-soft); }
+
+/* Date chip — the bulletin's calendar tear-off. */
+.dash-date {
+  flex: none; width: 3.1rem; padding: 0.4rem 0;
+  text-align: center; border-radius: 10px;
+  background: var(--dash-surface-2); border: 1px solid var(--line);
+}
+.dash-date__m {
+  display: block; font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-ink);
+}
+.dash-date__d {
+  display: block; font-family: var(--font-display);
+  font-size: 1.35rem; line-height: 1.1; font-weight: 500; font-variant-numeric: tabular-nums;
+}
+
+/* ---- 9. Badges, buttons, links ------------------------------------------ */
+.dash-badge {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.22rem 0.6rem; border-radius: 999px;
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--dash-surface-2); color: var(--text-soft);
+  border: 1px solid var(--line);
+}
+.dash-badge--gold { background: color-mix(in oklab, var(--accent) 22%, transparent); color: var(--accent-ink); border-color: color-mix(in oklab, var(--accent-brass) 40%, transparent); }
+.dash-badge--live { background: color-mix(in oklab, var(--accent-warm) 18%, transparent); color: #9C4322; border-color: color-mix(in oklab, var(--accent-warm) 40%, transparent); }
+.dash-panel .dash-badge { background: rgba(247, 242, 231, 0.12); color: var(--text-invert); border-color: var(--line-invert); }
+
+.dash-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+  min-height: 2.75rem; padding: 0.55rem 1.15rem;
+  border-radius: 999px; border: 1px solid var(--line);
+  font-family: var(--font-body); font-size: 0.88rem; font-weight: 700;
+  color: var(--text); background: var(--dash-surface);
+  text-decoration: none; cursor: pointer;
+  transition: background var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out),
+              transform var(--dur-1) var(--ease-out);
+}
+.dash-btn:hover { background: var(--dash-surface-2); }
+.dash-btn:active { transform: translateY(1px); }
+.dash-btn svg { width: 1rem; height: 1rem; }
+.dash-btn--primary {
+  color: var(--c-nightfall); border-color: transparent;
+  background: linear-gradient(160deg, var(--accent), var(--accent-brass));
+  box-shadow: var(--shadow-lift);
+}
+.dash-btn--primary:hover { background: var(--accent); }
+.dash-btn--ink { color: var(--text-invert); background: var(--bg-invert); border-color: transparent; }
+.dash-btn--ink:hover { background: var(--c-firmament); }
+.dash-btn--ghost { background: transparent; border-color: var(--line); }
+.dash-panel .dash-btn--ghost { color: var(--text-invert); border-color: var(--line-invert); }
+.dash-panel .dash-btn--ghost:hover { background: rgba(247, 242, 231, 0.1); }
+
+/* ---- 10. Media ---------------------------------------------------------- */
+.dash-media {
+  position: relative; overflow: hidden;
+  background: var(--dash-surface-2);
+  display: grid; place-items: center;
+}
+.dash-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dash-media__ph { color: color-mix(in oklab, var(--c-nightfall) 22%, transparent); }
+.dash-card--link:hover .dash-media img { transform: scale(1.04); }
+.dash-media img { transition: transform var(--dur-3) var(--ease-rise); }
+
+/* ---- 11. Empty & loading states -----------------------------------------
+   An empty state is a next step, never an apology. */
+.dash-empty {
+  display: grid; justify-items: center; gap: 0.5rem;
+  padding: var(--space-md) var(--space-sm);
+  text-align: center;
+}
+.dash-empty__icon {
+  display: grid; place-items: center;
+  width: 2.75rem; height: 2.75rem; border-radius: 999px;
+  background: var(--dash-surface-2); color: var(--accent-ink);
+}
+.dash-empty__title { margin: 0; font-weight: 600; }
+.dash-empty__note { margin: 0; font-size: 0.85rem; color: var(--text-soft); max-width: 30ch; }
+
+.dash-skeleton {
+  background: linear-gradient(90deg, var(--dash-surface-2) 25%, color-mix(in oklab, var(--dash-surface-2) 60%, var(--bg)) 50%, var(--dash-surface-2) 75%);
+  background-size: 200% 100%;
+  animation: dash-shimmer 1.4s linear infinite;
+  border-radius: 8px;
+}
+@keyframes dash-shimmer { to { background-position: -200% 0; } }
+
+/* ---- 12. Horizontal rails ----------------------------------------------- */
+.dash-rail-x {
+  display: flex; gap: var(--space-sm);
+  overflow-x: auto; scroll-snap-type: x proximity;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none;
+}
+.dash-rail-x::-webkit-scrollbar { display: none; }
+.dash-rail-x > * { scroll-snap-align: start; flex: 0 0 min(17rem, 78vw); }
+
+/* ---- 13. Tab bar (phones) ----------------------------------------------- */
+.dash-tabs {
+  position: fixed; z-index: 40;
+  left: 0.75rem; right: 0.75rem; bottom: max(0.75rem, env(safe-area-inset-bottom));
+  display: flex;
+  padding: 0.3rem;
+  border-radius: 18px;
+  background: linear-gradient(160deg, var(--c-firmament), var(--c-nightfall));
+  box-shadow: 0 18px 40px -18px rgba(14, 19, 48, 0.65);
+}
+@media (min-width: 1024px) { .dash-tabs { display: none; } }
+.dash-tabs__link {
+  flex: 1 1 0; min-width: 0;
+  display: grid; justify-items: center; gap: 0.2rem;
+  padding: 0.55rem 0.2rem;
+  border-radius: 14px;
+  color: var(--text-invert-soft); text-decoration: none;
+  transition: color var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out);
+}
+.dash-tabs__link svg { width: 1.2rem; height: 1.2rem; }
+.dash-tabs__label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.04em; }
+.dash-tabs__link[aria-current="page"] {
+  color: var(--c-nightfall);
+  background: linear-gradient(160deg, var(--accent), var(--accent-brass));
+}
+
+/* ---- 14. Focus ---------------------------------------------------------- */
+.dash :is(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent-ink); outline-offset: 2px; border-radius: 6px;
+}
+.dash-rail :is(a, button):focus-visible,
+.dash-panel :is(a, button):focus-visible,
+.dash-tabs :is(a, button):focus-visible { outline-color: var(--accent); }
+
+/* ---- 15. Migration shim -------------------------------------------------
+   Screens not yet rebuilt still carry the old palette as hardcoded Tailwind
+   arbitrary values. Remapping them here means the whole member area reads as
+   one product today, while screens are converted one at a time. Delete each
+   line as its screens stop using that colour — nothing new should ever be
+   written against these. */
+.dash :is(.text-\[\#1A3A6E\], .text-\[\#0A1F44\], .text-\[\#0a1f44\], .text-\[\#00081e\], .text-\[\#28467b\]) { color: var(--text); }
+.dash :is(.bg-\[\#1A3A6E\], .bg-\[\#0A1F44\], .bg-\[\#0a1f44\]) { background-color: var(--bg-invert); }
+.dash .text-\[\#1E5EC8\] { color: var(--accent-ink); }
+.dash .bg-\[\#1E5EC8\] { background-color: var(--bg-invert); }
+.dash .border-\[\#1E5EC8\] { border-color: var(--accent-ink); }
+.dash .text-\[\#415e94\] { color: var(--text-soft); }
+.dash .bg-\[\#415e94\] { background-color: var(--dash-surface-2); }
+.dash .border-\[\#415e94\] { border-color: var(--line); }
+.dash :is(.bg-\[\#a5c1fe\], .bg-\[\#EFF6FF\]) { background-color: var(--dash-surface-2); }
+.dash :is(.text-\[\#a5c1fe\], .text-\[\#b4c6f4\]) { color: var(--text-invert-soft); }
+/* Legacy cards: white boxes on a cream page read as holes, so they take the
+   same warm surface and hairline the new ones use. */
+.dash .bg-white { background-color: var(--dash-surface); }
+.dash :is(.border-gray-100, .border-slate-200, .border-gray-200) { border-color: var(--line); }
+
+/* ---- 16. Motion --------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .dash *, .dash *::before, .dash *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ============================================================================
+   BENTO DASHBOARD + DATA VISUALISATION
+   ----------------------------------------------------------------------------
+   Colour here was validated, not chosen by eye. The categorical trio was run
+   through the six checks against this surface:
+
+     #3A5BB5 firmament · #C98A2E brass · #0F8F76 sage
+     lightness band PASS · chroma floor PASS · CVD separation PASS
+     (worst adjacent ΔE 10.3 protan / 21.0 normal) · contrast PASS/WARN
+
+   The WARN is on the brass at 2.86:1, which obliges visible relief — so every
+   chart using it ships a legend and direct labels rather than leaning on the
+   fill. Brand navy (#0E1330) is deliberately NOT a mark colour: at L 0.363 it
+   sits below the band and reads as near-black against cream. It stays what it
+   has always been — ink and chrome.
+   ========================================================================== */
+.dash {
+  --viz-1: #3A5BB5;
+  --viz-2: #C98A2E;
+  --viz-3: #0F8F76;
+
+  /* Sequential ramp for magnitude: one hue, monotonically darkening. Step 0 is
+     a neutral, not a pale blue — "no record" is an absence, not a low value. */
+  --viz-c0: #EDE7D8;
+  --viz-c1: #D6DFF3;
+  --viz-c2: #A9BCE8;
+  --viz-c3: #6E8DD6;
+  --viz-c4: #33488F;
+
+  --viz-grid: color-mix(in oklab, var(--c-nightfall) 10%, transparent);
+  --viz-track: color-mix(in oklab, var(--c-nightfall) 7%, transparent);
+}
+
+/* ---- Bento grid --------------------------------------------------------- */
+.bento {
+  display: grid; gap: 0.85rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 60rem) { .bento { grid-template-columns: repeat(12, minmax(0, 1fr)); } }
+
+.bento__cell { grid-column: span 2; }
+@media (min-width: 60rem) {
+  .b-3 { grid-column: span 3; }
+  .b-4 { grid-column: span 4; }
+  .b-5 { grid-column: span 5; }
+  .b-6 { grid-column: span 6; }
+  .b-8 { grid-column: span 8; }
+}
+
+/* Every tile is the same object: surface, hairline, one radius, its own head. */
+.tile {
+  background: var(--dash-surface);
+  border: 1px solid var(--line);
+  border-radius: var(--dash-radius);
+  padding: 0.9rem 1rem 1rem;
+  display: flex; flex-direction: column; min-width: 0;
+}
+.tile__head {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.tile__title {
+  margin: 0; font-size: 0.86rem; font-weight: 600; letter-spacing: -0.005em;
+  display: inline-flex; align-items: center; gap: 0.45rem;
+}
+.tile__title svg { width: 0.95rem; height: 0.95rem; color: var(--accent-ink); }
+.tile__tools { margin-left: auto; display: inline-flex; align-items: center; gap: 0.3rem; }
+
+/* Segmented control — the reference's period pills. */
+.seg { display: inline-flex; background: var(--dash-surface-2); border-radius: 999px; padding: 2px; }
+.seg__btn {
+  border: 0; cursor: pointer; background: transparent; color: var(--text-soft);
+  font: inherit; font-size: 0.72rem; font-weight: 600;
+  padding: 0.25rem 0.6rem; border-radius: 999px;
+  transition: background var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+}
+.seg__btn[aria-pressed="true"] { background: var(--bg-invert); color: var(--text-invert); }
+
+.tile__ghost {
+  display: grid; place-items: center; width: 1.7rem; height: 1.7rem;
+  border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--dash-surface-2); color: var(--text-soft);
+}
+.tile__ghost:hover { color: var(--text); }
+.tile__ghost svg { width: 0.9rem; height: 0.9rem; }
+
+/* ---- KPI tile ----------------------------------------------------------- */
+.kpi { display: flex; align-items: flex-start; gap: 0.7rem; }
+.kpi__icon {
+  flex: none; display: grid; place-items: center;
+  width: 2.1rem; height: 2.1rem; border-radius: 10px;
+  background: var(--dash-surface-2); color: var(--accent-ink);
+}
+.kpi__icon svg { width: 1rem; height: 1rem; }
+.kpi__val {
+  margin: 0.1rem 0 0; font-family: var(--font-display);
+  font-size: var(--step-2); font-weight: 500; line-height: 1;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+}
+.kpi__foot { margin: 0.2rem 0 0; font-size: 0.74rem; color: var(--text-soft); }
+
+/* ---- Shared viz chrome -------------------------------------------------- */
+.viz-wrap { position: relative; }
+.viz-empty { margin: auto 0; text-align: center; font-size: 0.82rem; color: var(--text-soft); }
+.viz-grid { stroke: var(--viz-grid); stroke-width: 1; }
+.viz-axis { fill: var(--text-faint); font-size: 10px; font-family: var(--font-body); }
+
+.viz-tip {
+  position: absolute; transform: translate(-50%, -140%);
+  background: var(--bg-invert); color: var(--text-invert);
+  font-size: 0.72rem; padding: 0.3rem 0.55rem; border-radius: 6px;
+  white-space: nowrap; pointer-events: none; z-index: 2;
+}
+.viz-tip--bar { top: -0.25rem; right: 0; left: auto; transform: none; }
+
+/* Gauge */
+.viz-gauge { display: grid; justify-items: center; }
+.viz-gauge svg { width: 100%; max-width: 9.5rem; }
+.viz-gauge__track { fill: none; stroke: var(--viz-track); stroke-width: 12; }
+.viz-gauge__fill {
+  fill: none; stroke: var(--viz-1); stroke-width: 12; stroke-linecap: round;
+  transition: stroke-dasharray var(--dur-3) var(--ease-rise);
+}
+.viz-gauge__val {
+  fill: var(--text); font-family: var(--font-display); font-size: 26px; font-weight: 500;
+  text-anchor: middle; font-variant-numeric: tabular-nums;
+}
+.viz-gauge__lab { fill: var(--text-soft); font-size: 10px; text-anchor: middle; font-family: var(--font-body); }
+.viz-gauge__cap { margin: 0.5rem 0 0; font-size: 0.76rem; color: var(--text-soft); text-align: center; }
+
+/* Trend line */
+.viz-line { fill: none; stroke: var(--viz-1); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.viz-area { fill: url(#vizFade); }
+.viz-dot { fill: var(--dash-surface); stroke: var(--viz-1); stroke-width: 2; cursor: pointer; transition: r var(--dur-1) var(--ease-out); }
+.viz-callout { fill: var(--bg-invert); }
+.viz-callout__t { fill: var(--text-invert); font-size: 10px; font-weight: 600; font-family: var(--font-body); }
+
+/* Bars */
+.viz-bars { display: flex; align-items: flex-end; gap: 0.4rem; height: 9rem; }
+.viz-bars__col { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100%; }
+.viz-bars__track { flex: 1; display: flex; align-items: flex-end; }
+/* 4px rounded data-end, square where it meets the baseline. */
+.viz-bars__bar {
+  width: 100%; border-radius: 4px 4px 2px 2px;
+  background: var(--viz-1);
+  transition: height var(--dur-3) var(--ease-rise), background var(--dur-1) var(--ease-out);
+}
+.viz-bars__bar.is-current { background: var(--viz-2); box-shadow: inset 0 0 0 2px var(--dash-surface); }
+.viz-bars__col:hover .viz-bars__bar { background: color-mix(in oklab, var(--viz-1) 78%, var(--c-nightfall)); }
+.viz-bars__val {
+  position: absolute; left: 50%; top: -1.15rem; transform: translateX(-50%);
+  font-size: 0.66rem; font-weight: 700; color: var(--text); white-space: nowrap;
+}
+.viz-bars__bar { position: relative; }
+.viz-bars__lab { margin-top: 0.35rem; font-size: 0.66rem; color: var(--text-faint); text-align: center; }
+
+/* Heatmap */
+.viz-heat__grid { display: grid; gap: 3px; align-items: center; }
+.viz-heat__col, .viz-heat__row { font-size: 0.64rem; color: var(--text-faint); }
+.viz-heat__col { text-align: center; }
+.viz-heat__row { text-align: left; padding-right: 0.4rem; }
+.viz-heat__cell { aspect-ratio: 1; border-radius: 3px; display: block; }
+.viz-c0 { background: var(--viz-c0); }
+.viz-c1 { background: var(--viz-c1); }
+.viz-c2 { background: var(--viz-c2); }
+.viz-c3 { background: var(--viz-c3); }
+.viz-c4 { background: var(--viz-c4); }
+.viz-heat__key { display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; margin-top: 0.8rem; }
+.viz-heat__keyitem { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.66rem; color: var(--text-soft); }
+.viz-heat__sw { width: 0.65rem; height: 0.65rem; border-radius: 2px; }
+
+/* Meter */
+.viz-meter__track { height: 0.55rem; border-radius: 999px; background: var(--viz-track); overflow: hidden; }
+.viz-meter__fill { height: 100%; border-radius: 999px; background: var(--viz-1); transition: width var(--dur-3) var(--ease-rise); }
+.viz-meter__foot { display: flex; justify-content: space-between; margin-top: 0.4rem; font-size: 0.72rem; color: var(--text-soft); }
+
+/* ---- Feature tile (the reference's promo card) --------------------------- */
+.promo {
+  position: relative; overflow: hidden;
+  border-radius: var(--dash-radius); padding: 1rem;
+  background: linear-gradient(150deg, var(--c-firmament), var(--c-nightfall) 60%, var(--c-nightfall-2));
+  color: var(--text-invert);
+  display: flex; flex-direction: column; min-height: 100%;
+}
+.promo::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(80% 60% at 85% 0%, rgba(230,182,92,0.22), transparent 62%);
+}
+.promo > * { position: relative; z-index: 1; }

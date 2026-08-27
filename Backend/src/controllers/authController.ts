@@ -10,6 +10,7 @@ import { renderPasswordResetEmail } from '../templates/passwordResetEmail';
 import { renderPasswordChangedEmail } from '../templates/passwordChangedEmail';
 import { PasswordResetService } from '../services/passwordResetService';
 import { replyWithError } from '../utils/apiError';
+import { buildStoredFilename } from '../utils/multipart';
 
 /** Kept in step with PasswordResetService's TTL, for the copy in the email. */
 const RESET_LINK_TTL_MINUTES = 60;
@@ -119,9 +120,30 @@ export class AuthController {
     }
   }
 
+  /**
+   * Fields a member may change about themselves.
+   *
+   * Deliberately excludes `role`, `isActive`, `departmentId`, `cellGroupId` and
+   * `email`: the body used to be passed to UserService.updateUser untouched, so
+   * `{"role":"super_admin"}` on this route rewrote the caller's own role and
+   * handed them the whole admin surface on their next login.
+   */
+  private static readonly SELF_EDITABLE_FIELDS = [
+    'firstName',
+    'lastName',
+    'phoneNumber',
+    'address',
+    'dateOfBirth',
+    'profileImage',
+  ] as const;
+
   static async updateProfile(request: AuthenticatedRequest, reply: FastifyReply) {
     try {
-      const updates = request.body as any;
+      const body = (request.body ?? {}) as Record<string, unknown>;
+      const allowed = AuthController.SELF_EDITABLE_FIELDS as readonly string[];
+      const updates = Object.fromEntries(
+        Object.entries(body).filter(([key]) => allowed.includes(key))
+      );
       const userId = request.user!.id;
 
       const user = await UserService.updateUser(userId, updates);
@@ -158,8 +180,7 @@ export class AuthController {
 
       await fs.mkdir(config.upload.dir, { recursive: true });
 
-      const safeName = file.filename.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const filename = `${request.user!.id}-${Date.now()}-${safeName}`;
+      const filename = buildStoredFilename(request.user!.id, file.filename, file.mimetype);
       const filePath = path.join(config.upload.dir, filename);
 
       const chunks: Buffer[] = [];

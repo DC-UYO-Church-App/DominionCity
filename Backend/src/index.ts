@@ -8,6 +8,7 @@ import fastifyWebsocket from '@fastify/websocket';
 import { config } from './config';
 import { pool } from './config/database';
 import { errorHandler } from './middleware/errorHandler';
+import { authenticate } from './middleware/auth';
 import { setupCronJobs, shutdownJobs } from './jobs/cronJobs';
 
 // Import routes
@@ -40,8 +41,13 @@ async function registerPlugins() {
   });
 
   // JWT
+  // JWT_EXPIRES_IN was read from the environment but never handed to a
+  // signer, so issued tokens carried only `iat` and stayed valid forever —
+  // a token stolen once could never be aged out, and signing out did nothing
+  // server-side.
   await fastify.register(fastifyJwt, {
     secret: config.jwt.secret,
+    sign: { expiresIn: config.jwt.expiresIn },
   });
 
   // Multipart (file uploads)
@@ -58,9 +64,18 @@ async function registerPlugins() {
   });
 
   // Static files
+  // Uploads are member-supplied bytes served back from our own origin, so
+  // they are sent with the browser told not to interpret them: no MIME
+  // sniffing, no script execution, and download rather than render. Belt and
+  // braces alongside the extension being derived from the validated type.
   await fastify.register(fastifyStatic, {
     root: config.upload.dir,
     prefix: '/uploads/',
+    setHeaders(res) {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+      res.setHeader('Content-Disposition', 'attachment');
+    },
   });
 
   // WebSocket
@@ -100,14 +115,32 @@ async function registerRoutes() {
   await fastify.register(satelliteChurchRoutes, { prefix: '/api/satellite-churches' });
   await fastify.register(adminRoutes, { prefix: '/api/admin' });
 
-  // WebSocket for real-time messaging
+  // WebSocket for real-time messaging.
+  //
+  // The handler only echoes today, but it is named for the `messages` table,
+  // which holds private member-to-member correspondence. It used to accept any
+  // connection from any origin with no token, so it would have been wired up
+  // unauthenticated. Requiring a verified token and a known origin now means
+  // that cannot happen by omission later.
   fastify.register(async function (fastify) {
-    fastify.get('/ws/messages', { websocket: true }, (connection, _req) => {
-      connection.socket.on('message', (message: Buffer) => {
-        // Handle incoming messages
-        connection.socket.send(JSON.stringify({ echo: message.toString() }));
-      });
-    });
+    fastify.get(
+      '/ws/messages',
+      { websocket: true, onRequest: [authenticate] },
+      // @fastify/websocket v10 passes the socket as the first argument, not
+      // `connection.socket`. (The previous echo handler used the v8 shape and
+      // had been throwing on every connection.)
+      (socket, request) => {
+        const origin = request.headers.origin;
+        if (origin && origin !== config.cors.origin) {
+          socket.close(1008, 'Origin not allowed');
+          return;
+        }
+
+        socket.on('message', (message: Buffer) => {
+          socket.send(JSON.stringify({ echo: message.toString() }));
+        });
+      }
+    );
   });
 }
 

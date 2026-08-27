@@ -6,6 +6,31 @@ import { config } from '../config';
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg'];
 
 /**
+ * Builds the name an upload is stored under.
+ *
+ * The extension comes from the validated mime type, never from the uploaded
+ * filename. Uploads used to keep whatever extension they arrived with — the
+ * sanitiser deliberately preserves "." — and @fastify/static picks the
+ * Content-Type off that extension. Since `mimetype` is just a client-supplied
+ * multipart header, "payload.html" declared as image/png was stored as .html
+ * and served back as text/html: stored XSS on the API origin.
+ *
+ * The original name is kept only as a readable, extension-stripped hint.
+ */
+export function buildStoredFilename(prefix: string, originalName: string, mimetype: string): string {
+  const extension = mimetype === 'image/png' ? 'png' : 'jpg';
+  const base =
+    String(originalName)
+      .replace(/[^a-zA-Z0-9._-]/g, '_')
+      .replace(/\.[^.]*$/, '')   // drop the uploaded extension
+      .replace(/\.+/g, '.')      // collapse dot runs, so ".." cannot survive
+      .replace(/^[.\-]+/, '')    // no leading dot or dash (dotfiles, arg-lookalikes)
+      .replace(/[.\-]+$/, '')    // no trailing dot, which would double up with the extension
+      .slice(0, 40) || 'image';
+  return `${prefix}-${Date.now()}-${base}.${extension}`;
+}
+
+/**
  * Error thrown for client-side problems while parsing a multipart form.
  * Controllers can inspect `statusCode` to return the right HTTP status.
  */
@@ -49,9 +74,8 @@ export async function parseMultipartForm(
         throw new MultipartError('Only JPG or PNG images are allowed');
       }
       await fs.mkdir(config.upload.dir, { recursive: true });
-      const safeName = String(part.filename).replace(/[^a-zA-Z0-9._-]/g, '_');
       const prefix = opts.filePrefix ?? 'upload';
-      const filename = `${prefix}-${Date.now()}-${safeName}`;
+      const filename = buildStoredFilename(prefix, part.filename, part.mimetype);
       const buffer = await part.toBuffer();
       await fs.writeFile(path.join(config.upload.dir, filename), buffer);
       imageUrl = `/uploads/${filename}`;
