@@ -1,5 +1,22 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
+/**
+ * Carries the HTTP status alongside the message. Without it every failure
+ * arrives as an indistinguishable Error, and a screen cannot tell "wrong
+ * password" (401) from "too many attempts" (429) from "the server is down"
+ * — which are three different things to tell a person. `status` is 0 when the
+ * request never reached the server at all.
+ */
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 class ApiClient {
   private token: string | null = null;
 
@@ -36,14 +53,24 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+      });
+    } catch {
+      // fetch only rejects when the request never completed — offline, DNS,
+      // CORS, server down. "Failed to fetch" means nothing to a member.
+      throw new ApiError('Could not reach the server. Check your connection and try again.', 0);
+    }
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Request failed' }));
-      throw new Error(error.error || `HTTP ${response.status}`);
+      const body = await response.json().catch(() => null);
+      // Our own handlers answer with `error`; Fastify's rate limiter puts the
+      // useful part ("retry in 14 minutes") in `message`.
+      const message = body?.error || body?.message || `Request failed (${response.status})`;
+      throw new ApiError(message, response.status);
     }
 
     return response.json();
