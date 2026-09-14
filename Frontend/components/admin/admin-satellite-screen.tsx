@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Church, MapPin, UserCircle2 } from "lucide-react"
 import { apiClient } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dialog"
 
 export function AdminSatelliteScreen() {
-  const { toast } = useToast()
 
   const [churches, setChurches] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -76,7 +75,7 @@ export function AdminSatelliteScreen() {
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      toast({ title: "Missing details", description: "Church name is required.", variant: "destructive" })
+      toast.error("Missing details", { description: "Church name is required." })
       return
     }
     setIsSubmitting(true)
@@ -96,15 +95,11 @@ export function AdminSatelliteScreen() {
       if (res?.satelliteChurch) {
         load()
       }
-      toast({ title: editingId ? "Satellite church updated" : "Satellite church created" })
+      toast.success(editingId ? "Satellite church updated" : "Satellite church created")
       setIsModalOpen(false)
       resetForm()
     } catch (error) {
-      toast({
-        title: "Save failed",
-        description: error instanceof Error ? error.message : "Failed to save",
-        variant: "destructive",
-      })
+      toast.error("Save failed", { description: error instanceof Error ? error.message : "Failed to save" })
     } finally {
       setIsSubmitting(false)
     }
@@ -126,13 +121,9 @@ export function AdminSatelliteScreen() {
     try {
       await apiClient.deleteSatelliteChurch(id)
       setChurches((prev) => prev.filter((c) => c.id !== id))
-      toast({ title: "Satellite church deleted" })
+      toast.success("Satellite church deleted")
     } catch (error) {
-      toast({
-        title: "Delete failed",
-        description: error instanceof Error ? error.message : "Failed to delete",
-        variant: "destructive",
-      })
+      toast.error("Delete failed", { description: error instanceof Error ? error.message : "Failed to delete" })
     }
   }
 

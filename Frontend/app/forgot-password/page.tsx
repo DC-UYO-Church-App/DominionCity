@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { apiClient } from "@/lib/api"
+import { toastApiError } from "@/lib/feedback"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -30,6 +31,16 @@ export default function ForgotPasswordPage() {
       )
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send the reset link. Please try again.")
+      toastApiError(
+        err,
+        {
+          429: {
+            title: "Too many reset requests",
+            description: "Wait about fifteen minutes before asking for another link.",
+          },
+        },
+        "Could not send the reset link",
+      )
     } finally {
       setIsSubmitting(false)
     }

@@ -29,6 +29,7 @@ type AdminLayoutProps = {
 
 const primaryNav = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/admin" },
+  { icon: Users, label: "Members", href: "/dashboard/admin/members" },
   { icon: BookOpen, label: "Sermons", href: "/dashboard/admin/sermons" },
   { icon: HandCoins, label: "Giving", href: "/dashboard/admin/giving" },
   { icon: FolderKanban, label: "Projects", href: "/dashboard/admin/projects" },

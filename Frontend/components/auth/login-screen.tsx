@@ -6,7 +6,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, LogIn } from "lucide-react"
 import { toast } from "sonner"
-import { ApiError, apiClient } from "@/lib/api"
+import { apiClient } from "@/lib/api"
+import { toastApiError } from "@/lib/feedback"
 
 const CATHEDRAL_IMG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCFjCtFcvRIDanP72siuQ0tO0mwFu2kuagC3ZVBDLcahDiCWSF5eaK3pvDxb90UFJ9y5YVbJ1hNNXwjB8vt1jLDm3m6KOM2eEu_9yK7wskJvGstdM6qMA0YdYLUqdDhiuquQt55C6Xyr-FvEqCGH1m5dFtoUdHweqcaUE-JNTcEIytrPZAszqIFHY7fMibtqK3MYzwyfq52fyf6sj3Zs7dZs3xnwXCksAdYFdGGDtEII2xhSLwhy9w3HtBX08BA5tBphX3WqQ-Hsg"
@@ -44,27 +45,21 @@ export function LoginScreen() {
       })
       router.push("/dashboard")
     } catch (err) {
-      const status = err instanceof ApiError ? err.status : -1
-      const raw = err instanceof Error ? err.message : ""
-
-      if (status === 401) {
-        toast.error("Those details don't match", {
-          description: "The email or phone and password combination is not recognised.",
-        })
-      } else if (status === 429) {
-        toast.error("Too many attempts", {
-          description:
-            "This account is paused for a few minutes to keep it safe. Try again shortly, or reset your password.",
-        })
-      } else if (status === 0) {
-        toast.error("Could not reach the server", {
-          description: "Check your connection and try again.",
-        })
-      } else {
-        toast.error("Sign in failed", {
-          description: raw || "Something went wrong. Please try again.",
-        })
-      }
+      toastApiError(
+        err,
+        {
+          401: {
+            title: "Those details don't match",
+            description: "The email or phone and password combination is not recognised.",
+          },
+          429: {
+            title: "Too many attempts",
+            description:
+              "This account is paused for a few minutes to keep it safe. Try again shortly, or reset your password.",
+          },
+        },
+        "Sign in failed",
+      )
       setIsSubmitting(false)
     }
   }

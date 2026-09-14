@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { UploadCloud } from "lucide-react"
 import { BookshopManagerBottomNav } from "@/components/bookshop-manager/bookshop-manager-bottom-nav"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -27,7 +27,6 @@ import {
 export function BookshopManagerBooksScreen() {
   const router = useRouter()
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
-  const { toast } = useToast()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [title, setTitle] = useState("")
   const [author, setAuthor] = useState("")
@@ -75,30 +74,18 @@ export function BookshopManagerBooksScreen() {
 
   const handleSaveBook = async () => {
     if (!title || !author || !category || !price || !quantity) {
-      toast({
-        title: "Missing details",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      })
+      toast.error("Missing details", { description: "Please fill in all required fields." })
       return
     }
 
     const parsedPrice = Number(price)
     const parsedQuantity = Number(quantity)
     if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
-      toast({
-        title: "Invalid price",
-        description: "Please enter a valid price.",
-        variant: "destructive",
-      })
+      toast.error("Invalid price", { description: "Please enter a valid price." })
       return
     }
     if (!Number.isInteger(parsedQuantity) || parsedQuantity < 0) {
-      toast({
-        title: "Invalid quantity",
-        description: "Please enter a valid quantity.",
-        variant: "destructive",
-      })
+      toast.error("Invalid quantity", { description: "Please enter a valid quantity." })
       return
     }
 
@@ -127,19 +114,12 @@ export function BookshopManagerBooksScreen() {
       }
       const refreshed = await apiClient.getBooks()
       setBooks(refreshed.books || [])
-      toast({
-        title: editingId ? "Book updated" : "Book saved",
-        description: editingId ? "The book has been updated." : "The book has been added successfully.",
-      })
+      toast.success(editingId ? "Book updated" : "Book saved", { description: editingId ? "The book has been updated." : "The book has been added successfully." })
       setIsModalOpen(false)
       resetForm()
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to save book"
-      toast({
-        title: "Save failed",
-        description: message,
-        variant: "destructive",
-      })
+      toast.error("Save failed", { description: message })
     } finally {
       setIsSubmitting(false)
     }
@@ -174,14 +154,10 @@ export function BookshopManagerBooksScreen() {
     try {
       await apiClient.deleteBook(id)
       setBooks((prev) => prev.filter((book) => book.id !== id))
-      toast({ title: "Book deleted" })
+      toast.success("Book deleted")
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to delete book"
-      toast({
-        title: "Delete failed",
-        description: message,
-        variant: "destructive",
-      })
+      toast.error("Delete failed", { description: message })
     }
   }
 
@@ -367,11 +343,7 @@ export function BookshopManagerBooksScreen() {
                 onChange={(event) => {
                   const file = event.target.files?.[0] || null
                   if (file && !allowedImageTypes.includes(file.type)) {
-                    toast({
-                      title: "Invalid image",
-                      description: "Only JPG or PNG images are allowed.",
-                      variant: "destructive",
-                    })
+                    toast.error("Invalid image", { description: "Only JPG or PNG images are allowed." })
                     event.target.value = ""
                     setCoverFile(null)
                     setCoverPreview(null)

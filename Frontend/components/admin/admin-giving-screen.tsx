@@ -66,7 +66,13 @@ export function AdminGivingScreen() {
         await apiClient.rejectContribution(id)
       }
       setPending((prev) => prev.filter((c) => c.id !== id))
-      toast.success(confirm ? "Payment confirmed" : "Payment rejected")
+      // Both branches completed successfully, but green for "rejected" reads as
+      // approval at a glance. The rejection gets a neutral toast instead.
+      if (confirm) {
+        toast.success("Payment confirmed", { description: "The contribution has been recorded." })
+      } else {
+        toast("Payment rejected", { description: "The contribution was not recorded." })
+      }
       // Refresh totals after a confirmation
       if (confirm) {
         apiClient.getGivingStats().then(setStats).catch(() => {})

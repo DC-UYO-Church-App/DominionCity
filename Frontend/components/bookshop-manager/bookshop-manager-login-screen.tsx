@@ -9,14 +9,14 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { apiClient } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
+import { toastApiError } from "@/lib/feedback"
 
 export function BookshopManagerLoginScreen() {
   const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
-  const { toast } = useToast()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,10 +25,8 @@ export function BookshopManagerLoginScreen() {
     const isPhone = /^\d{11}$/.test(trimmedIdentifier)
 
     if (!isEmail && !isPhone) {
-      toast({
-        title: "Incomplete login details",
+      toast.error("Check your details", {
         description: "Enter a full email address or an 11-digit phone number.",
-        variant: "destructive",
       })
       return
     }
@@ -39,23 +37,25 @@ export function BookshopManagerLoginScreen() {
       const profile = await apiClient.getProfile()
       if (profile?.user?.role !== "bookshop_manager") {
         apiClient.logout()
-        toast({
-          title: "Access denied",
-          description: "This account is not a bookshop manager.",
-          variant: "destructive",
+        toast.error("Access denied", {
+          description: "That account is not registered as a bookshop manager.",
         })
+        setIsSubmitting(false)
         return
       }
+      toast.success("Signed in", { description: "Opening the bookshop." })
       router.push("/dashboard/bookshop-manager")
     } catch (err) {
-      const rawMessage = err instanceof Error ? err.message : "Login failed"
-      const message = rawMessage === "Request failed" ? "Invalid email/phone or password" : rawMessage
-      toast({
-        title: "Login failed",
-        description: message,
-        variant: "destructive",
-      })
-    } finally {
+      toastApiError(
+        err,
+        {
+          401: {
+            title: "Those details don't match",
+            description: "The email or phone and password combination is not recognised.",
+          },
+        },
+        "Sign in failed",
+      )
       setIsSubmitting(false)
     }
   }

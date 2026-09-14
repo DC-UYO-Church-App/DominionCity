@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { BookOpen, ShoppingBag, UploadCloud, Warehouse } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { apiClient } from "@/lib/api"
 import {
   Dialog,
@@ -27,7 +27,6 @@ import {
 } from "recharts"
 
 export function AdminBookShopScreen() {
-  const { toast } = useToast()
   const [isManagerModalOpen, setIsManagerModalOpen] = useState(false)
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
@@ -153,38 +152,22 @@ export function AdminBookShopScreen() {
 
   const handleRegisterManager = async () => {
     if (!firstName || !lastName || !email || !phone || !address || !password || !confirmPassword) {
-      toast({
-        title: "Missing details",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      })
+      toast.error("Missing details", { description: "Please fill in all required fields." })
       return
     }
 
     if (!/^\S+@\S+\.\S+$/.test(email)) {
-      toast({
-        title: "Invalid email",
-        description: "Please provide a valid email address.",
-        variant: "destructive",
-      })
+      toast.error("Invalid email", { description: "Please provide a valid email address." })
       return
     }
 
     if (password.length < 8) {
-      toast({
-        title: "Weak password",
-        description: "Password must be at least 8 characters.",
-        variant: "destructive",
-      })
+      toast.error("Weak password", { description: "Password must be at least 8 characters." })
       return
     }
 
     if (password !== confirmPassword) {
-      toast({
-        title: "Password mismatch",
-        description: "Passwords do not match.",
-        variant: "destructive",
-      })
+      toast.error("Password mismatch", { description: "Passwords do not match." })
       return
     }
 
@@ -203,19 +186,12 @@ export function AdminBookShopScreen() {
       if (response?.user) {
         setManagers((prev) => [response.user, ...prev])
       }
-      toast({
-        title: "Manager registered",
-        description: "Bookshop manager account has been created.",
-      })
+      toast.success("Manager registered", { description: "Bookshop manager account has been created." })
       setIsManagerModalOpen(false)
       resetForm()
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to register manager"
-      toast({
-        title: "Registration failed",
-        description: message,
-        variant: "destructive",
-      })
+      toast.error("Registration failed", { description: message })
     } finally {
       setIsSubmitting(false)
     }
@@ -226,16 +202,12 @@ export function AdminBookShopScreen() {
     try {
       await apiClient.deleteBookshopManager(id)
       setManagers((prev) => prev.filter((manager) => manager.id !== id))
-      toast({ title: "Manager deleted" })
+      toast.success("Manager deleted")
       setIsDeleteModalOpen(false)
       setManagerToDelete(null)
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to delete manager"
-      toast({
-        title: "Delete failed",
-        description: message,
-        variant: "destructive",
-      })
+      toast.error("Delete failed", { description: message })
     } finally {
       setIsDeleting(false)
     }
@@ -488,11 +460,7 @@ export function AdminBookShopScreen() {
                   onChange={(event) => {
                     const file = event.target.files?.[0] || null
                     if (file && !allowedImageTypes.includes(file.type)) {
-                      toast({
-                        title: "Invalid image",
-                        description: "Only JPG or PNG images are allowed.",
-                        variant: "destructive",
-                      })
+                      toast.error("Invalid image", { description: "Only JPG or PNG images are allowed." })
                       event.target.value = ""
                       setProfileImage(null)
                       setProfilePreview(null)

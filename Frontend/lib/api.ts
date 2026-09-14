@@ -190,6 +190,72 @@ class ApiClient {
     return this.request('/admin/stats');
   }
 
+  async getAdminMembers(params?: {
+    status?: 'all' | 'active' | 'non_active' | 'deactivated';
+    role?: string;
+    q?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const search = new URLSearchParams();
+    if (params?.status && params.status !== 'all') search.set('status', params.status);
+    if (params?.role) search.set('role', params.role);
+    if (params?.q?.trim()) search.set('q', params.q.trim());
+    if (params?.page) search.set('page', String(params.page));
+    if (params?.limit) search.set('limit', String(params.limit));
+    const qs = search.toString();
+    return this.request(`/admin/members${qs ? `?${qs}` : ''}`);
+  }
+
+  async getAdminMember(id: string) {
+    return this.request(`/admin/members/${id}`);
+  }
+
+  async updateAdminMember(
+    id: string,
+    data: {
+      firstName?: string;
+      lastName?: string;
+      phoneNumber?: string;
+      address?: string | null;
+      dateOfBirth?: string | null;
+      role?: string;
+      departmentId?: string | null;
+      cellGroupId?: string | null;
+      isFirstTimer?: boolean;
+      isActive?: boolean;
+    }
+  ) {
+    return this.request(`/admin/members/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Batched member email sends.
+  async getEmailAudience(audience: 'active' | 'non_active') {
+    return this.request(`/admin/email-campaigns/audience?audience=${audience}`);
+  }
+
+  async startEmailCampaign(data: {
+    audience: 'active' | 'non_active';
+    subject: string;
+    body: string;
+  }) {
+    return this.request('/admin/email-campaigns', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getEmailCampaign(id: string) {
+    return this.request(`/admin/email-campaigns/${id}`);
+  }
+
+  async listEmailCampaigns() {
+    return this.request('/admin/email-campaigns');
+  }
+
   async createBookshopManager(data: {
     firstName: string;
     lastName: string;

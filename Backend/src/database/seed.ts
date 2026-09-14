@@ -5,13 +5,28 @@ async function seed() {
   try {
     console.log('Seeding database...');
 
+    /* The seed password used to be a literal in this file. Because the file is
+       committed, anyone who could read the repository knew the super admin's
+       password. It now has to be supplied at seed time and is never written
+       down here. */
+    const seedPassword = process.env.SEED_ADMIN_PASSWORD;
+    if (!seedPassword || seedPassword.trim().length < 12) {
+      console.error(
+        'SEED_ADMIN_PASSWORD must be set to at least 12 characters before seeding.\n' +
+          'Example: SEED_ADMIN_PASSWORD="$(openssl rand -base64 24)" npm run seed'
+      );
+      process.exit(1);
+    }
+
+    const seedAdminEmail = process.env.SEED_ADMIN_EMAIL || 'icodes001@gmail.com';
+
     // Create super admin user
-    const superAdminPassword = await hashPassword('88888888');
+    const superAdminPassword = await hashPassword(seedPassword);
     await pool.query(
       `INSERT INTO users (email, password, first_name, last_name, phone_number, role)
        VALUES ($1, $2, $3, $4, $5, $6)
        ON CONFLICT (email) DO NOTHING`,
-      ['icodes001@gmail.com', superAdminPassword, 'Super', 'Admin', '+2341234567890', 'super_admin']
+      [seedAdminEmail, superAdminPassword, 'Super', 'Admin', '+2341234567890', 'super_admin']
     );
 
     // Create departments

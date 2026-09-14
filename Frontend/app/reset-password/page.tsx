@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
 import { apiClient } from "@/lib/api"
+import { toastApiError } from "@/lib/feedback"
 
 const MIN_PASSWORD_LENGTH = 8
 
@@ -53,10 +55,14 @@ function ResetPasswordForm() {
 
     if (password.length < MIN_PASSWORD_LENGTH) {
       setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`)
+      toast.error("Password too short", {
+        description: `Use at least ${MIN_PASSWORD_LENGTH} characters.`,
+      })
       return
     }
     if (password !== confirmPassword) {
       setError("Those passwords do not match.")
+      toast.error("Passwords do not match", { description: "Type the same password in both fields." })
       return
     }
 
@@ -64,10 +70,23 @@ function ResetPasswordForm() {
     try {
       await apiClient.resetPassword(token, password)
       setIsDone(true)
+      // The toast outlives the redirect, so the reason for landing on the
+      // sign-in page is still on screen when you get there.
+      toast.success("Password changed", { description: "Sign in with your new password." })
       // Give the reader a moment to see the confirmation before moving on.
       setTimeout(() => router.replace("/login"), 2500)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not reset your password. Please try again.")
+      toastApiError(
+        err,
+        {
+          400: {
+            title: "That reset link has expired",
+            description: "Reset links last 60 minutes and work once. Request a new one to continue.",
+          },
+        },
+        "Could not reset your password",
+      )
     } finally {
       setIsSubmitting(false)
     }

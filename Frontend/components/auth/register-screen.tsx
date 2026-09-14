@@ -5,7 +5,8 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { apiClient } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
+import { toastApiError } from "@/lib/feedback"
 
 const SANCTUARY_IMG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAnCZv4E7BFSOBjNjklE61zhfhXrdT7W5w8vMGXsV69GbjzDC2-yYLV0HkwIsS3prXCSUxsaybU2ESiDmOy1F84xNKB3K4NxG0R_W8wPiDRGq3u0Elh1RN7cDGXuJyOcgYZNjm8Hswzp9c04F502-NmtG2k6GWX1YDKVppPxr5DyGbhDftFD3qM_Ku9_PKSQ6MnrxG9JtTiQ7TbjMjxNnAk0LgZZV-wUnt00TemnNVDrSda0iVZkTSpiMeRTKCQAMBrS6DAHIp0qA"
@@ -29,7 +30,6 @@ export function RegisterScreen() {
   const [agreed, setAgreed] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
-  const { toast } = useToast()
 
   const set = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setFormData((prev) => ({ ...prev, [field]: e.target.value }))
@@ -38,11 +38,15 @@ export function RegisterScreen() {
     e.preventDefault()
 
     if (formData.password !== formData.confirmPassword) {
-      toast({ title: "Registration error", description: "Passwords do not match.", variant: "destructive" })
+      toast.error("Passwords do not match", {
+        description: "Type the same password in both fields.",
+      })
       return
     }
     if (!agreed) {
-      toast({ title: "Registration error", description: "Please accept the Terms of Service.", variant: "destructive" })
+      toast.error("One more thing", {
+        description: "Please accept the Terms of Service to create your account.",
+      })
       return
     }
 
@@ -57,12 +61,28 @@ export function RegisterScreen() {
         dateOfBirth: formData.dateOfBirth || undefined,
         address: formData.address || undefined,
       })
+      // Registering signs you straight in, so say so — the page used to just
+      // change, which reads as "did that work?" at the exact moment a new
+      // member most needs reassurance.
+      toast.success(`Welcome to Dominion City, ${formData.firstName.trim() || "friend"}`, {
+        description: "Your account is ready. Taking you to your dashboard.",
+      })
       router.push("/dashboard")
     } catch (err) {
-      const raw = err instanceof Error ? err.message : "Registration failed"
-      const message = raw === "Request failed" ? "Unable to register. Check your details and try again." : raw
-      toast({ title: "Registration failed", description: message, variant: "destructive" })
-    } finally {
+      toastApiError(
+        err,
+        {
+          409: {
+            title: "That email is already registered",
+            description: "Try signing in instead, or use the forgotten-password link.",
+          },
+          429: {
+            title: "Too many sign-ups from here",
+            description: "Please wait a few minutes and try again.",
+          },
+        },
+        "Could not create your account",
+      )
       setIsSubmitting(false)
     }
   }

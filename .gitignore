@@ -3,3 +3,19 @@ cost.md
 erd.md
 SECURITY.md
 SECURITY_AUDIT.md
+
+# Environment files, as a backstop for any new package added at this level.
+.env
+.env.*
+!.env.example
+
+# Keys and credentials must never be committed.
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+.git-credentials
+.npmrc
+service-account*.json

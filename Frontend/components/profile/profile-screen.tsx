@@ -18,12 +18,11 @@ import {
   LogOut,
 } from "lucide-react"
 import { apiClient } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 
 export function ProfileScreen() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const { toast } = useToast()
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api"
   const uploadsBaseUrl = apiBaseUrl.replace(/\/api$/, "")
 
@@ -103,7 +102,7 @@ export function ProfileScreen() {
     const file = e.target.files?.[0]
     if (!file) return
     if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
-      toast({ title: "Invalid file", description: "Only JPG or PNG images are allowed.", variant: "destructive" })
+      toast.error("Invalid file", { description: "Only JPG or PNG images are allowed." })
       return
     }
     try {
@@ -111,13 +110,9 @@ export function ProfileScreen() {
       const raw = res?.imageUrl || res?.user?.profileImage
       const url = raw?.startsWith("/uploads/") ? `${uploadsBaseUrl}${raw}` : raw
       if (url) setUser((prev) => ({ ...prev, avatar: url }))
-      toast({ title: "Profile updated", description: "Your profile picture has been updated." })
+      toast.success("Profile updated", { description: "Your profile picture has been updated." })
     } catch (error) {
-      toast({
-        title: "Upload failed",
-        description: error instanceof Error ? error.message : "Upload failed",
-        variant: "destructive",
-      })
+      toast.error("Upload failed", { description: error instanceof Error ? error.message : "Upload failed" })
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = ""
     }
@@ -143,13 +138,9 @@ export function ProfileScreen() {
         dateOfBirth: u?.dateOfBirth ? u.dateOfBirth.split("T")[0] : draft.dateOfBirth,
       }))
       setIsEditing(false)
-      toast({ title: "Profile saved", description: "Your changes have been saved." })
+      toast.success("Profile saved", { description: "Your changes have been saved." })
     } catch (error) {
-      toast({
-        title: "Save failed",
-        description: error instanceof Error ? error.message : "Save failed",
-        variant: "destructive",
-      })
+      toast.error("Save failed", { description: error instanceof Error ? error.message : "Save failed" })
     } finally {
       setIsSaving(false)
     }

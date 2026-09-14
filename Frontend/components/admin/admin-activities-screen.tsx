@@ -5,7 +5,7 @@ import { AdminLayout } from "@/components/admin/admin-layout"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { apiClient } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,6 @@ import {
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
 export function AdminActivitiesScreen() {
-  const { toast } = useToast()
 
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -57,7 +56,7 @@ export function AdminActivitiesScreen() {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      toast({ title: "Missing details", description: "Activity title is required.", variant: "destructive" })
+      toast.error("Missing details", { description: "Activity title is required." })
       return
     }
     setIsSubmitting(true)
@@ -79,15 +78,11 @@ export function AdminActivitiesScreen() {
           editingId ? prev.map((a) => (a.id === editingId ? res.activity : a)) : [...prev, res.activity]
         )
       }
-      toast({ title: editingId ? "Activity updated" : "Activity created" })
+      toast.success(editingId ? "Activity updated" : "Activity created")
       setIsModalOpen(false)
       resetForm()
     } catch (error) {
-      toast({
-        title: "Save failed",
-        description: error instanceof Error ? error.message : "Failed to save activity",
-        variant: "destructive",
-      })
+      toast.error("Save failed", { description: error instanceof Error ? error.message : "Failed to save activity" })
     } finally {
       setIsSubmitting(false)
     }
@@ -109,13 +104,9 @@ export function AdminActivitiesScreen() {
     try {
       await apiClient.deleteWeeklyActivity(id)
       setActivities((prev) => prev.filter((a) => a.id !== id))
-      toast({ title: "Activity deleted" })
+      toast.success("Activity deleted")
     } catch (error) {
-      toast({
-        title: "Delete failed",
-        description: error instanceof Error ? error.message : "Failed to delete",
-        variant: "destructive",
-      })
+      toast.error("Delete failed", { description: error instanceof Error ? error.message : "Failed to delete" })
     }
   }
 
