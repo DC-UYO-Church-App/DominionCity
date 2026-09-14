@@ -3,6 +3,7 @@ node_modules
 ./pnp.js
 .yarn/install-state.gz
 next-env.d.ts
+*.tsbuildinfo
 # OS generated files
 .DS_Store
 .DS_Store?
@@ -13,7 +14,10 @@ ehthumbs.db
 Thumbs.db
 text.
 .next
-.env.local
+# Environment files. Only .env.example belongs in the repository.
+.env
+.env.*
+!.env.example
 ../td.md
 ../PROJECT_SUMMARY.md
 FRONTEND_PRD.md

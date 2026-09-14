@@ -12,6 +12,11 @@ export class NotificationService {
     metadata?: Record<string, any>;
     /** Optional deep link for the emailed copy; not persisted. */
     emailAction?: { label: string; path: string };
+    /**
+     * Suppresses the generic notification email. For callers that send their
+     * own, purpose-built message and only want the in-app record here.
+     */
+    skipEmail?: boolean;
   }): Promise<Notification> {
     const result = await query(
       `INSERT INTO notifications (user_id, type, title, message, metadata)
@@ -21,6 +26,10 @@ export class NotificationService {
     );
 
     const notification = this.mapDbRowToNotification(result.rows[0]);
+
+    if (data.skipEmail) {
+      return notification;
+    }
 
     // Send email notification
     try {

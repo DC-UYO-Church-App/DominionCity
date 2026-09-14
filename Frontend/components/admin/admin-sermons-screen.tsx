@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { UploadCloud } from "lucide-react"
 import { apiClient } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dialog"
 
 export function AdminSermonsScreen() {
-  const { toast } = useToast()
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api"
   const uploadsBaseUrl = apiBaseUrl.replace(/\/api$/, "")
   const [title, setTitle] = useState("")
@@ -76,11 +75,7 @@ export function AdminSermonsScreen() {
 
   const handleSubmit = async () => {
     if (!title.trim() || !preacher.trim()) {
-      toast({
-        title: "Missing details",
-        description: "Sermon title and pastor name are required.",
-        variant: "destructive",
-      })
+      toast.error("Missing details", { description: "Sermon title and pastor name are required." })
       return
     }
 
@@ -118,19 +113,12 @@ export function AdminSermonsScreen() {
           }
         }
       }
-      toast({
-        title: editingId ? "Sermon updated" : "Sermon saved",
-        description: editingId ? "Your sermon has been updated." : "Your sermon has been posted.",
-      })
+      toast.success(editingId ? "Sermon updated" : "Sermon saved", { description: editingId ? "Your sermon has been updated." : "Your sermon has been posted." })
       setIsModalOpen(false)
       resetForm()
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to save sermon"
-      toast({
-        title: "Save failed",
-        description: message,
-        variant: "destructive",
-      })
+      toast.error("Save failed", { description: message })
     } finally {
       setIsSubmitting(false)
     }
@@ -152,10 +140,10 @@ export function AdminSermonsScreen() {
     try {
       await apiClient.deleteSermon(id)
       setSermons((prev) => prev.filter((item) => item.id !== id))
-      toast({ title: "Sermon deleted" })
+      toast.success("Sermon deleted")
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to delete sermon"
-      toast({ title: "Delete failed", description: message, variant: "destructive" })
+      toast.error("Delete failed", { description: message })
     }
   }
 
@@ -259,11 +247,7 @@ export function AdminSermonsScreen() {
                 onChange={(event) => {
                   const file = event.target.files?.[0] || null
                   if (file && !allowedImageTypes.includes(file.type)) {
-                    toast({
-                      title: "Invalid image",
-                      description: "Only JPG or PNG images are allowed.",
-                      variant: "destructive",
-                    })
+                    toast.error("Invalid image", { description: "Only JPG or PNG images are allowed." })
                     event.target.value = ""
                     setThumbnailFile(null)
                     setThumbnailPreview(null)

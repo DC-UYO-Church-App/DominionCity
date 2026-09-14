@@ -4,7 +4,6 @@ import { Fraunces, Hanken_Grotesk, Poppins } from "next/font/google"
 import Script from "next/script"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 
 // Brand type — Display = Fraunces (optical serif), Body/UI = Hanken Grotesk.
@@ -64,7 +63,6 @@ export default function RootLayout({
       <body>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           {children}
-          <Toaster />
           <SonnerToaster position="bottom-right" richColors />
         </ThemeProvider>
       </body>

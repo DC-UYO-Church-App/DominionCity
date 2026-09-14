@@ -16,6 +16,52 @@ export async function adminRoutes(fastify: FastifyInstance) {
     AdminController.getDashboardStats
   );
 
+  // Full user registry for the admin Members page (active and deactivated).
+  fastify.get(
+    '/members',
+    {
+      onRequest: [authenticate, authorize(UserRole.SUPER_ADMIN)],
+    },
+    AdminController.listMembers
+  );
+
+  fastify.get(
+    '/members/:id',
+    { onRequest: [authenticate, authorize(UserRole.SUPER_ADMIN)] },
+    AdminController.getMemberProfile
+  );
+
+  fastify.patch(
+    '/members/:id',
+    { onRequest: [authenticate, authorize(UserRole.SUPER_ADMIN)] },
+    AdminController.updateMember
+  );
+
+  // Batched email sends to the active / non-active member audiences.
+  fastify.get(
+    '/email-campaigns/audience',
+    { onRequest: [authenticate, authorize(UserRole.SUPER_ADMIN)] },
+    AdminController.getEmailAudience
+  );
+
+  fastify.get(
+    '/email-campaigns',
+    { onRequest: [authenticate, authorize(UserRole.SUPER_ADMIN)] },
+    AdminController.listEmailCampaigns
+  );
+
+  fastify.post(
+    '/email-campaigns',
+    { onRequest: [authenticate, authorize(UserRole.SUPER_ADMIN)] },
+    AdminController.createEmailCampaign
+  );
+
+  fastify.get(
+    '/email-campaigns/:id',
+    { onRequest: [authenticate, authorize(UserRole.SUPER_ADMIN)] },
+    AdminController.getEmailCampaign
+  );
+
   fastify.post(
     '/bookshop-managers',
     {

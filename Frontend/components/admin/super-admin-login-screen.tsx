@@ -7,11 +7,11 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { apiClient } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
+import { toastApiError } from "@/lib/feedback"
 
 export function SuperAdminLoginScreen() {
   const router = useRouter()
-  const { toast } = useToast()
   const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -23,22 +23,29 @@ export function SuperAdminLoginScreen() {
       await apiClient.login(identifier.trim(), password)
       const profile = await apiClient.getProfile()
       if (profile?.user?.role !== "super_admin") {
-        toast({
-          title: "Access denied",
-          description: "You do not have super-admin privileges.",
-          variant: "destructive",
+        // The credentials were valid, so a token is now held. Telling someone
+        // they are denied while leaving them signed in is worse than useless —
+        // drop it before saying so.
+        apiClient.logout()
+        toast.error("Access denied", {
+          description: "That account does not have super-admin privileges.",
         })
+        setIsSubmitting(false)
         return
       }
+      toast.success("Signed in as super admin", { description: "Opening the admin console." })
       router.push("/dashboard/admin")
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Login failed"
-      toast({
-        title: "Login failed",
-        description: message,
-        variant: "destructive",
-      })
-    } finally {
+      toastApiError(
+        error,
+        {
+          401: {
+            title: "Those details don't match",
+            description: "The email or phone and password combination is not recognised.",
+          },
+        },
+        "Sign in failed",
+      )
       setIsSubmitting(false)
     }
   }

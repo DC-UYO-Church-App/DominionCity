@@ -6,6 +6,7 @@ import fastifyRateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
 import fastifyWebsocket from '@fastify/websocket';
 import { config } from './config';
+import { EmailCampaignService } from './services/emailCampaignService';
 import { pool } from './config/database';
 import { errorHandler } from './middleware/errorHandler';
 import { authenticate } from './middleware/auth';
@@ -156,6 +157,13 @@ async function start() {
     // Test database connection
     await pool.query('SELECT NOW()');
     console.log('Database connected successfully');
+
+    // A send that was mid-flight when the process died would otherwise sit on
+    // 'sending' forever, showing the admin a progress bar that never moves.
+    const stranded = await EmailCampaignService.reconcileInterrupted();
+    if (stranded > 0) {
+      console.log(`Marked ${stranded} interrupted email campaign(s)`);
+    }
 
     // Setup cron jobs
     await setupCronJobs();

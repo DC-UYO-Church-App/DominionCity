@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { UploadCloud } from "lucide-react"
 import { apiClient } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,6 @@ const naira = (value: number) =>
   )
 
 export function AdminProgramsScreen() {
-  const { toast } = useToast()
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api"
   const uploadsBaseUrl = apiBaseUrl.replace(/\/api$/, "")
   const allowedImageTypes = ["image/jpeg", "image/png", "image/jpg"]
@@ -84,7 +83,7 @@ export function AdminProgramsScreen() {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      toast({ title: "Missing details", description: "Program title is required.", variant: "destructive" })
+      toast.error("Missing details", { description: "Program title is required." })
       return
     }
     setIsSubmitting(true)
@@ -106,15 +105,11 @@ export function AdminProgramsScreen() {
           editingId ? prev.map((p) => (p.id === editingId ? { ...p, ...res.program } : p)) : [res.program, ...prev]
         )
       }
-      toast({ title: editingId ? "Program updated" : "Program created" })
+      toast.success(editingId ? "Program updated" : "Program created")
       setIsModalOpen(false)
       resetForm()
     } catch (error) {
-      toast({
-        title: "Save failed",
-        description: error instanceof Error ? error.message : "Failed to save program",
-        variant: "destructive",
-      })
+      toast.error("Save failed", { description: error instanceof Error ? error.message : "Failed to save program" })
     } finally {
       setIsSubmitting(false)
     }
@@ -137,13 +132,9 @@ export function AdminProgramsScreen() {
     try {
       await apiClient.deleteProgram(id)
       setPrograms((prev) => prev.filter((p) => p.id !== id))
-      toast({ title: "Program deleted" })
+      toast.success("Program deleted")
     } catch (error) {
-      toast({
-        title: "Delete failed",
-        description: error instanceof Error ? error.message : "Failed to delete",
-        variant: "destructive",
-      })
+      toast.error("Delete failed", { description: error instanceof Error ? error.message : "Failed to delete" })
     }
   }
 
@@ -265,7 +256,7 @@ export function AdminProgramsScreen() {
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null
                     if (file && !allowedImageTypes.includes(file.type)) {
-                      toast({ title: "Invalid image", description: "Only JPG or PNG allowed.", variant: "destructive" })
+                      toast.error("Invalid image", { description: "Only JPG or PNG allowed." })
                       e.target.value = ""
                       return
                     }

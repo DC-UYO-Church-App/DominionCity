@@ -5,8 +5,9 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, LogIn } from "lucide-react"
+import { toast } from "sonner"
 import { apiClient } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
+import { toastApiError } from "@/lib/feedback"
 
 const CATHEDRAL_IMG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCFjCtFcvRIDanP72siuQ0tO0mwFu2kuagC3ZVBDLcahDiCWSF5eaK3pvDxb90UFJ9y5YVbJ1hNNXwjB8vt1jLDm3m6KOM2eEu_9yK7wskJvGstdM6qMA0YdYLUqdDhiuquQt55C6Xyr-FvEqCGH1m5dFtoUdHweqcaUE-JNTcEIytrPZAszqIFHY7fMibtqK3MYzwyfq52fyf6sj3Zs7dZs3xnwXCksAdYFdGGDtEII2xhSLwhy9w3HtBX08BA5tBphX3WqQ-Hsg"
@@ -17,7 +18,6 @@ export function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
-  const { toast } = useToast()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,27 +26,40 @@ export function LoginScreen() {
     const isPhone = /^\d{11}$/.test(trimmedIdentifier)
 
     if (!isEmail && !isPhone) {
-      toast({
-        title: "Incomplete login details",
+      toast.error("Check your details", {
         description: "Enter a full email address or an 11-digit phone number.",
-        variant: "destructive",
       })
       return
     }
 
     setIsSubmitting(true)
     try {
-      await apiClient.login(trimmedIdentifier, password)
+      const res = await apiClient.login(trimmedIdentifier, password)
+
+      // Signing in used to be silent: the page simply changed. Say so, by
+      // name, and hold the button in its pending state through the navigation
+      // so it never flicks back to "Sign In" on the way out.
+      const name = res?.user?.firstName
+      toast.success(name ? `Welcome back, ${name}` : "Signed in", {
+        description: "Taking you to your dashboard.",
+      })
       router.push("/dashboard")
     } catch (err) {
-      const rawMessage = err instanceof Error ? err.message : "Login failed"
-      const message = rawMessage === "Request failed" ? "Invalid email/phone or password" : rawMessage
-      toast({
-        title: "Login failed",
-        description: message,
-        variant: "destructive",
-      })
-    } finally {
+      toastApiError(
+        err,
+        {
+          401: {
+            title: "Those details don't match",
+            description: "The email or phone and password combination is not recognised.",
+          },
+          429: {
+            title: "Too many attempts",
+            description:
+              "This account is paused for a few minutes to keep it safe. Try again shortly, or reset your password.",
+          },
+        },
+        "Sign in failed",
+      )
       setIsSubmitting(false)
     }
   }

@@ -1,5 +1,22 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
+/**
+ * Carries the HTTP status alongside the message. Without it every failure
+ * arrives as an indistinguishable Error, and a screen cannot tell "wrong
+ * password" (401) from "too many attempts" (429) from "the server is down"
+ * — which are three different things to tell a person. `status` is 0 when the
+ * request never reached the server at all.
+ */
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 class ApiClient {
   private token: string | null = null;
 
@@ -36,14 +53,24 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+      });
+    } catch {
+      // fetch only rejects when the request never completed — offline, DNS,
+      // CORS, server down. "Failed to fetch" means nothing to a member.
+      throw new ApiError('Could not reach the server. Check your connection and try again.', 0);
+    }
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Request failed' }));
-      throw new Error(error.error || `HTTP ${response.status}`);
+      const body = await response.json().catch(() => null);
+      // Our own handlers answer with `error`; Fastify's rate limiter puts the
+      // useful part ("retry in 14 minutes") in `message`.
+      const message = body?.error || body?.message || `Request failed (${response.status})`;
+      throw new ApiError(message, response.status);
     }
 
     return response.json();
@@ -161,6 +188,72 @@ class ApiClient {
 
   async getAdminDashboardStats() {
     return this.request('/admin/stats');
+  }
+
+  async getAdminMembers(params?: {
+    status?: 'all' | 'active' | 'non_active' | 'deactivated';
+    role?: string;
+    q?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const search = new URLSearchParams();
+    if (params?.status && params.status !== 'all') search.set('status', params.status);
+    if (params?.role) search.set('role', params.role);
+    if (params?.q?.trim()) search.set('q', params.q.trim());
+    if (params?.page) search.set('page', String(params.page));
+    if (params?.limit) search.set('limit', String(params.limit));
+    const qs = search.toString();
+    return this.request(`/admin/members${qs ? `?${qs}` : ''}`);
+  }
+
+  async getAdminMember(id: string) {
+    return this.request(`/admin/members/${id}`);
+  }
+
+  async updateAdminMember(
+    id: string,
+    data: {
+      firstName?: string;
+      lastName?: string;
+      phoneNumber?: string;
+      address?: string | null;
+      dateOfBirth?: string | null;
+      role?: string;
+      departmentId?: string | null;
+      cellGroupId?: string | null;
+      isFirstTimer?: boolean;
+      isActive?: boolean;
+    }
+  ) {
+    return this.request(`/admin/members/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Batched member email sends.
+  async getEmailAudience(audience: 'active' | 'non_active') {
+    return this.request(`/admin/email-campaigns/audience?audience=${audience}`);
+  }
+
+  async startEmailCampaign(data: {
+    audience: 'active' | 'non_active';
+    subject: string;
+    body: string;
+  }) {
+    return this.request('/admin/email-campaigns', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getEmailCampaign(id: string) {
+    return this.request(`/admin/email-campaigns/${id}`);
+  }
+
+  async listEmailCampaigns() {
+    return this.request('/admin/email-campaigns');
   }
 
   async createBookshopManager(data: {

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { AdminLayout } from "@/components/admin/admin-layout"
 import { apiClient } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import {
   Plus,
   Search,
@@ -182,7 +182,6 @@ function AddMemberModal({
   onSaved: () => void
   existingIds: Set<string>
 }) {
-  const { toast } = useToast()
   const [query, setQuery] = useState("")
   const [users, setUsers] = useState<UserResult[]>([])
   const [searching, setSearching] = useState(false)
@@ -214,17 +213,17 @@ function AddMemberModal({
   const save = async () => {
     if (!selected) return
     if (roles.length === 0) {
-      toast({ title: "No roles", description: "Add at least one role.", variant: "destructive" })
+      toast.error("No roles", { description: "Add at least one role." })
       return
     }
     setSaving(true)
     try {
       await apiClient.addTeamMember({ userId: selected.id, roles })
-      toast({ title: "Member added", description: `${selected.firstName} ${selected.lastName} added to the team.` })
+      toast.success("Member added", { description: `${selected.firstName} ${selected.lastName} added to the team.` })
       onSaved()
       onClose()
     } catch (err) {
-      toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to save", variant: "destructive" })
+      toast.error("Error", { description: err instanceof Error ? err.message : "Failed to save" })
     } finally {
       setSaving(false)
     }
@@ -353,23 +352,22 @@ function EditRolesModal({
   onClose: () => void
   onSaved: () => void
 }) {
-  const { toast } = useToast()
   const [roles, setRoles] = useState<Role[]>(member.roles)
   const [saving, setSaving] = useState(false)
 
   const save = async () => {
     if (roles.length === 0) {
-      toast({ title: "No roles", description: "Assign at least one role.", variant: "destructive" })
+      toast.error("No roles", { description: "Assign at least one role." })
       return
     }
     setSaving(true)
     try {
       await apiClient.updateTeamMemberRoles(member.id, roles)
-      toast({ title: "Roles updated", description: `${member.firstName}'s roles have been updated.` })
+      toast.success("Roles updated", { description: `${member.firstName}'s roles have been updated.` })
       onSaved()
       onClose()
     } catch (err) {
-      toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to save", variant: "destructive" })
+      toast.error("Error", { description: err instanceof Error ? err.message : "Failed to save" })
     } finally {
       setSaving(false)
     }
@@ -410,7 +408,6 @@ function EditRolesModal({
 
 // ── Main Screen ────────────────────────────────────────────────────────────
 export function AdminTeamScreen() {
-  const { toast } = useToast()
   const [members, setMembers] = useState<TeamMember[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -437,10 +434,10 @@ export function AdminTeamScreen() {
     setDeletingId(member.id)
     try {
       await apiClient.removeTeamMember(member.id)
-      toast({ title: "Removed", description: `${member.firstName} has been removed from the team.` })
+      toast.success("Removed", { description: `${member.firstName} has been removed from the team.` })
       load()
     } catch (err) {
-      toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to remove", variant: "destructive" })
+      toast.error("Error", { description: err instanceof Error ? err.message : "Failed to remove" })
     } finally {
       setDeletingId(null)
     }

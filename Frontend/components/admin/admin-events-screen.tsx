@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { UploadCloud } from "lucide-react"
 import { apiClient } from "@/lib/api"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/dialog"
 
 export function AdminEventsScreen() {
-  const { toast } = useToast()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -81,21 +80,13 @@ export function AdminEventsScreen() {
 
   const handleSubmit = async () => {
     if (!title.trim() || !date || !time) {
-      toast({
-        title: "Missing details",
-        description: "Event name, date, and time are required.",
-        variant: "destructive",
-      })
+      toast.error("Missing details", { description: "Event name, date, and time are required." })
       return
     }
 
     const eventDate = new Date(`${date}T${time}`)
     if (Number.isNaN(eventDate.getTime())) {
-      toast({
-        title: "Invalid date",
-        description: "Please provide a valid event date and time.",
-        variant: "destructive",
-      })
+      toast.error("Invalid date", { description: "Please provide a valid event date and time." })
       return
     }
 
@@ -123,19 +114,12 @@ export function AdminEventsScreen() {
         )
       }
 
-      toast({
-        title: editingId ? "Event updated" : "Event saved",
-        description: editingId ? "Your event has been updated." : "Your event has been posted.",
-      })
+      toast.success(editingId ? "Event updated" : "Event saved", { description: editingId ? "Your event has been updated." : "Your event has been posted." })
       setIsModalOpen(false)
       resetForm()
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to save event"
-      toast({
-        title: "Save failed",
-        description: message,
-        variant: "destructive",
-      })
+      toast.error("Save failed", { description: message })
     } finally {
       setIsSubmitting(false)
     }
@@ -163,10 +147,10 @@ export function AdminEventsScreen() {
     try {
       await apiClient.deleteEvent(id)
       setEvents((prev) => prev.filter((item) => item.id !== id))
-      toast({ title: "Event deleted" })
+      toast.success("Event deleted")
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to delete event"
-      toast({ title: "Delete failed", description: message, variant: "destructive" })
+      toast.error("Delete failed", { description: message })
     }
   }
 
@@ -176,10 +160,10 @@ export function AdminEventsScreen() {
       if (response?.event) {
         setEvents((prev) => prev.map((item) => (item.id === id ? response.event : item)))
       }
-      toast({ title: "Event cancelled" })
+      toast.success("Event cancelled")
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to cancel event"
-      toast({ title: "Cancel failed", description: message, variant: "destructive" })
+      toast.error("Cancel failed", { description: message })
     }
   }
 
@@ -381,11 +365,7 @@ export function AdminEventsScreen() {
                   onChange={(event) => {
                     const file = event.target.files?.[0] || null
                     if (file && !allowedImageTypes.includes(file.type)) {
-                      toast({
-                        title: "Invalid image",
-                        description: "Only JPG or PNG images are allowed.",
-                        variant: "destructive",
-                      })
+                      toast.error("Invalid image", { description: "Only JPG or PNG images are allowed." })
                       event.target.value = ""
                       setCoverFile(null)
                       setCoverPreview(null)
