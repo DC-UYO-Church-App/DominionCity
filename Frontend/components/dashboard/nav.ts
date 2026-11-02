@@ -12,7 +12,7 @@
    I give, how I grow, and my own account.
    ========================================================================== */
 import {
-  Bell, BookOpen, CalendarDays, Church, CheckSquare, FolderKanban, HandCoins,
+  Bell, BookOpen, CalendarDays, CheckSquare, FolderKanban, Gift, HandCoins,
   Home, MessageSquare, Repeat, Settings, Sparkles, User, Users,
   type LucideIcon,
 } from 'lucide-react'
@@ -28,6 +28,14 @@ export interface NavItem {
 export interface NavGroup {
   label: string
   items: NavItem[]
+  /** Shown beside the group label. */
+  icon?: LucideIcon
+  /**
+   * Renders the group as a dropdown: the label becomes a toggle and the items
+   * stay hidden until it is opened. A group holding the page you are on opens
+   * itself, so the current destination is never concealed.
+   */
+  collapsible?: boolean
 }
 
 export const navGroups: NavGroup[] = [
@@ -45,12 +53,13 @@ export const navGroups: NavGroup[] = [
     label: 'My church',
     items: [
       { name: 'Cell groups', href: '/dashboard/cell-groups', icon: Users },
-      { name: 'Satellite churches', href: '/dashboard/satellite', icon: Church },
       { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
     ],
   },
   {
     label: 'Giving',
+    icon: Gift,
+    collapsible: true,
     items: [
       { name: 'Give', href: '/dashboard/giving', icon: HandCoins, title: 'Giving' },
       { name: 'Tithe record', href: '/dashboard/tithing', icon: BookOpen, title: 'Tithe record' },

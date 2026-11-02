@@ -1,5 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserService } from '../services/userService';
+import { getDashboardsForRoles, RoleDashboard } from '../config/roleDashboards';
+import { AcademyService } from '../services/academyService';
 import { AuthenticatedRequest } from '../middleware/auth';
 import fs from 'fs/promises';
 import path from 'path';
@@ -117,6 +119,59 @@ export class AuthController {
       reply.send({ user });
     } catch (error) {
       replyWithError(reply, 'Failed to get profile', error);
+    }
+  }
+
+  /**
+   * Role dashboards the signed-in member can open from their own dashboard.
+   *
+   * Always a list. A member with none gets an empty array and the client shows
+   * no button; with one it links straight through; with several the client
+   * asks which to open. The roles are read fresh rather than taken from the
+   * JWT, so a role revoked since sign-in stops offering its dashboard without
+   * waiting for the token to expire.
+   */
+  static async getMyDashboards(request: AuthenticatedRequest, reply: FastifyReply) {
+    try {
+      const user = await UserService.getUserById(request.user!.id);
+
+      if (!user || !user.isActive) {
+        return reply.status(404).send({ error: 'User not found' });
+      }
+
+      const dashboards: RoleDashboard[] = getDashboardsForRoles([user.role]);
+
+      /* A cohort coordinator normally holds no elevated role, so their way in
+         is the staff grant rather than `users.role`. One entry per cohort they
+         run, which the client turns into a button or, for several, a picker.
+         Academy admins already reach every cohort through their own dashboard,
+         so they are not given a duplicate entry per cohort. */
+      if (!AcademyService.isAcademyAdmin(user.role)) {
+        const staffCohorts = await AcademyService.getStaffCohorts(user.id);
+        const trackCounts = new Map<string, number>();
+        for (const cohort of staffCohorts) {
+          trackCounts.set(cohort.trackName, (trackCounts.get(cohort.trackName) || 0) + 1);
+        }
+
+        for (const cohort of staffCohorts) {
+          dashboards.push({
+            key: `cohort:${cohort.cohortId}`,
+            // The track name alone is what the coordinator calls it. The cohort
+            // name is added only when they run two runs of the same track and
+            // the track name would be ambiguous.
+            label:
+              (trackCounts.get(cohort.trackName) || 0) > 1
+                ? `${cohort.trackName} (${cohort.cohortName})`
+                : cohort.trackName,
+            path: `/dashboard/academy/cohorts/${cohort.cohortId}`,
+            cta: 'Go to',
+          });
+        }
+      }
+
+      reply.send({ dashboards });
+    } catch (error) {
+      replyWithError(reply, 'Failed to get dashboards', error);
     }
   }
 

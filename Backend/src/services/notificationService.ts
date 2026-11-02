@@ -83,13 +83,27 @@ export class NotificationService {
     return result.rows.map(this.mapDbRowToNotification);
   }
 
-  static async markAsRead(notificationId: string): Promise<Notification | null> {
+  static async getUnreadCount(userId: string): Promise<number> {
     const result = await query(
-      `UPDATE notifications 
-       SET is_read = true, read_at = CURRENT_TIMESTAMP 
-       WHERE id = $1
+      `SELECT COUNT(*)::int AS count
+         FROM notifications WHERE user_id = $1 AND is_read = false`,
+      [userId]
+    );
+    return result.rows[0]?.count || 0;
+  }
+
+  // Scoped to the owner so one member can never mark or clear another's
+  // notification by guessing its id.
+  static async markAsRead(
+    notificationId: string,
+    userId: string
+  ): Promise<Notification | null> {
+    const result = await query(
+      `UPDATE notifications
+       SET is_read = true, read_at = CURRENT_TIMESTAMP
+       WHERE id = $1 AND user_id = $2
        RETURNING *`,
-      [notificationId]
+      [notificationId, userId]
     );
 
     if (result.rows.length === 0) {
@@ -108,10 +122,10 @@ export class NotificationService {
     );
   }
 
-  static async deleteNotification(notificationId: string): Promise<boolean> {
+  static async deleteNotification(notificationId: string, userId: string): Promise<boolean> {
     const result = await query(
-      `DELETE FROM notifications WHERE id = $1`,
-      [notificationId]
+      `DELETE FROM notifications WHERE id = $1 AND user_id = $2`,
+      [notificationId, userId]
     );
 
     return result.rowCount !== null && result.rowCount > 0;

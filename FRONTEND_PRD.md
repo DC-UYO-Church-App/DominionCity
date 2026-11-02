@@ -644,6 +644,7 @@ The dashboard adapts its content based on user role. All versions share the same
 - **Offline state:** Show friendly "No internet connection" banner when offline
 
 ---
+Devotional board leaderboard
 
 ## 12. Suggested Tech Stack (Frontend)
 

@@ -20,12 +20,27 @@ import {
 import { apiClient } from "@/lib/api"
 import { toast } from "sonner"
 
+type AcademyProgress = {
+  trackId: string
+  name: string
+  status: "not_started" | "in_progress" | "completed" | "withdrawn"
+  completedAt: string | null
+  currentCohort: string | null
+  locked: boolean
+  openCohortId: string | null
+  openCohortName: string | null
+  requestPending: boolean
+}
+
 export function ProfileScreen() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api"
   const uploadsBaseUrl = apiBaseUrl.replace(/\/api$/, "")
 
+  const [programs, setPrograms] = useState<AcademyProgress[]>([])
+  const [isLoadingPrograms, setIsLoadingPrograms] = useState(true)
+  const [joiningTrackId, setJoiningTrackId] = useState<string | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -148,6 +163,35 @@ export function ProfileScreen() {
 
   const fullName = useMemo(() => `${user.firstName} ${user.lastName}`.trim(), [user.firstName, user.lastName])
 
+  const loadPrograms = () =>
+    apiClient
+      .getMyAcademyProgress()
+      .then((response) => setPrograms(response.progress || []))
+      .catch(() => setPrograms([]))
+      .finally(() => setIsLoadingPrograms(false))
+
+  useEffect(() => {
+    loadPrograms()
+  }, [])
+
+  const requestToJoin = async (program: AcademyProgress) => {
+    if (!program.openCohortId) return
+    setJoiningTrackId(program.trackId)
+    try {
+      await apiClient.requestToJoinAcademyCohort(program.openCohortId)
+      toast.success("Request sent", {
+        description: `The ${program.name} team will review your request.`,
+      })
+      await loadPrograms()
+    } catch (error) {
+      toast.error("Could not send request", {
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setJoiningTrackId(null)
+    }
+  }
+
   const initials = useMemo(() => {
     const parts = fullName.split(" ").filter(Boolean)
     return parts.length >= 2 ? `${parts[0][0]}${parts[1][0]}` : parts[0]?.[0] || "U"
@@ -155,13 +199,6 @@ export function ProfileScreen() {
 
   const roleLabel = user.role.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 
-  const programs = [
-    { name: "DCA Basic", completed: false, date: "" },
-    { name: "DCA Advance", completed: false, date: "" },
-    { name: "Encounter", completed: false, date: "" },
-    { name: "DLI Basic", completed: false, date: "" },
-    { name: "DLI Advance", completed: false, date: "" },
-  ]
 
   const inputClass = (editing: boolean) =>
     `w-full border rounded-lg px-4 py-2.5 text-sm transition-all ${
@@ -357,8 +394,15 @@ export function ProfileScreen() {
               Academy Progress
             </h3>
             <div className="space-y-3">
-              {programs.map((program) =>
-                program.completed ? (
+              {isLoadingPrograms ? (
+                <p className="py-6 text-center text-sm text-gray-400">Loading your progress...</p>
+              ) : programs.length === 0 ? (
+                <p className="py-6 text-center text-sm text-gray-400">
+                  No academy tracks have been set up yet.
+                </p>
+              ) : (
+                programs.map((program) =>
+                program.status === "completed" ? (
                   <div
                     key={program.name}
                     className="flex items-center gap-3 p-3 bg-[#a5c1fe]/10 border border-[#a5c1fe]/30 rounded-xl"
@@ -369,26 +413,74 @@ export function ProfileScreen() {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-[#00081e] text-sm">{program.name}</p>
                       <p className="text-xs text-[#28467b]">
-                        Completed{program.date ? ` • ${program.date}` : ""}
+                        Completed
+                        {program.completedAt
+                          ? ` • ${new Date(program.completedAt).toLocaleDateString("en-US", {
+                              month: "short",
+                              year: "numeric",
+                            })}`
+                          : ""}
                       </p>
                     </div>
                     <CheckCircle className="h-5 w-5 text-[#415e94] flex-shrink-0" />
                   </div>
+                ) : program.status === "in_progress" ? (
+                  <div
+                    key={program.trackId}
+                    className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl"
+                  >
+                    <div className="w-12 h-12 bg-amber-100 flex items-center justify-center rounded-full flex-shrink-0">
+                      <GraduationCap className="h-6 w-6 text-amber-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-[#00081e] text-sm">{program.name}</p>
+                      <p className="text-xs text-amber-700 truncate">
+                        In progress{program.currentCohort ? ` • ${program.currentCohort}` : ""}
+                      </p>
+                    </div>
+                  </div>
                 ) : (
                   <div
-                    key={program.name}
-                    className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl opacity-60 grayscale"
+                    key={program.trackId}
+                    className={`flex items-center gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl ${
+                      program.locked ? "opacity-60 grayscale" : ""
+                    }`}
                   >
                     <div className="w-12 h-12 bg-gray-200 flex items-center justify-center rounded-full flex-shrink-0">
                       <GraduationCap className="h-6 w-6 text-gray-400" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-gray-500 text-sm">{program.name}</p>
-                      <p className="text-xs text-gray-400">Not started</p>
+                      <p className="text-xs text-gray-400">
+                        {program.locked
+                          ? "Locked"
+                          : program.status === "withdrawn"
+                            ? "Withdrawn"
+                            : program.openCohortName
+                              ? `Open • ${program.openCohortName}`
+                              : "Not started"}
+                      </p>
                     </div>
-                    <Lock className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    {/* Only shown when a prerequisite really is unfinished. */}
+                    {program.locked ? (
+                      <Lock className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    ) : program.requestPending ? (
+                      <span className="flex-shrink-0 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                        Request pending
+                      </span>
+                    ) : program.openCohortId ? (
+                      <button
+                        type="button"
+                        onClick={() => requestToJoin(program)}
+                        disabled={joiningTrackId === program.trackId}
+                        className="flex-shrink-0 rounded-full bg-[#1A3A6E] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#28467b] disabled:opacity-60"
+                      >
+                        {joiningTrackId === program.trackId ? "Sending..." : "Request to join"}
+                      </button>
+                    ) : null}
                   </div>
                 ),
+                )
               )}
             </div>
           </div>

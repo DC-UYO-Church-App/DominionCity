@@ -137,6 +137,36 @@
   text-transform: uppercase; color: var(--text-invert-soft); opacity: 0.75;
 }
 
+/* A group label may carry an icon; it sits inline with the text at the same
+   optical weight as the link icons below it. */
+.dash-rail__label-icon { width: 1rem; height: 1rem; flex: none; opacity: 0.9; }
+.dash-rail__label-text { display: inline-flex; align-items: center; gap: 0.6rem; }
+
+/* The dropdown heading is set larger than a static group label: it is a
+   control rather than a caption, so it takes a tap target and reads at a size
+   closer to the links it opens. */
+.dash-rail__label--toggle {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  width: 100%; background: none; border: 0; cursor: pointer;
+  font-family: inherit; text-align: left;
+  /* Vertical only. The 0.75rem inline padding matches .dash-rail__link, so the
+     label's text and the links it opens stay on the same left edge. */
+  padding: 0.75rem;
+  font-size: 0.82rem; letter-spacing: 0.08em; opacity: 0.9;
+  border-radius: 10px;
+  transition: opacity var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out);
+}
+.dash-rail__label--toggle:hover {
+  opacity: 1;
+  color: var(--text-invert);
+  background: rgba(247, 242, 231, 0.07);
+}
+.dash-rail__chevron {
+  width: 0.9rem; height: 0.9rem; flex: none; opacity: 0.8;
+  transition: transform var(--dur-1) var(--ease-out);
+}
+.dash-rail__chevron.is-open { transform: rotate(180deg); }
+
 .dash-rail__link {
   position: relative;
   display: flex; align-items: center; gap: 0.75rem;
@@ -381,6 +411,7 @@ a.dash-row:hover { background: var(--dash-surface-2); }
 .dash-btn--primary:hover { background: var(--accent); }
 .dash-btn--ink { color: var(--text-invert); background: var(--bg-invert); border-color: transparent; }
 .dash-btn--ink:hover { background: var(--c-firmament); }
+.dash-btn--sm { min-height: 2.25rem; padding: 0.35rem 0.8rem; font-size: 0.8rem; }
 .dash-btn--ghost { background: transparent; border-color: var(--line); }
 .dash-panel .dash-btn--ghost { color: var(--text-invert); border-color: var(--line-invert); }
 .dash-panel .dash-btn--ghost:hover { background: rgba(247, 242, 231, 0.1); }
