@@ -6,6 +6,7 @@ export enum UserRole {
   CELL_LEADER = 'cell_leader',
   WORKER = 'worker',
   BOOKSHOP_MANAGER = 'bookshop_manager',
+  TECHNICAL = 'technical',
   MEMBER = 'member',
 }
 

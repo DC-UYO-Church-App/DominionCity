@@ -129,6 +129,66 @@ class ApiClient {
     return this.request('/auth/profile');
   }
 
+  // ---- Facial recognition ------------------------------------------------
+  // A member's own face registration.
+  async getMyFaceEnrollment() {
+    return this.request('/face/my-enrollment');
+  }
+
+  async enrollMyFace(image: string, consent: boolean) {
+    return this.request('/face/enroll', {
+      method: 'POST',
+      body: JSON.stringify({ image, consent }),
+    });
+  }
+
+  async deleteMyFaceEnrollment() {
+    return this.request('/face/my-enrollment', { method: 'DELETE' });
+  }
+
+  // Technical dashboard.
+  async getFaceUsers(params?: { q?: string; enrolled?: 'true' | 'false' }) {
+    const search = new URLSearchParams();
+    if (params?.q) search.set('q', params.q);
+    if (params?.enrolled) search.set('enrolled', params.enrolled);
+    const qs = search.toString();
+    return this.request(`/face/users${qs ? `?${qs}` : ''}`);
+  }
+
+  /**
+   * Fetches a user's enrolled face still (an authenticated binary endpoint)
+   * and returns an object URL for an <img>. The caller must revoke the URL
+   * when done. An <img src> cannot carry the auth header itself, so we fetch
+   * the bytes here and wrap them.
+   */
+  async getFaceUserImageUrl(userId: string): Promise<string> {
+    const headers: Record<string, string> = {};
+    if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
+
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}/face/users/${userId}/image`, { headers });
+    } catch {
+      throw new ApiError('Could not reach the server.', 0);
+    }
+    if (!response.ok) {
+      throw new ApiError(`Could not load the face image (${response.status})`, response.status);
+    }
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+  }
+
+  async recognizeFace(image: string) {
+    return this.request('/face/recognize', {
+      method: 'POST',
+      body: JSON.stringify({ image }),
+    });
+  }
+
+  async deleteUserFaceEnrollment(userId: string) {
+    return this.request(`/face/users/${userId}/enrollment`, { method: 'DELETE' });
+  }
+
   async updateProfile(data: any) {
     return this.request('/auth/profile', {
       method: 'PUT',

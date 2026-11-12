@@ -169,7 +169,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => router.push("/dashboard/profile")}>Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/dashboard/face")}>Face ID</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/dashboard/settings")}>Settings</DropdownMenuItem>
+                {/* Only the technical team and super admins see the technical area. */}
+                {(profile?.role === "technical" || profile?.role === "super_admin") && (
+                  <DropdownMenuItem onClick={() => router.push("/dashboard/technical")}>
+                    Technical dashboard
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout}>Log out</DropdownMenuItem>
               </DropdownMenuContent>

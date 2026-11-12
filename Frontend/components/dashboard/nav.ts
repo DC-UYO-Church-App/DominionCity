@@ -13,7 +13,7 @@
    ========================================================================== */
 import {
   Bell, BookOpen, CalendarDays, Church, CheckSquare, FolderKanban, HandCoins,
-  Home, MessageSquare, Repeat, Settings, Sparkles, User, Users,
+  Home, MessageSquare, Repeat, ScanFace, Settings, Sparkles, User, Users,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -65,6 +65,7 @@ export const navGroups: NavGroup[] = [
     label: 'Account',
     items: [
       { name: 'Profile', href: '/dashboard/profile', icon: User },
+      { name: 'Face ID', href: '/dashboard/face', icon: ScanFace },
       { name: 'Notifications', href: '/dashboard/notifications', icon: Bell },
       { name: 'Settings', href: '/dashboard/settings', icon: Settings },
     ],
