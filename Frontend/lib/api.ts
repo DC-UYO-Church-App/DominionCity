@@ -246,6 +246,195 @@ class ApiClient {
     return this.request(`/attendance/user/${userId}/stats`);
   }
 
+  /** Role dashboards the signed-in member may open, beyond the member one. */
+  async getMyDashboards() {
+    return this.request('/auth/my-dashboards');
+  }
+
+  // ---- Academy ----------------------------------------------------------
+  async getMyAcademyProgress() {
+    return this.request('/academy/my-progress');
+  }
+
+  async getAcademyMemberProgress(userId: string) {
+    return this.request(`/academy/members/${userId}/progress`);
+  }
+
+  async getAcademyAccess() {
+    return this.request('/academy/my-access');
+  }
+
+  async getAcademyOverview() {
+    return this.request('/academy/overview');
+  }
+
+  async getAcademyTracks() {
+    return this.request('/academy/tracks');
+  }
+
+  async createAcademyTrack(data: {
+    name: string;
+    description?: string;
+    sequence?: number;
+    prerequisiteTrackId?: string | null;
+  }) {
+    return this.request('/academy/tracks', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  async updateAcademyTrack(
+    id: string,
+    data: {
+      name?: string;
+      description?: string | null;
+      sequence?: number;
+      prerequisiteTrackId?: string | null;
+      isActive?: boolean;
+    }
+  ) {
+    return this.request(`/academy/tracks/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+  }
+
+  async deleteAcademyTrack(id: string) {
+    return this.request(`/academy/tracks/${id}`, { method: 'DELETE' });
+  }
+
+  async getAcademyCohorts(params?: { trackId?: string; status?: string; mine?: boolean }) {
+    const search = new URLSearchParams();
+    if (params?.trackId) search.set('trackId', params.trackId);
+    if (params?.status) search.set('status', params.status);
+    if (params?.mine) search.set('mine', 'true');
+    const qs = search.toString();
+    return this.request(`/academy/cohorts${qs ? `?${qs}` : ''}`);
+  }
+
+  async getAcademyCohort(id: string) {
+    return this.request(`/academy/cohorts/${id}`);
+  }
+
+  async createAcademyCohort(data: {
+    trackId: string;
+    name: string;
+    startDate?: string | null;
+    endDate?: string | null;
+    status?: string;
+  }) {
+    return this.request('/academy/cohorts', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  async updateAcademyCohort(
+    id: string,
+    data: { name?: string; startDate?: string | null; endDate?: string | null; status?: string }
+  ) {
+    return this.request(`/academy/cohorts/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+  }
+
+  async deleteAcademyCohort(id: string) {
+    return this.request(`/academy/cohorts/${id}`, { method: 'DELETE' });
+  }
+
+  async addAcademyCohortStaff(cohortId: string, data: { userId: string; staffRole?: string }) {
+    return this.request(`/academy/cohorts/${cohortId}/staff`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async removeAcademyCohortStaff(cohortId: string, userId: string) {
+    return this.request(`/academy/cohorts/${cohortId}/staff/${userId}`, { method: 'DELETE' });
+  }
+
+  async enrollInAcademyCohort(cohortId: string, userIds: string[]) {
+    return this.request(`/academy/cohorts/${cohortId}/enrollments`, {
+      method: 'POST',
+      body: JSON.stringify({ userIds }),
+    });
+  }
+
+  async updateAcademyEnrollment(
+    enrollmentId: string,
+    data: { status?: string; certificateNumber?: string | null; notes?: string | null }
+  ) {
+    return this.request(`/academy/enrollments/${enrollmentId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async removeAcademyEnrollment(enrollmentId: string) {
+    return this.request(`/academy/enrollments/${enrollmentId}`, { method: 'DELETE' });
+  }
+
+  async createAcademySession(
+    cohortId: string,
+    data: { title: string; topic?: string; sessionDate: string; facilitatorId?: string | null }
+  ) {
+    return this.request(`/academy/cohorts/${cohortId}/sessions`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteAcademySession(sessionId: string) {
+    return this.request(`/academy/sessions/${sessionId}`, { method: 'DELETE' });
+  }
+
+  async getAcademySessionAttendance(sessionId: string) {
+    return this.request(`/academy/sessions/${sessionId}/attendance`);
+  }
+
+  async recordAcademySessionAttendance(
+    sessionId: string,
+    attendance: { enrollmentId: string; status: string }[]
+  ) {
+    return this.request(`/academy/sessions/${sessionId}/attendance`, {
+      method: 'PUT',
+      body: JSON.stringify({ attendance }),
+    });
+  }
+
+  // ---- Academy enrolment requests ---------------------------------------
+  async requestToJoinAcademyCohort(cohortId: string) {
+    return this.request(`/academy/cohorts/${cohortId}/join`, { method: 'POST' });
+  }
+
+  async getMyAcademyRequests() {
+    return this.request('/academy/my-requests');
+  }
+
+  async getAcademyCohortJoinRequests(cohortId: string) {
+    return this.request(`/academy/cohorts/${cohortId}/join-requests`);
+  }
+
+  async acceptAcademyJoinRequest(requestId: string) {
+    return this.request(`/academy/join-requests/${requestId}/accept`, { method: 'PUT' });
+  }
+
+  async rejectAcademyJoinRequest(requestId: string) {
+    return this.request(`/academy/join-requests/${requestId}/reject`, { method: 'PUT' });
+  }
+
+  // ---- Notifications ----------------------------------------------------
+  async getNotifications(params?: { unread?: boolean }) {
+    const qs = params?.unread ? '?unread=true' : '';
+    return this.request(`/notifications${qs}`);
+  }
+
+  async getUnreadNotificationCount() {
+    return this.request('/notifications/unread-count');
+  }
+
+  async markNotificationRead(id: string) {
+    return this.request(`/notifications/${id}/read`, { method: 'PATCH' });
+  }
+
+  async markAllNotificationsRead() {
+    return this.request('/notifications/read-all', { method: 'PATCH' });
+  }
+
+  async deleteNotification(id: string) {
+    return this.request(`/notifications/${id}`, { method: 'DELETE' });
+  }
+
   async getAdminDashboardStats() {
     return this.request('/admin/stats');
   }

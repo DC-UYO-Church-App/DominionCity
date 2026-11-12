@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Church,
   FolderKanban,
+  GraduationCap,
   HandCoins,
   LayoutDashboard,
   LogOut,
@@ -34,6 +35,7 @@ const primaryNav = [
   { icon: HandCoins, label: "Giving", href: "/dashboard/admin/giving" },
   { icon: FolderKanban, label: "Projects", href: "/dashboard/admin/projects" },
   { icon: CalendarDays, label: "Programs", href: "/dashboard/admin/programs" },
+  { icon: GraduationCap, label: "Academy", href: "/dashboard/admin/academy" },
   { icon: Users2, label: "Departments", href: "/dashboard/admin/community" },
   { icon: BookOpen, label: "Book Shop", href: "/dashboard/admin/book-shop" },
 ]

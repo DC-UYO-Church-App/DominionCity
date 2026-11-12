@@ -4,13 +4,13 @@
    order, so moving between a phone and a laptop never means relearning where
    anything lives. */
 
-import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LogOut } from "lucide-react"
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { isActive, navGroups } from "@/components/dashboard/nav"
+import { navGroups } from "@/components/dashboard/nav"
+import { NavGroupSection } from "@/components/dashboard/nav-group-section"
 import { apiClient } from "@/lib/api"
 
 interface SideDrawerProps {
@@ -76,21 +76,12 @@ export function SideDrawer({ isOpen, setIsOpen, profile, profileImage }: SideDra
 
         <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
           {navGroups.map((group) => (
-            <div className="dash-rail__group" key={group.label}>
-              <p className="dash-rail__label">{group.label}</p>
-              {group.items.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className="dash-rail__link"
-                  aria-current={isActive(item.href, pathname) ? "page" : undefined}
-                >
-                  <item.icon />
-                  {item.name}
-                </Link>
-              ))}
-            </div>
+            <NavGroupSection
+              key={group.label}
+              group={group}
+              pathname={pathname}
+              onNavigate={() => setIsOpen(false)}
+            />
           ))}
         </div>
 
