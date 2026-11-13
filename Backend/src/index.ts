@@ -19,6 +19,8 @@ import { titheRoutes } from './routes/titheRoutes';
 import { sermonRoutes } from './routes/sermonRoutes';
 import { cellGroupRoutes } from './routes/cellGroupRoutes';
 import { adminRoutes } from './routes/adminRoutes';
+import { academyRoutes } from './routes/academyRoutes';
+import { notificationRoutes } from './routes/notificationRoutes';
 import { eventRoutes } from './routes/eventRoutes';
 import { bookRoutes } from './routes/bookRoutes';
 import { projectRoutes } from './routes/projectRoutes';
@@ -115,6 +117,8 @@ async function registerRoutes() {
   await fastify.register(givingRoutes, { prefix: '/api/giving' });
   await fastify.register(satelliteChurchRoutes, { prefix: '/api/satellite-churches' });
   await fastify.register(adminRoutes, { prefix: '/api/admin' });
+  await fastify.register(academyRoutes, { prefix: '/api/academy' });
+  await fastify.register(notificationRoutes, { prefix: '/api/notifications' });
 
   // WebSocket for real-time messaging.
   //

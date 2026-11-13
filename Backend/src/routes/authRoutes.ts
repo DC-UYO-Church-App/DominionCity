@@ -66,6 +66,7 @@ export async function authRoutes(fastify: FastifyInstance) {
 
   // Protected routes
   fastify.get('/profile', { onRequest: [authenticate] }, AuthController.getProfile);
+  fastify.get('/my-dashboards', { onRequest: [authenticate] }, AuthController.getMyDashboards);
   fastify.put('/profile', { onRequest: [authenticate] }, AuthController.updateProfile);
   fastify.post('/profile/image', { onRequest: [authenticate] }, AuthController.uploadProfileImage);
 }

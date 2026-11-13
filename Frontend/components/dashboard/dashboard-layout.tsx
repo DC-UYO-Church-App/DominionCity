@@ -10,6 +10,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { Bell, LogOut, Menu } from "lucide-react"
+import { RoleDashboardButton } from "./role-dashboard-button"
 
 import { BottomNavigation } from "@/components/navigation/bottom-navigation"
 import { SideDrawer } from "@/components/navigation/side-drawer"
@@ -23,13 +24,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { apiClient } from "@/lib/api"
-import { isActive, navGroups, titleFor } from "./nav"
+import { navGroups, titleFor } from "./nav"
+import { NavGroupSection } from "./nav-group-section"
 import "./dashboard-ui.css"
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const [profile, setProfile] = useState<any | null>(null)
+  const [unreadCount, setUnreadCount] = useState(0)
   const router = useRouter()
   const pathname = usePathname() || "/dashboard"
 
@@ -51,6 +54,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         router.replace("/login")
       })
   }, [router])
+
+  // Keep the bell badge in step. Re-checked on every navigation so opening the
+  // notifications page (which marks items read) clears the dot on the way back.
+  useEffect(() => {
+    apiClient
+      .getUnreadNotificationCount()
+      .then((r) => setUnreadCount(r?.count || 0))
+      .catch(() => setUnreadCount(0))
+  }, [pathname])
 
   /* The drawer belongs to phones and tablets. If the viewport grows into rail
      territory while it is open, close it outright — hiding just the panel in
@@ -106,20 +118,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
           <nav className="flex-1">
             {navGroups.map((group) => (
-              <div className="dash-rail__group" key={group.label}>
-                <p className="dash-rail__label">{group.label}</p>
-                {group.items.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="dash-rail__link"
-                    aria-current={isActive(item.href, pathname) ? "page" : undefined}
-                  >
-                    <item.icon />
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
+              <NavGroupSection key={group.label} group={group} pathname={pathname} />
             ))}
           </nav>
 
@@ -146,9 +145,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <h1 className="dash-top__title">{titleFor(pathname)}</h1>
             <span className="dash-top__spacer" />
 
+            {/* Renders nothing for a member with no role dashboard of their own. */}
+            <RoleDashboardButton />
+
             <Link href="/dashboard/notifications" className="dash-icon-btn" aria-label="Notifications">
               <Bell className="h-5 w-5" />
-              <span className="dash-icon-btn__dot" />
+              {unreadCount > 0 && <span className="dash-icon-btn__dot" />}
             </Link>
 
             <DropdownMenu>

@@ -43,6 +43,9 @@ export enum NotificationType {
   TRAVEL_BLESSING = 'travel_blessing',
   CELL_JOIN_REQUEST = 'cell_join_request',
   CELL_JOIN_RESPONSE = 'cell_join_response',
+  ACADEMY_COHORT_OPEN = 'academy_cohort_open',
+  ACADEMY_JOIN_REQUEST = 'academy_join_request',
+  ACADEMY_JOIN_RESPONSE = 'academy_join_response',
   GENERAL = 'general',
 }
 
