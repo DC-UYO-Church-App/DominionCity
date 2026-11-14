@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calendar, CheckCircle, QrCode, UserPlus } from "lucide-react"
+import { Calendar, CheckCircle, MapPin, QrCode, UserPlus } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,29 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { apiClient } from "@/lib/api"
+import { toast } from "sonner"
+
+/**
+ * Resolves with the device's current position, or rejects with a member-facing
+ * message. Used to satisfy a geofenced event's check-in on the server.
+ */
+function getCurrentPosition(): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      reject(new Error("Your device can't share its location, so this check-in can't be verified."))
+      return
+    }
+    navigator.geolocation.getCurrentPosition(resolve, (error) => {
+      if (error.code === error.PERMISSION_DENIED) {
+        reject(new Error("Location access is blocked. Allow it in your browser settings to check in here."))
+      } else if (error.code === error.POSITION_UNAVAILABLE) {
+        reject(new Error("Your location couldn't be determined. Move to an open area and try again."))
+      } else {
+        reject(new Error("Getting your location timed out. Please try again."))
+      }
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 })
+  })
+}
 
 export function AttendanceScreen() {
   const [isCheckInDialogOpen, setIsCheckInDialogOpen] = useState(false)
@@ -27,6 +50,7 @@ export function AttendanceScreen() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(true)
   const [events, setEvents] = useState<any[]>([])
   const [isLoadingEvents, setIsLoadingEvents] = useState(true)
+  const [isCheckingIn, setIsCheckingIn] = useState(false)
 
   const today = useMemo(() => new Date(), [])
   const todayLabel = today.toLocaleDateString("en-US", {
@@ -98,12 +122,28 @@ export function AttendanceScreen() {
       .finally(() => setIsLoadingEvents(false))
   }, [])
 
+  // An event is geofenced when it carries a centre point and a radius; only
+  // then do we need the member's location to check in.
+  const isGeofenced = (event: any) =>
+    event?.latitude != null && event?.longitude != null && event?.geofenceRadiusM != null
+
   const handleCheckIn = async () => {
-    if (!userId || !activeEvent) {
+    if (!userId || !activeEvent || isCheckingIn) {
       return
     }
-    setIsCheckInDialogOpen(false)
+    setIsCheckingIn(true)
     try {
+      let coords: { latitude: number; longitude: number; accuracy?: number } | undefined
+
+      if (isGeofenced(activeEvent)) {
+        const position = await getCurrentPosition()
+        coords = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        }
+      }
+
       await apiClient.recordAttendance({
         userId,
         eventId: activeEvent.id,
@@ -111,7 +151,10 @@ export function AttendanceScreen() {
         status: "present",
         isFirstTimer: isFirstTimeVisitor,
         notes: activeEvent.title,
+        ...coords,
       })
+
+      setIsCheckInDialogOpen(false)
       setIsConfirmationOpen(true)
       const newRecord = {
         id: `${userId}-${today.toISOString()}`,
@@ -128,8 +171,11 @@ export function AttendanceScreen() {
       setTimeout(() => {
         setIsConfirmationOpen(false)
       }, 2000)
-    } catch {
-      setIsConfirmationOpen(false)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Check-in failed. Please try again."
+      toast.error("Check-in failed", { description: message })
+    } finally {
+      setIsCheckingIn(false)
     }
   }
 
@@ -247,12 +293,26 @@ export function AttendanceScreen() {
             <Label htmlFor="first-time">I am a first-time visitor</Label>
           </div>
 
+          {activeEvent && isGeofenced(activeEvent) ? (
+            <div className="flex items-start gap-2 rounded-lg bg-church-gold/10 p-3 text-sm text-muted-foreground">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-church-gold" />
+              <span>
+                This service checks in on location. You&apos;ll be asked to share your location, and you must be at the
+                venue{activeEvent.address ? ` (${activeEvent.address})` : ""} to check in.
+              </span>
+            </div>
+          ) : null}
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCheckInDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsCheckInDialogOpen(false)} disabled={isCheckingIn}>
               Cancel
             </Button>
-            <Button onClick={handleCheckIn} className="bg-church-gold hover:bg-amber-400 text-church-navy">
-              Check-in
+            <Button
+              onClick={handleCheckIn}
+              disabled={isCheckingIn}
+              className="bg-church-gold hover:bg-amber-400 text-church-navy"
+            >
+              {isCheckingIn ? "Checking in..." : "Check-in"}
             </Button>
           </DialogFooter>
         </DialogContent>

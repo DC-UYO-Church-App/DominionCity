@@ -64,15 +64,6 @@ export function HomeScreen() {
     return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"
   })()
 
-  const getNextWeekday = (weekday: number, hour: number, minute = 0) => {
-    const now = new Date()
-    const ahead = (weekday + 7 - now.getDay()) % 7 || 7
-    const next = new Date(now)
-    next.setDate(now.getDate() + ahead)
-    next.setHours(hour, minute, 0, 0)
-    return next
-  }
-
   useEffect(() => {
     apiClient.getProfile().then((res) => {
       const user = res?.user
@@ -117,11 +108,7 @@ export function HomeScreen() {
       const real = (res?.events || [])
         .map((e: any) => ({ ...e, eventDate: e.eventDate ? new Date(e.eventDate) : null }))
         .filter((e: any) => e.eventDate && e.status !== "cancelled" && e.eventDate >= now)
-      const weekly = [
-        { id: "w-sun", title: "Sunday Service", location: "Dominion City Uyo HQ", eventDate: getNextWeekday(0, 8) },
-        { id: "w-wed", title: "Word & Prayer", location: "Dominion City Uyo HQ", eventDate: getNextWeekday(3, 17, 30) },
-      ]
-      setEvents([...weekly, ...real].sort((a, b) => a.eventDate - b.eventDate).slice(0, 5))
+      setEvents(real.sort((a: any, b: any) => a.eventDate - b.eventDate).slice(0, 5))
     }).catch(() => setEvents([]))
 
     apiClient.getSermons({ limit: 3 })
@@ -303,17 +290,32 @@ export function HomeScreen() {
 
         <section className="bento__cell b-3 promo">
           <p className="dash-label">Next gathering</p>
-          <p className="mt-1 font-[family-name:var(--font-display)] text-[length:var(--step-3)] font-medium leading-none">
-            {whenLabel}
-          </p>
-          <p className="mt-2 font-semibold">{nextUp?.title ?? "Sunday Service"}</p>
-          <p className="mt-0.5 flex items-center gap-1 text-sm text-[var(--text-invert-soft)]">
-            <MapPin className="h-3.5 w-3.5" />
-            {nextUp?.location ?? "Dominion City Uyo HQ"}
-          </p>
-          <p className="mt-1 text-sm text-[var(--text-invert-soft)]">
-            {nextUp ? new Date(nextUp.eventDate).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "8:00 AM"}
-          </p>
+          {nextUp ? (
+            <>
+              <p className="mt-1 font-[family-name:var(--font-display)] text-[length:var(--step-3)] font-medium leading-none">
+                {whenLabel}
+              </p>
+              <p className="mt-2 font-semibold">{nextUp.title}</p>
+              {nextUp.location || nextUp.address ? (
+                <p className="mt-0.5 flex items-center gap-1 text-sm text-[var(--text-invert-soft)]">
+                  <MapPin className="h-3.5 w-3.5" />
+                  {nextUp.location ?? nextUp.address}
+                </p>
+              ) : null}
+              <p className="mt-1 text-sm text-[var(--text-invert-soft)]">
+                {new Date(nextUp.eventDate).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="mt-1 font-[family-name:var(--font-display)] text-[length:var(--step-3)] font-medium leading-none">
+                Nothing scheduled
+              </p>
+              <p className="mt-2 text-sm text-[var(--text-invert-soft)]">
+                No upcoming events yet. Check back soon.
+              </p>
+            </>
+          )}
           <Link href="/dashboard/events" className="dash-btn dash-btn--ghost mt-auto self-start">
             All events <ArrowUpRight />
           </Link>

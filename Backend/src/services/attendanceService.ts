@@ -3,6 +3,40 @@ import { Attendance, AttendanceStatus, NotificationType } from '../types';
 import { NotificationService } from './notificationService';
 import { config } from '../config';
 
+/**
+ * Raised when a geofenced event is checked into from the wrong place, or
+ * without a usable location. Carries an HTTP status so the controller can
+ * answer with a clear 4xx instead of a generic 500.
+ */
+export class AttendanceLocationError extends Error {
+  statusCode: number;
+  constructor(message: string, statusCode = 422) {
+    super(message);
+    this.name = 'AttendanceLocationError';
+    this.statusCode = statusCode;
+  }
+}
+
+/**
+ * Great-circle distance between two WGS84 points, in metres (haversine).
+ * Accurate to well within a metre at the scale of a church campus.
+ */
+function distanceInMetres(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
+  const R = 6371000; // Earth's mean radius in metres
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
 export class AttendanceService {
   static async recordAttendance(data: {
     userId: string;
@@ -12,7 +46,50 @@ export class AttendanceService {
     status?: AttendanceStatus;
     isFirstTimer?: boolean;
     notes?: string;
+    location?: { latitude: number; longitude: number; accuracy?: number };
   }): Promise<Attendance> {
+    // Location gate: if the event carries a geofence, the check-in must come
+    // from inside it. Events without all three geofence fields are unrestricted.
+    if (data.eventId) {
+      const eventResult = await query(
+        `SELECT latitude, longitude, geofence_radius_m FROM events WHERE id = $1`,
+        [data.eventId]
+      );
+      const event = eventResult.rows[0];
+
+      if (event && event.latitude != null && event.longitude != null && event.geofence_radius_m != null) {
+        if (
+          !data.location ||
+          !Number.isFinite(data.location.latitude) ||
+          !Number.isFinite(data.location.longitude)
+        ) {
+          throw new AttendanceLocationError(
+            'This service requires you to check in at the venue. Enable location access and try again.',
+            400
+          );
+        }
+
+        const radius = Number(event.geofence_radius_m);
+        const distance = distanceInMetres(
+          parseFloat(event.latitude),
+          parseFloat(event.longitude),
+          data.location.latitude,
+          data.location.longitude
+        );
+
+        // Allow the device's own reported accuracy as slack, so a member
+        // standing inside the venue is not rejected by GPS jitter. Capped so a
+        // wildly imprecise fix (e.g. 2km) can't defeat the geofence entirely.
+        const accuracySlack = Math.min(Math.max(data.location.accuracy ?? 0, 0), 100);
+
+        if (distance - accuracySlack > radius) {
+          throw new AttendanceLocationError(
+            `You appear to be about ${Math.round(distance)}m from the venue. You need to be within ${radius}m to check in.`
+          );
+        }
+      }
+    }
+
     const result = await query(
       `INSERT INTO attendance (user_id, event_id, service_date, check_in_time, status, is_first_timer, notes)
        VALUES ($1, $2, $3, $4, $5, $6, $7)

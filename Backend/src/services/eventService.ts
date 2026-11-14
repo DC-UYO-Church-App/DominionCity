@@ -9,11 +9,14 @@ export class EventService {
     status?: EventStatus;
     imageUrl?: string;
     address?: string;
+    latitude?: number;
+    longitude?: number;
+    geofenceRadiusM?: number;
     createdBy: string;
   }): Promise<Event> {
     const result = await query(
-      `INSERT INTO events (title, description, event_date, status, image_url, location, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO events (title, description, event_date, status, image_url, location, latitude, longitude, geofence_radius_m, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
       [
         data.title,
@@ -22,6 +25,9 @@ export class EventService {
         data.status ?? EventStatus.SCHEDULED,
         data.imageUrl,
         data.address,
+        data.latitude ?? null,
+        data.longitude ?? null,
+        data.geofenceRadiusM ?? null,
         data.createdBy,
       ]
     );
@@ -141,6 +147,7 @@ export class EventService {
     if (str === 'address') return 'location';
     if (str === 'status') return 'status';
     if (str === 'imageUrl') return 'image_url';
+    if (str === 'geofenceRadiusM') return 'geofence_radius_m';
     return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
   }
 
@@ -153,6 +160,10 @@ export class EventService {
       status: row.status || EventStatus.SCHEDULED,
       imageUrl: row.image_url,
       address: row.location,
+      // Postgres returns DECIMAL as a string; coerce so clients get numbers.
+      latitude: row.latitude != null ? parseFloat(row.latitude) : undefined,
+      longitude: row.longitude != null ? parseFloat(row.longitude) : undefined,
+      geofenceRadiusM: row.geofence_radius_m != null ? Number(row.geofence_radius_m) : undefined,
       createdBy: row.created_by,
       createdAt: row.created_at,
       updatedAt: row.updated_at,

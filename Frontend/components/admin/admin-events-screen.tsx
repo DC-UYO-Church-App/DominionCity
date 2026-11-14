@@ -30,6 +30,10 @@ export function AdminEventsScreen() {
   const [date, setDate] = useState("")
   const [address, setAddress] = useState("")
   const [description, setDescription] = useState("")
+  const [latitude, setLatitude] = useState("")
+  const [longitude, setLongitude] = useState("")
+  const [radius, setRadius] = useState("")
+  const [isLocating, setIsLocating] = useState(false)
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [coverPreview, setCoverPreview] = useState<string | null>(null)
   const allowedImageTypes = ["image/jpeg", "image/png", "image/jpg"]
@@ -40,9 +44,34 @@ export function AdminEventsScreen() {
     setDate("")
     setAddress("")
     setDescription("")
+    setLatitude("")
+    setLongitude("")
+    setRadius("")
     setCoverFile(null)
     setCoverPreview(null)
     setEditingId(null)
+  }
+
+  const handleUseMyLocation = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      toast.error("Location unavailable", { description: "This device can't share its location." })
+      return
+    }
+    setIsLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude.toFixed(6))
+        setLongitude(position.coords.longitude.toFixed(6))
+        if (!radius.trim()) setRadius("100")
+        setIsLocating(false)
+        toast.success("Location captured", { description: "Centred the check-in area on your current position." })
+      },
+      () => {
+        setIsLocating(false)
+        toast.error("Couldn't get location", { description: "Allow location access, or enter the coordinates manually." })
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    )
   }
 
   useEffect(() => {
@@ -90,6 +119,39 @@ export function AdminEventsScreen() {
       return
     }
 
+    // Geofence is optional, but all three parts move together.
+    const latStr = latitude.trim()
+    const lngStr = longitude.trim()
+    const radStr = radius.trim()
+    const hasAny = latStr !== "" || lngStr !== "" || radStr !== ""
+    const hasAll = latStr !== "" && lngStr !== "" && radStr !== ""
+
+    if (hasAny && !hasAll) {
+      toast.error("Incomplete check-in area", {
+        description: "Enter latitude, longitude, and radius together, or leave all three empty.",
+      })
+      return
+    }
+
+    const latNum = Number(latStr)
+    const lngNum = Number(lngStr)
+    const radNum = Number(radStr)
+
+    if (hasAll) {
+      if (!Number.isFinite(latNum) || latNum < -90 || latNum > 90) {
+        toast.error("Invalid latitude", { description: "Latitude must be between -90 and 90." })
+        return
+      }
+      if (!Number.isFinite(lngNum) || lngNum < -180 || lngNum > 180) {
+        toast.error("Invalid longitude", { description: "Longitude must be between -180 and 180." })
+        return
+      }
+      if (!Number.isInteger(radNum) || radNum <= 0) {
+        toast.error("Invalid radius", { description: "Radius must be a whole number of metres greater than 0." })
+        return
+      }
+    }
+
     setIsSubmitting(true)
     try {
       const response = editingId
@@ -98,6 +160,10 @@ export function AdminEventsScreen() {
             description,
             eventDate: eventDate.toISOString(),
             address: address || undefined,
+            // On edit, all-three-empty clears any existing geofence.
+            latitude: hasAll ? latNum : null,
+            longitude: hasAll ? lngNum : null,
+            geofenceRadiusM: hasAll ? radNum : null,
             coverFile: coverFile || undefined,
           })
         : await apiClient.createEvent({
@@ -105,6 +171,9 @@ export function AdminEventsScreen() {
             description,
             eventDate: eventDate.toISOString(),
             address: address || undefined,
+            latitude: hasAll ? latNum : undefined,
+            longitude: hasAll ? lngNum : undefined,
+            geofenceRadiusM: hasAll ? radNum : undefined,
             coverFile: coverFile || undefined,
           })
 
@@ -138,6 +207,9 @@ export function AdminEventsScreen() {
       setTime("")
     }
     setAddress(event.address || "")
+    setLatitude(event.latitude != null ? String(event.latitude) : "")
+    setLongitude(event.longitude != null ? String(event.longitude) : "")
+    setRadius(event.geofenceRadiusM != null ? String(event.geofenceRadiusM) : "")
     setCoverFile(null)
     setCoverPreview(event.cover || null)
     setIsModalOpen(true)
@@ -430,6 +502,66 @@ export function AdminEventsScreen() {
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                 />
+              </div>
+
+              <div className="md:col-span-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <label className="text-sm font-semibold text-slate-600">Location check-in (optional)</label>
+                    <p className="text-xs text-slate-400">
+                      Set a centre point and radius to require members to be at the venue to check in. Leave empty to
+                      allow check-in from anywhere.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0"
+                    onClick={handleUseMyLocation}
+                    disabled={isLocating}
+                  >
+                    {isLocating ? "Locating..." : "Use my current location"}
+                  </Button>
+                </div>
+                <div className="mt-3 grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500">Latitude</label>
+                    <input
+                      type="number"
+                      step="any"
+                      inputMode="decimal"
+                      className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm"
+                      placeholder="e.g. 5.038811"
+                      value={latitude}
+                      onChange={(event) => setLatitude(event.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500">Longitude</label>
+                    <input
+                      type="number"
+                      step="any"
+                      inputMode="decimal"
+                      className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm"
+                      placeholder="e.g. 7.909568"
+                      value={longitude}
+                      onChange={(event) => setLongitude(event.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500">Radius (metres)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      inputMode="numeric"
+                      className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm"
+                      placeholder="e.g. 100"
+                      value={radius}
+                      onChange={(event) => setRadius(event.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

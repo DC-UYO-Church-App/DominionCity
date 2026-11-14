@@ -7,16 +7,10 @@ export async function attendanceRoutes(fastify: FastifyInstance) {
   // All attendance routes require authentication
   fastify.addHook('onRequest', authenticate);
 
-  // Record attendance (workers, admins, pastors, HODs)
-  fastify.post(
-    '/',
-    {
-      onRequest: [
-        authorize(UserRole.ADMIN, UserRole.PASTOR, UserRole.HOD, UserRole.WORKER),
-      ],
-    },
-    AttendanceController.recordAttendance
-  );
+  // Record attendance. Any authenticated user may check themselves in (the
+  // controller enforces that a member can only record their own attendance);
+  // workers/HODs/pastors/admins may record on another member's behalf.
+  fastify.post('/', AttendanceController.recordAttendance);
 
   // Get user's attendance
   fastify.get('/user/:userId', AttendanceController.getUserAttendance);

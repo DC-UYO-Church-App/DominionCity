@@ -156,6 +156,12 @@ export interface Event {
   status: EventStatus;
   imageUrl?: string;
   address?: string;
+  /** Geofence centre latitude. Set together with longitude and geofenceRadiusM. */
+  latitude?: number;
+  /** Geofence centre longitude. Set together with latitude and geofenceRadiusM. */
+  longitude?: number;
+  /** Check-in radius in metres around (latitude, longitude). */
+  geofenceRadiusM?: number;
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;

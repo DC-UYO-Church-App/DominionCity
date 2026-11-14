@@ -45,7 +45,11 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<any> {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      // Only declare a JSON body when one is actually sent. Setting this on a
+      // body-less POST/PUT (e.g. joining a cohort, accepting a request) makes
+      // Fastify reject it with "Body cannot be empty when content-type is set
+      // to 'application/json'".
+      ...(options.body != null ? { 'Content-Type': 'application/json' } : {}),
       ...(options.headers as Record<string, string> | undefined),
     };
 
@@ -228,6 +232,9 @@ class ApiClient {
     status?: string;
     isFirstTimer?: boolean;
     notes?: string;
+    latitude?: number;
+    longitude?: number;
+    accuracy?: number;
   }) {
     return this.request('/attendance', {
       method: 'POST',
@@ -752,6 +759,9 @@ class ApiClient {
     eventDate: string;
     address?: string;
     status?: 'scheduled' | 'cancelled';
+    latitude?: number;
+    longitude?: number;
+    geofenceRadiusM?: number;
     coverFile?: File | null;
   }) {
     if (data.coverFile) {
@@ -761,6 +771,9 @@ class ApiClient {
       formData.append('eventDate', data.eventDate);
       if (data.address) formData.append('address', data.address);
       if (data.status) formData.append('status', data.status);
+      if (data.latitude !== undefined) formData.append('latitude', String(data.latitude));
+      if (data.longitude !== undefined) formData.append('longitude', String(data.longitude));
+      if (data.geofenceRadiusM !== undefined) formData.append('geofenceRadiusM', String(data.geofenceRadiusM));
       formData.append('cover', data.coverFile);
 
       const headers: Record<string, string> = {};
@@ -806,6 +819,9 @@ class ApiClient {
       eventDate?: string;
       address?: string;
       status?: 'scheduled' | 'cancelled';
+      latitude?: number | null;
+      longitude?: number | null;
+      geofenceRadiusM?: number | null;
       coverFile?: File | null;
     }
   ) {
@@ -816,6 +832,11 @@ class ApiClient {
       if (data.eventDate) formData.append('eventDate', data.eventDate);
       if (data.address) formData.append('address', data.address);
       if (data.status) formData.append('status', data.status);
+      // An empty string clears the geofence server-side; a value sets it.
+      if (data.latitude !== undefined) formData.append('latitude', data.latitude === null ? '' : String(data.latitude));
+      if (data.longitude !== undefined) formData.append('longitude', data.longitude === null ? '' : String(data.longitude));
+      if (data.geofenceRadiusM !== undefined)
+        formData.append('geofenceRadiusM', data.geofenceRadiusM === null ? '' : String(data.geofenceRadiusM));
       formData.append('cover', data.coverFile);
 
       const headers: Record<string, string> = {};
